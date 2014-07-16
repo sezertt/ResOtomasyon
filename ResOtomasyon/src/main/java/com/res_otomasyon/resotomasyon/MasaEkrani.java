@@ -160,14 +160,12 @@ public class MasaEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmp");
         FileIO fileIO = new FileIO();
         List<File> files = null;
+
         try {
-            files = fileIO.getListFiles(new File("/mnt/shared/Lenovo"));
-        } catch (Exception e) {
-            try {
-                files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
-            } catch (Exception ex) {
-            }
+            files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+        } catch (Exception ex) {
         }
+
         r = (RelativeLayout) findViewById(R.id.screen);
         ReadXML readUrun = new ReadXML();
         lstProducts = readUrun.readUrunler(files);
