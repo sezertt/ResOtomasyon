@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textSize">17sp</item>
+        <item name="android:actionBarSize">50dp</item>
+        <item name="android:actionBarTabBarStyle">@style/customActionBarTabStyle</item>
+        <item name="android:actionBarTabTextStyle">@style/customActionBarTabTextStyle</item>
+    </style>
+    <style name="customActionBarTabTextStyle" parent="Widget.AppCompat.Light.ActionBar.TabBar">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="customActionBarTabStyle" parent="Widget.AppCompat.Light.ActionBar.TabBar">
+        <item name="android:background">@android:color/background_dark</item>
+        <item name="android:height">100dp</item>
+        <item name="android:width">100dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <!--<item name="android:width">300dip</item>-->
+        <!--<item name="android:height">100dp</item>-->
+        <!--<item name="android:minHeight">100dp</item>-->
+        <!--<item name="android:minWidth">100dp</item>-->
+        <!--<item name="android:paddingLeft">100dp</item>-->
+        <!--<item name="android:paddingRight">100dp</item>-->
+    </style>
+</resources>

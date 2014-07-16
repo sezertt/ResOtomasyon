@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.res_otomasyon.resotomasyon.MasaEkrani" >
+    <item android:id="@+id/action_lockTable"
+          android:title="Masayı Kilitle"
+          android:orderInCategory="10"
+          android:showAsAction="never" />
+    <item android:id="@+id/action_callWaiter"
+          android:title="Garson İstiyorum"
+          android:orderInCategory="1"
+          android:showAsAction="never" />
+    <item android:id="@+id/action_cleanTable"
+          android:title="Masamı Temizleyin"
+          android:orderInCategory="2"
+          android:showAsAction="never" />
+    <item android:id="@+id/action_gorusOneri"
+          android:title="Görüş ve Öneriler"
+          android:orderInCategory="3"
+          android:showAsAction="never" />
+    <item android:id="@+id/action_settings"
+          android:title=""
+          android:icon="@drawable/check"
+          android:orderInCategory="100"
+          android:showAsAction="always" />
+</menu>

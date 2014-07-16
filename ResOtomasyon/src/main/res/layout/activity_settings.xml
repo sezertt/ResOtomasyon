@@ -1,0 +1,97 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.res_otomasyon.resotomasyon.Settings">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kaydet"
+        android:id="@+id/button"
+        android:layout_marginTop="76dp"
+        android:layout_below="@+id/editTextTableName"
+        android:layout_alignLeft="@+id/editTextTableName"
+        android:layout_alignStart="@+id/editTextTableName"
+        android:layout_toLeftOf="@+id/textViewPort"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLength="15"
+        android:gravity="center"
+        android:id="@+id/editTextIP"
+        android:minWidth="300dp"
+        android:textSize="30dp"
+        android:hint="192.168.212.101"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IP Adresi"
+        android:textSize="30dp"
+        android:id="@+id/textView"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Port"
+        android:textSize="30dp"
+        android:id="@+id/textViewPort"
+        android:gravity="center"
+        android:layout_below="@+id/editTextIP"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="47dp"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editTextPort"
+        android:hint="Port"
+        android:minWidth="300dp"
+        android:gravity="center"
+        android:layout_below="@+id/textViewPort"
+        android:layout_alignRight="@+id/editTextIP"
+        android:layout_alignEnd="@+id/editTextIP"
+        android:layout_alignLeft="@+id/editTextIP"
+        android:layout_alignStart="@+id/editTextIP"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tablet Adı"
+        android:textSize="30dp"
+        android:id="@+id/textViewTabletName"
+        android:gravity="center"
+        android:layout_marginTop="49dp"
+        android:layout_below="@+id/editTextPort"
+        android:layout_centerHorizontal="true"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editTextTableName"
+        android:hint="Tablet Adı"
+        android:minWidth="300dp"
+        android:gravity="center"
+        android:layout_below="@+id/textViewTabletName"
+        android:layout_alignLeft="@+id/editTextPort"
+        android:layout_alignStart="@+id/editTextPort"
+        android:layout_alignRight="@+id/editTextPort"
+        android:layout_alignEnd="@+id/editTextPort"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btnIptalText"
+        android:id="@+id/btnIptal"
+        android:layout_alignTop="@+id/button"
+        android:layout_alignRight="@+id/editTextTableName"
+        android:layout_alignEnd="@+id/editTextTableName"
+        android:layout_toRightOf="@+id/textViewPort"/>
+</RelativeLayout>

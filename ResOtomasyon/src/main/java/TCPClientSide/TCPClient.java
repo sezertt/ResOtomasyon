@@ -1,0 +1,243 @@
+package TCPClientSide;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Base64;
+import android.util.Log;
+import android.util.Xml;
+
+import com.res_otomasyon.resotomasyon.BitConverter;
+
+import org.apache.http.util.EncodingUtils;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+
+/**
+ * Created by Mustafa on 20.5.2014.
+ */
+public class TCPClient {
+
+    public String serverMessage;
+    public static String SERVERIP; //your computer IP address
+    public static int SERVERPORT;
+    private OnMessageReceived mMessageListener = null;
+    public boolean mRun = false;
+    public InputStream stream;
+    Socket socket;
+    PrintWriter out;
+    BufferedReader in;
+    InetAddress serverAddr;
+
+    /**
+     * Constructor of the class. OnMessagedReceived listens for the messages received from server
+     */
+    public TCPClient(OnMessageReceived listener) {
+        mMessageListener = listener;
+    }
+
+
+    /**
+     * Sends the message entered by client to the server
+     *
+     * @param message text entered by client
+     */
+    public void sendMessage(String message) {
+        if (out != null && !out.checkError()) {
+            out.println(message);
+            out.flush();
+        }
+    }
+
+    public boolean getFolder() {
+        byte[] buffer = new byte[1024 * 5000];
+        try {
+            int receivedBytesLength = socket.getInputStream().read(buffer);
+            int fileNameLen = BitConverter.toInt32(buffer, 0);
+            String fileName = EncodingUtils.getString(buffer, 4, fileNameLen, Charset.defaultCharset().name());
+
+            String [] uzanti = fileName.split("\\.");
+
+            if(uzanti[1].contentEquals("png"))
+            {
+                File folder = new File("/mnt/sdcard/shared/Lenovo/resimler/");
+                if(!folder.exists())
+                {
+                    folder.mkdirs();
+                }
+                File file = new File("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "");
+                if (!file.exists())
+                    file.createNewFile();
+                else {
+                    file.delete();
+                    file.createNewFile();
+                }
+                FileOutputStream out = new FileOutputStream("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "");
+                out.write(buffer, 4 + fileNameLen, receivedBytesLength - 4 - fileNameLen);
+            }
+            else
+            {
+                File folder = new File("/mnt/sdcard/shared/Lenovo/");
+                if(!folder.exists())
+                {
+                    folder.mkdirs();
+                }
+                File file = new File("/mnt/sdcard/shared/Lenovo/" + fileName + "");
+                if (!file.exists())
+                    file.createNewFile();
+                else {
+                    file.delete();
+                    file.createNewFile();
+                }
+                FileOutputStream out = new FileOutputStream("/mnt/sdcard/shared/Lenovo/" + fileName + "");
+                out.write(buffer, 4 + fileNameLen, receivedBytesLength - 4 - fileNameLen);
+            }
+
+            return true;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void stopClient() throws IOException {
+        if (stream != null) {
+            stream.close();
+        }
+        mRun = false;
+    }
+
+    public void run() {
+
+        mRun = true;
+
+        try {
+            //here you must put your computer's IP address.
+            serverAddr = InetAddress.getByName(SERVERIP);
+
+            Log.e("TCP Client", "C: Connecting...");
+
+            //create a socket to make the connection with the server
+            socket = new Socket(serverAddr, SERVERPORT);
+            try {
+                //send the message to the server
+                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+
+                Log.e("TCP Client", "C: Sent.");
+
+                Log.e("TCP Client", "C: Done.");
+
+//                //receive the message which the server sends back
+//                //in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//                inputStream = socket.getInputStream();
+//                //DataInputStream dis = new DataInputStream(inputStream);
+//                //in this while the client listens for the messages sent by the server
+//                while (mRun) {
+//                    byte firstByte = (byte) inputStream.read();
+//                    byte[] firsCharArray = new byte[1];
+//                    firsCharArray[0] = firstByte;
+//                    String firstChar = new String(firsCharArray, "UTF-8");
+//                    if (firstChar.contentEquals("<")) {
+//                        int availableBytes = inputStream.available();
+//                        byte[] serverMessageArray = new byte[availableBytes - 1];
+//                        inputStream.read(serverMessageArray, 0, availableBytes - 1);
+//                        byte[] lastByte = new byte[1];
+//                        lastByte[0] = (byte) inputStream.read();
+//                        String lastChar = new String(lastByte, "UTF-8");
+//                        if (!lastChar.contentEquals(">"))
+//                            return;
+//                        serverMessage = new String(serverMessageArray, "UTF-8");
+//                    }
+//                    if (serverMessage != null && mMessageListener != null) {
+//                        //call the method messageReceived from MyActivity class
+//                        mMessageListener.messageReceived(serverMessage);
+//                    }
+//                }
+
+                //<
+                byte FIRST_BYTE = (byte) 60;
+                //>
+                byte LAST_BYTE = (byte) 62;
+
+                stream = socket.getInputStream();
+                byte[] data = new byte[100];
+
+                while (mRun) {
+                    int firstByte = stream.read();
+
+                    if ((byte) firstByte != FIRST_BYTE) {
+                        //Başlangıç byte'ı değil, bu karakteri atla!
+                        continue;
+                    }
+
+                    //Mesajı oku
+                    ArrayList<Byte> bList = new ArrayList<Byte>();
+
+                    while ((byte) (firstByte = stream.read()) != LAST_BYTE) {
+                        bList.add((byte) firstByte);
+                    }
+
+                    byte[] result = new byte[bList.size()];
+
+                    for (int i = 0; i < bList.size(); i++) {
+                        result[i] = bList.get(i).byteValue();
+                    }
+
+                    serverMessage = new String(result, "UTF-8");
+
+                    if (serverMessage != null && mMessageListener != null) {
+                        mMessageListener.messageReceived(serverMessage);
+                    }
+                }
+
+                Log.e("RESPONSE FROM SERVER", "S: Received Message: '" + serverMessage + "'");
+
+            } catch (Exception e) {
+
+                Log.e("TCP", "S: Error", e);
+
+            } finally {
+                //the socket must be closed. It is not possible to reconnect to this socket
+                // after it is closed, which means a new socket instance has to be created.
+                socket.close();
+            }
+
+        } catch (Exception e) {
+
+            Log.e("TCP", "C: Error", e);
+
+        }
+
+    }
+
+    //Declare the interface. The method messageReceived(String message) will must be implemented in the MyActivity
+    //class at on asynckTask doInBackground
+    public interface OnMessageReceived {
+        public void messageReceived(String message);
+    }
+}
+
+
+
