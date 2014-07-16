@@ -23,6 +23,7 @@ import java.util.Set;
 
 import Entity.Employee;
 import HashPassword.passwordHash;
+import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
 
 
@@ -52,6 +53,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     protected void onResume() {
         preferences = this.getSharedPreferences("KilitliMasa",Context.MODE_PRIVATE);
         MasaKilitliMi = preferences.getBoolean("MasaKilitli",false);
+
         if(MasaKilitliMi)
         {
             this.setVisible(false);

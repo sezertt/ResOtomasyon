@@ -15,5 +15,6 @@
     <string name="txtPin">Pin :</string>
     <string name="title_activity_settings">Settings</string>
     <string name="title_activity_masa_ekrani">MasaEkrani</string>
+    <string name="title_activity_start_screen">StartScreen</string>
 
 </resources>

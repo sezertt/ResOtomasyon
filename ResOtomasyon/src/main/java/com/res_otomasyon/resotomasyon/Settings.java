@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 
 
@@ -41,6 +42,11 @@ public class Settings extends Activity implements View.OnClickListener {
 
     public enum Komutlar {
         dosyalar;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public class connectTask extends AsyncTask<String, String, TCPClient> {
@@ -88,6 +94,7 @@ public class Settings extends Activity implements View.OnClickListener {
                     }
                 }
             });
+            myHandler.sendEmptyMessage(0);
             mTcpClient.run();
             return null;
         }
@@ -104,7 +111,8 @@ public class Settings extends Activity implements View.OnClickListener {
                         public void run() {
                             kacinci++;
                             dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
-                            if (kacinci <= kacDosya)
+
+                            if (kacinci == 1 || kacinci <= kacDosya)
                                 mTcpClient.sendMessage(dosyaIsteKomutu);
                             else
                                 onDestroy();
@@ -168,7 +176,7 @@ public class Settings extends Activity implements View.OnClickListener {
             if(mTcpClient !=null) {
                 mTcpClient.stopClient();
             }
-            kacinci = 1;
+            kacinci = 0;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -182,29 +190,26 @@ public class Settings extends Activity implements View.OnClickListener {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            mTcpClient = ConnectTCP.getInstance().getmTCPClient();
+            try {
+                mTcpClient.stopClient();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mTcpClient = null;
             try {
                 SharedPreferences preferences = null;
-                preferences = this.getSharedPreferences("MyPreferences",
-                        Context.MODE_PRIVATE);
+                preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
                 cnnTask = new connectTask();
                 mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
                 mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
                 cnnTask.execute("");
             } catch (Exception e) {
                 showAlertDialog = new ShowAlertDialog();
-                AlertDialog alertDialog = showAlertDialog.showAlert(this, context, "Uyarı!",
-                        "Önce ayarları doldurunuz.");
+                AlertDialog alertDialog = showAlertDialog.showAlert(this, context, "Uyarı!","Önce ayarları doldurunuz.");
                 alertDialog.show();
             }
-            kacinci = 1;
-            dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            mTcpClient.sendMessage(dosyaIsteKomutu);
-
+            kacinci = 0;
         }
         return super.onOptionsItemSelected(item);
     }

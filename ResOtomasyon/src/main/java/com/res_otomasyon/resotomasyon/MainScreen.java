@@ -212,8 +212,7 @@ public class MainScreen extends FragmentActivity implements ActionBar.TabListene
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                fragment[0] = (FragmentMasaDesign) collectionPagerAdapter.fragments[mViewPager
-                                        .getCurrentItem()];
+                                fragment[0] = (FragmentMasaDesign) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
                                 fragment[0].startSendAcikMasalar(acikMasalar, tabName);
                                 try {
                                     Thread.sleep(10);
