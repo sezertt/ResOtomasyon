@@ -40,6 +40,9 @@ import XMLReader.ReadXML;
 
 
 public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
+
+    Menu menu;
+
     public Handler myHandler = new Handler() {
 
         @Override
@@ -61,6 +64,8 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
                                     editor.putString("LastName", lstEmployee.get(0).LastName);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     editor.putString("Title", lstEmployee.get(0).Title);
+                                    editor.putString("masaAdi",masaAdi);
+                                    editor.putString("departmanAdi",departmanAdi);
                                     Set<String> mySet = new HashSet<String>(Arrays.asList(lstEmployee.get
                                             (0).Permissions));
                                     editor.putStringSet("Permission", mySet);
@@ -69,16 +74,18 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
                                 } catch (Exception e) {
 
                                 }
-                                if (masaKilitliMi && item.getTitle().toString().contentEquals("Masayı Kilitle")) {
-                                    masaKilitliMi = true;
-                                    item.setTitle(R.string.masa_ac);
-                                }
                             } else {
-                                passCorrect = passwordHash.validatePassword(m_Text,
-                                        lstEmployee.get(0).PinCode);
-                                if (passCorrect && masaKilitliMi) {
+//                                passCorrect = passwordHash.validatePassword(m_Text,
+//                                        lstEmployee.get(0).PinCode);
+//                                if (passCorrect && masaKilitliMi) {
+//                                    masaKilitliMi = false;
+//                                    item.setTitle(R.string.masa_ac);
+//                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
+//                                    editor.commit();
+//                                }
+                                if (masaKilitliMi) {
                                     masaKilitliMi = false;
-                                    item.setTitle(R.string.masa_kilitle);
+                                    item.setTitle(R.string.masa_ac);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     editor.commit();
                                 }
@@ -119,6 +126,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         super.onResume();
     }
 
+
     String departmanAdi, masaAdi;
     TCPClient mTCPClient;
     String message;
@@ -145,7 +153,6 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
             String message = intent.getStringExtra("message");
         }
     };
-    RelativeLayout r;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +165,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
         masaAdi = extras.getString("MasaAdi");
-        lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmp");
+        lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
         FileIO fileIO = new FileIO();
         List<File> files = null;
 
@@ -167,7 +174,6 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         } catch (Exception ex) {
         }
 
-        r = (RelativeLayout) findViewById(R.id.screen);
         ReadXML readUrun = new ReadXML();
         lstProducts = readUrun.readUrunler(files);
         LocalBroadcastManager.getInstance(this).registerReceiver(rec, new IntentFilter("myevent"));
@@ -213,10 +219,23 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         super.onDestroy();
     }
 
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_ekrani, menu);
+        this.menu = menu;
+        masaKilitliMi = context.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE).getBoolean
+                ("MasaKilitli", masaKilitliMi);
+        if (masaKilitliMi) {
+            this.item = menu.findItem(R.id.action_lockTable);
+            item.setTitle(R.string.masa_ac);
+        }
         return true;
     }
 
@@ -227,11 +246,9 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         this.item = item;
-        switch (id)
-        {
+        switch (id) {
             case R.id.action_lockTable:
-                if (item.getTitle().toString().contentEquals("Masayı Kilitle"))
-                {
+                if (item.getTitle().toString().contentEquals("Masayı Kilitle")) {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle("Masa Kilitle");
                     builder.setPositiveButton("Masayı Kilitle", new DialogInterface.OnClickListener() {
@@ -248,9 +265,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
                     });
                     builder.show();
                     return false;
-                }
-                else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır"))
-                {
+                } else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle("Title");
 

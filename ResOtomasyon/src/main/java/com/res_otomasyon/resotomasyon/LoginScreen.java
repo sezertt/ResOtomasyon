@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import ekclasslar.FileIO;
 import Entity.Employee;
@@ -59,6 +60,13 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         {
             this.setVisible(false);
             intent = new Intent(LoginScreen.this, MasaEkrani.class);
+            lstEmployees.get(0).PinCode = preferences.getString("PinCode", "0000");
+            lstEmployees.get(0).Title = preferences.getString("Title",null);
+            Set<String> setPermissions = preferences.getStringSet("Permission",null);
+            lstEmployees.get(0).Permissions = setPermissions.toArray(new String[setPermissions.size()]);
+            lstEmployees.get(0).UserName = preferences.getString("UserName",null);
+            lstEmployees.get(0).Name = preferences.getString("Name", null);
+            lstEmployees.get(0).LastName = preferences.getString("LastName",null);
             intent.putExtra("lstEmployees", lstEmployees);
             startActivity(intent);
         }
@@ -202,7 +210,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 //                    e.Title = lstEmployees.get(getCurrentEmployee).Title;
                     lstEmployees.removeAll(lstEmployees);
                     lstEmployees.add(e);
-                    intent = new Intent(LoginScreen.this, MenuEkrani.class);
+                    intent = new Intent(LoginScreen.this, MasaEkrani.class);
                     intent.putExtra("lstEmployees", lstEmployees);
                     startActivity(intent);
                 } else {

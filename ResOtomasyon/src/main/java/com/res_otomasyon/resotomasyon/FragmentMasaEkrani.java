@@ -1,7 +1,10 @@
 package com.res_otomasyon.resotomasyon;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,6 +19,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import java.util.ArrayList;
+
 import Entity.Employee;
 
 /**
@@ -31,6 +35,8 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     public String acilanMasa;
     public String kapananMasa;
     public String acilanMasaDepartman;
+    public String kilitliMasa;
+    public String kilitliDepartman;
 
     View fragmentView;
     TableLayout tableView;
@@ -44,19 +50,21 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         public String _kapananMasa;
         public String _acilanMasaDepartman;
 
-        public getKapananMasa(String masa,String acilanMasaDepartman) {
+        public getKapananMasa(String masa, String acilanMasaDepartman) {
             this._kapananMasa = masa;
             this._acilanMasaDepartman = acilanMasaDepartman;
         }
 
         @Override
         public void run() {
-            while(kapananMasa == null)
-            {
-                kapananMasa = this._kapananMasa;
-                acilanMasaDepartman = this._acilanMasaDepartman;
+            while (kapananMasa == null) {
+
             }
-            if(departmanAdi.contentEquals(acilanMasaDepartman))
+
+            kapananMasa = this._kapananMasa;
+            acilanMasaDepartman = this._acilanMasaDepartman;
+
+            if (departmanAdi.contentEquals(acilanMasaDepartman))
                 myHandler.sendEmptyMessage(1);
         }
     }
@@ -72,12 +80,13 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
         @Override
         public void run() {
-            while(acilanMasa == null)
-            {
-                acilanMasa = this._acilanMasa;
-                acilanMasaDepartman = this._acilanMasaDepartman;
+            while (acilanMasa == null) {
+
             }
-            if(departmanAdi.contentEquals(acilanMasaDepartman))
+            acilanMasa = this._acilanMasa;
+            acilanMasaDepartman = this._acilanMasaDepartman;
+
+            if (departmanAdi.contentEquals(acilanMasaDepartman))
                 myHandler.sendEmptyMessage(2);
         }
     }
@@ -94,11 +103,12 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
         @Override
         public void run() {
-            while(acikMasalar == null)
-            {
-                acikMasalar = this.arrayAcikmasalar;
-                departmanAdi = this._DepartmanAdi;
+            while (_DepartmanAdi == null) {
+
             }
+
+            acikMasalar = this.arrayAcikmasalar;
+            departmanAdi = this._DepartmanAdi;
             myHandler.sendEmptyMessage(0);
         }
     }
@@ -143,6 +153,22 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         }
     };
 
+    SharedPreferences preferences;
+
+    @Override
+    public void onAttach(Activity activity) {
+        preferences = getActivity().getSharedPreferences("KilitliMasa",
+                Context.MODE_PRIVATE);
+        if (preferences.getBoolean("MasaKilitli", false)) {
+            Intent intent = new Intent(getActivity(), MenuEkrani.class);
+            intent.putExtra("DepartmanAdi", this.departmanAdi);
+            intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
+            intent.putExtra("lstEmployees", this.lstEmployees);
+            startActivity(intent);
+        }
+        super.onAttach(activity);
+    }
+
     public void startKapananMasa(String masa, String departmanAdi) {
         new Thread(new getKapananMasa(masa, departmanAdi)).start();
     }
@@ -161,7 +187,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         Intent intent = new Intent(getActivity(), MenuEkrani.class);
         intent.putExtra("DepartmanAdi", this.departmanAdi);
         intent.putExtra("MasaAdi", v.getTag().toString());
-        intent.putExtra("lstEmp", this.lstEmployees);
+        intent.putExtra("lstEmployees", this.lstEmployees);
         startActivity(intent);
     }
 
@@ -177,7 +203,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         fragmentView = inflater.inflate(R.layout.fragment_fragment_masa_design, container, false);
         this.masalar = getArguments().getStringArrayList("masalar");
         this.departmanAdi = getArguments().getString("departmanAdi");
-        this.lstEmployees = (ArrayList<Employee>)getArguments().getSerializable("lstEmp");
+        this.lstEmployees = (ArrayList<Employee>) getArguments().getSerializable("lstEmployees");
         linearLayout = new LinearLayout(getActivity());
         scrollView = new ScrollView(getActivity());
         tableView = new TableLayout(getActivity());

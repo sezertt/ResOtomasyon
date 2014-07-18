@@ -24,14 +24,19 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
     Fragment fragment;
     public Fragment[] fragments = null;
     public ArrayList<Employee> lstEmployees = null;
+    public String kilitliMasaAdi;
+    public String kilitliDepartmanAdi;
 
     public static FragmentMasaEkrani newInstance(ArrayList<String> masalar, String DepartmanAdi,
-                                                 ArrayList<Employee> lstEmployees) {
+                                                 ArrayList<Employee> lstEmployees, String kilitliMasaAdi,
+                                                 String kilitliDepartmanAdi) {
         FragmentMasaEkrani myFragment = new FragmentMasaEkrani();
         Bundle args = new Bundle();
         args.putStringArrayList("masalar", masalar);
         args.putString("departmanAdi", DepartmanAdi);
-        args.putSerializable("lstEmp",lstEmployees);
+        args.putString("kilitliDepartmanAdi", kilitliDepartmanAdi);
+        args.putString("kilitliMasaAdi", kilitliMasaAdi);
+        args.putSerializable("lstEmployees", lstEmployees);
         myFragment.setArguments(args);
         return myFragment;
     }
@@ -57,7 +62,8 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
                         }
                     }
                 }
-                fragment = newInstance(masaIsimleri, lstDepartmanlar.get(i).DepartmanAdi,lstEmployees);
+                fragment = newInstance(masaIsimleri, lstDepartmanlar.get(i).DepartmanAdi, lstEmployees, this.kilitliMasaAdi,
+                        this.kilitliDepartmanAdi);
             }
         }
         fragments[i] = fragment;

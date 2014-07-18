@@ -128,7 +128,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             kapananMasaDepartman = collection.get("departmanAdi");
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
                                     .getCurrentItem()];
-                            fragment[0].startKapananMasa(kapananMasa, acilanMasaDepartman);
+                            fragment[0].startKapananMasa(kapananMasa, kapananMasaDepartman);
                             break;
                         case siparis:
                             mesajGeldi = false;
@@ -229,7 +229,10 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
         this.masaPlanIsmi = readXML.masaPlanIsimleri;
-
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+        if (preferences.getBoolean("MasaKilitli", masaKilitliMi)) {
+            this.setVisible(false);
+        }
         //Giriş ekranından gelen çalışan bilgilerini alır.
         Bundle extras = getIntent().getExtras();
         lstEmployees = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
@@ -242,6 +245,8 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
             collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
             collectionPagerAdapter.lstEmployees = lstEmployees;
+            collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
+            collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
             mViewPager = (ViewPager) findViewById(R.id.pager);
             mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
             mViewPager.setAdapter(collectionPagerAdapter);
@@ -270,14 +275,21 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 actionBar.addTab(tab);
             }
         }
-        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
-        if(preferences.getBoolean("MasaKilitli",masaKilitliMi))
-        {
-            this.setVisible(false);
-            intent = new Intent(MasaEkrani.this, MenuEkrani.class);
-            intent.putExtra("lstEmployees", lstEmployees);
-            startActivity(intent);
+    }
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        if (preferences.getBoolean("MasaKilitli", masaKilitliMi)) {
+            for (int i = 0; i < actionBar.getTabCount(); i++) {
+                if (actionBar.getTabAt(i).getText().toString().contentEquals(preferences.getString
+                        ("departmanAdi", "Departman2"))) {
+                    actionBar.setSelectedNavigationItem(actionBar.getTabAt(i).getPosition());
+                    this.fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[actionBar
+                            .getTabAt(i).getPosition()];
+                }
+            }
         }
+        super.onAttachFragment(fragment);
     }
 
     BroadcastReceiver rec = new BroadcastReceiver() {
@@ -303,10 +315,9 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                     if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
                         mesajGeldi = true;
                         myHandler.sendEmptyMessage(0);
-                    } else if (komut.toString().contentEquals("giris")&&!baglanti.contentEquals("basarili")){
+                    } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
                         hataVerIsim();
-                    }
-                    else {
+                    } else {
                         hataVer();
                     }
                 }
@@ -329,6 +340,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         AlertDialog alertDialog = aBuilder.create();
         alertDialog.show();
     }
+
     private void hataVer() {
         AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
         aBuilder.setTitle("Bağlantı Hatası");
@@ -343,6 +355,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         AlertDialog alertDialog = aBuilder.create();
         alertDialog.show();
     }
+
     @Override
     public void asyncResponse(String mesaj) {
 
