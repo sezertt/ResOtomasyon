@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.res_otomasyon.resotomasyon.MenuEkrani" >
+    <item android:id="@+id/action_lockTable"
+          android:title="Masayı Kilitle"
+          android:orderInCategory="10"/>
+    <item android:id="@+id/action_garsonIstiyorum"
+          android:title="Garson İstiyorum"
+          android:orderInCategory="1"/>
+    <item android:id="@+id/action_masaTemizleyin"
+          android:title="Masamı Temizleyin"
+          android:orderInCategory="2"/>
+    <item android:id="@+id/action_gorusOneri"
+          android:title="Görüş ve Öneriler"
+          android:orderInCategory="3"/>
+    <item android:id="@+id/action_hesap"
+          android:title=""
+          android:icon="@drawable/check"
+          android:orderInCategory="100"
+          android:showAsAction="always"/>
+</menu>

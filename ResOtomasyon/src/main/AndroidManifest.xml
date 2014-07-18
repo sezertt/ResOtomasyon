@@ -11,9 +11,9 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
-            android:name=".MainScreen"
+            android:name=".MenuEkrani"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" >
@@ -22,9 +22,7 @@
             android:name=".LoginScreen"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
-            android:stateNotNeeded="true"
-            android:windowSoftInputMode="adjustResize" >
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".Settings"
@@ -38,14 +36,22 @@
         </activity>
         <activity
             android:name=".StartScreen"
-            android:label="@string/title_activity_start_screen" >
+            android:label="@string/title_activity_start_screen"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.MONKEY" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".HesapEkrani"
+            android:label="@string/title_activity_hesap_ekrani"
+            android:screenOrientation="portrait" >
         </activity>
     </application>
 

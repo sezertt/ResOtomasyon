@@ -1,7 +1,8 @@
 package com.res_otomasyon.resotomasyon;
 
-import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,87 +12,192 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.InputType;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.ExpandableListView;
-import android.widget.RelativeLayout;
 
 import java.io.File;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 
+import android.support.v4.app.FragmentActivity;
+import android.view.Window;
+import android.view.WindowManager;
+
+import ekclasslar.CollectionPagerAdapter;
+import ekclasslar.FileIO;
+import Entity.Departman;
 import Entity.Employee;
-import Entity.Urunler;
-import HashPassword.passwordHash;
+import Entity.MasaDizayn;
 import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
 
 
-public class MasaEkrani extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
+public class MasaEkrani extends FragmentActivity implements ActionBar.TabListener,
+        CommonAsyncTask.OnAsyncRequestComplete {
+
+    final FragmentMasaEkrani[] fragment = {new FragmentMasaEkrani()};
+    //
+    ActionBar actionBar;
+    ActionBar.Tab tab;
+    ViewPager mViewPager;
+    //
+    TCPClient mTcpClient;
+    CommonAsyncTask commonAsyncTask;
+    //
+    ArrayList<Departman> lstDepartmanlar;
+    ArrayList<MasaDizayn> lstMasaDizayn;
+    String[] masaPlanIsmi;
+    String tabName;
+    String acilanMasa;
+    String acilanMasaDepartman;
+    String kapananMasa;
+    String kapananMasaDepartman;
+    SharedPreferences preferences;
+    //
+    public String[] acikMasalar;
+    public String srvrMessage;
+    public boolean mesajGeldi = false;
+    public boolean firstRun = false;
+    ArrayList<Employee> lstEmployees;
+    //
+    CollectionPagerAdapter collectionPagerAdapter;
+    Context context = this;
+
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+        mViewPager.setCurrentItem(tab.getPosition());
+        tabName = (String) tab.getText();
+        String komut = "<komut=departman&departmanAdi=" + tabName + ">";
+        if (mTcpClient != null && mesajGeldi == false) {
+            mTcpClient.sendMessage(komut);
+        }
+    }
+
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+    }
+
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+    }
+
     public Handler myHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    try {
-                        try {
-                            SharedPreferences preferences = context.getSharedPreferences("KilitliMasa",
-                                    Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = preferences.edit();
-                            if (!masaKilitliMi) {
+                    firstRun = true;
+                    String departmanKomutu = "<komut=departman&departmanAdi=" + lstDepartmanlar.get(0).DepartmanAdi + ">";
+                    if (mTcpClient != null) {
+                        mTcpClient.sendMessage(departmanKomutu);
+                    }
+                    ConnectTCP.getInstance().setmTCPClient(mTcpClient);
+                    break;
+                case 1:
+                    String[] parametreler = srvrMessage.split("&");
+                    String[] esitlik;
+                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                    for (String parametre : parametreler) {
+                        esitlik = parametre.split("=");
+                        if (esitlik.length == 2)
+                            collection.put(esitlik[0], esitlik[1]);
+                    }
+                    String gelenkomut = collection.get("komut");
+                    Komutlar komut = Komutlar.valueOf(gelenkomut);
 
-                                try {
-                                    if (!masaKilitliMi)
-                                        masaKilitliMi = true;
-                                    editor.putString("PinCode", lstEmployee.get(0).PinCode);
-                                    editor.putString("Name", lstEmployee.get(0).Name);
-                                    editor.putString("LastName", lstEmployee.get(0).LastName);
-                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
-                                    editor.putString("Title", lstEmployee.get(0).Title);
-                                    Set<String> mySet = new HashSet<String>(Arrays.asList(lstEmployee.get
-                                            (0).Permissions));
-                                    editor.putStringSet("Permission", mySet);
-                                    editor.putString("UserName", lstEmployee.get(0).UserName);
-                                    editor.commit();
-                                } catch (Exception e) {
+                    switch (komut) {
+                        case iptal:
+                            mesajGeldi = false;
+                            break;
+                        case masaKapandi:
+                            mesajGeldi = false;
 
-                                }
-                                if (masaKilitliMi && item.getTitle().toString().contentEquals("Masayı Kilitle")) {
-                                    masaKilitliMi = true;
-                                    item.setTitle(R.string.masa_ac);
-                                }
-                            } else {
-                                passCorrect = passwordHash.validatePassword(m_Text,
-                                        lstEmployee.get(0).PinCode);
-                                if (passCorrect && masaKilitliMi) {
-                                    masaKilitliMi = false;
-                                    item.setTitle(R.string.masa_kilitle);
-                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
-                                    editor.commit();
-                                }
+                            kapananMasa = collection.get("masa");
+                            kapananMasaDepartman = collection.get("departmanAdi");
+                            fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
+                                    .getCurrentItem()];
+                            fragment[0].startKapananMasa(kapananMasa,acilanMasaDepartman);
+                            break;
+                        case siparis:
+                            mesajGeldi = false;
+                            break;
+
+                        case masaAcildi:
+                            mesajGeldi = false;
+
+                            acilanMasa = collection.get("masa");
+                            acilanMasaDepartman = collection.get("departmanAdi");
+                            fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
+                                    .getCurrentItem()];
+                            fragment[0].startAcilanMasa(acilanMasa,acilanMasaDepartman);
+                            break;
+                        case departman:
+                            mesajGeldi = false;
+                            acikMasalar = null;
+
+                            try {
+                                acikMasalar = collection.get("masa").split("\\*");
+                            } catch (Exception e) {
+                                acikMasalar = null;
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                            fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
+                            fragment[0].startSendAcikMasalar(acikMasalar, tabName);
+                            break;
+
+                        case hesapOdeniyor:
+                            break;
+                        case masaGirilebilirMi:
+                            break;
+                        case masaDegistir:
+                            break;
+                        case urunTasindi:
+                            break;
+                        case ikram:
+                            break;
+                        case ikramIptal:
+                            break;
+                        case BulunanYazicilar:
+                            break;
+                        case IndirimOnay:
+                            break;
+                        case OdemeOnay:
+                            break;
+                        case LoadSiparis:
+                            break;
+                        case OdenenleriGonder:
+                            break;
+                        case toplumesaj:
+                            break;
+                        case AdisyonNotu:
+                            break;
+                        case IslemHatasi:
+                            break;
+                    }
+                    break;
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+
+                    mTcpClient = commonAsyncTask.client;
+
+                    if (mTcpClient != null){
+                        if(mTcpClient.out != null)
+                            mTcpClient.sendMessage(girisKomutu);
+                        else
+                        {
+                            hataVer();
                         }
-
-                    } catch (Exception ex) {
-
-
                     }
                     break;
                 default:
@@ -101,114 +207,175 @@ public class MasaEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
     };
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (!masaKilitliMi)
-            this.finish();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        FileIO fileIO = new FileIO();
+        List<File> files;
+        files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+        ReadXML readXML = new ReadXML();
+        lstDepartmanlar = readXML.readDepartmanlar(files);
+        lstMasaDizayn = readXML.readMasaDizayn(files);
+        this.masaPlanIsmi = readXML.masaPlanIsimleri;
+
+        //Giriş ekranından gelen çalışan bilgilerini alır.
+        Bundle extras = getIntent().getExtras();
+        lstEmployees = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
+        Log.e("OnCreate", "mesajGeldi=true");
+        Object lockObject = new Object();
+        synchronized (lockObject) {
+            setContentView(R.layout.activity_masa_ekrani);
+            collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+            collectionPagerAdapter.lstDepartmanlar = lstDepartmanlar;
+            collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
+            collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
+            collectionPagerAdapter.lstEmployees = lstEmployees;
+            mViewPager = (ViewPager) findViewById(R.id.pager);
+            mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
+            mViewPager.setAdapter(collectionPagerAdapter);
+            mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    actionBar.setSelectedNavigationItem(position);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
+
+            actionBar = getActionBar();
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            for (Departman departman : lstDepartmanlar) {
+                tab = actionBar.newTab().setText(departman.DepartmanAdi);
+                tab.setTabListener(this);
+                actionBar.addTab(tab);
+            }
+        }
+
+        try {
+            commonAsyncTask = new CommonAsyncTask(this, myHandler);
+            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
+            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+            mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
+            mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
+            commonAsyncTask.execute((android.os.Handler[]) null);
+        } catch (Exception e) { }
     }
-
-    @Override
-    public void onBackPressed() {
-        if (masaKilitliMi)
-            return;
-        else
-            super.onBackPressed();
-    }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-    }
-
-    String departmanAdi, masaAdi;
-    TCPClient mTCPClient;
-    String message;
-    private String m_Text = "";
-    ArrayList<Employee> lstEmployee;
-
-    boolean masaKilitliMi = false;
-    boolean passCorrect = false;
-    Context context = this;
-    MenuItem item;
-
-    ArrayList<Urunler> lstProducts;
-
-
-    // more efficient than HashMap for mapping integers to objects
-    SparseArray<listGroup> groups = new SparseArray<listGroup>();
 
     BroadcastReceiver rec = new BroadcastReceiver() {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             //all events will be received here
             //get message
-            String message = intent.getStringExtra("message");
-        }
-    };
-    RelativeLayout r;
+            srvrMessage = intent.getStringExtra("message");
+            if (firstRun == false) {
+                if (srvrMessage != null) {
+                    String[] parametreler = srvrMessage.split("&");
+                    String[] esitlik;
+                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                    for (String parametre : parametreler) {
+                        esitlik = parametre.split("=");
+                        if (esitlik.length == 2)
+                            collection.put(esitlik[0], esitlik[1]);
+                    }
+                    String gelenkomut = collection.get("komut");
+                    Komutlar komut = Komutlar.valueOf(gelenkomut);
+                    final String baglanti = collection.get("sonuc");
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        mTCPClient = ConnectTCP.getInstance().getmTCPClient();
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_masa_ekrani);
-        Bundle extras = getIntent().getExtras();
-        departmanAdi = extras.getString("DepartmanAdi");
-        masaAdi = extras.getString("MasaAdi");
-        lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmp");
-        FileIO fileIO = new FileIO();
-        List<File> files = null;
-
-        try {
-            files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
-        } catch (Exception ex) {
-        }
-
-        r = (RelativeLayout) findViewById(R.id.screen);
-        ReadXML readUrun = new ReadXML();
-        lstProducts = readUrun.readUrunler(files);
-        LocalBroadcastManager.getInstance(this).registerReceiver(rec, new IntentFilter("myevent"));
-
-        createData();
-        ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-        MyExpandableListAdapter adapter = new MyExpandableListAdapter(this,
-                groups);
-        listView.setAdapter(adapter);
-    }
-
-
-    public void createData() {
-        int j = 0;
-        for (int i = 0; i < lstProducts.size(); i++) {
-            listGroup group = new listGroup(lstProducts.get(i).urunKategorisi);
-            if (i + 1 < lstProducts.size()) {
-                while (lstProducts.get(i).urunKategorisi.contentEquals(lstProducts.get(i + 1).urunKategorisi)) {
-                    group.productName.add(lstProducts.get(i).urunAdi);
-                    group.productPrice.add(lstProducts.get(i).porsiyonFiyati);
-                    group.productInfo.add(lstProducts.get(i).urunAciklamasi);
-
-                    i++;
-                    if (i + 1 >= lstProducts.size())
-                        break;
+                    if(komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili"))
+                    {
+                        mesajGeldi = true;
+                        myHandler.sendEmptyMessage(0);
+                    }
+                    else
+                    {
+                        hataVer();
+                    }
                 }
             }
-            groups.append(j, group);
-            j++;
+            else
+            {
+                myHandler.sendEmptyMessage(1);
+            }
         }
+    };
+
+    private void hataVer()
+    {
+        AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
+        aBuilder.setTitle("Bağlantı Hatası");
+        aBuilder.setMessage("Bilgisayar adı kullanılıyor veya sunucuya bağlanırken bir hata ile karşılaşıldı. Lütfen tekrar deneyiniz").setCancelable(false)
+                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MasaEkrani.this.finish();
+                    }
+                });
+        AlertDialog alertDialog = aBuilder.create();
+        alertDialog.show();
+    }
+
+    @Override
+    public void asyncResponse(String mesaj) {
+
+    }
+
+    public Fragment getVisibleFragment() {
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+
+        Fragment visibleFragment = new Fragment();
+        for (Fragment fragment : allFragments) {
+            if (fragment.getUserVisibleHint()) {
+                visibleFragment = fragment;
+                break;
+            }
+        }
+        return visibleFragment;
+    }
+
+    public enum Komutlar {
+        siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
+        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
+        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi;
     }
 
     @Override
     protected void onStop() {
-        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
+        if (mTcpClient != null) {
+            try {
+                mTcpClient.stopClient();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        mTcpClient = null;
+        commonAsyncTask = null;
+
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
+        if (mTcpClient != null) {
+            try {
+                mTcpClient.stopClient();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        mTcpClient = null;
+        commonAsyncTask = null;
         super.onDestroy();
     }
 
@@ -220,73 +387,14 @@ public class MasaEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
     }
 
     @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        this.item = (MenuItem) item;
-        if (id == R.id.action_lockTable) {
-            if (item.getTitle().toString().contentEquals("Masayı Kilitle")) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Masa Kilitle");
-
-//// Set up the input
-//                final EditText input = new EditText(context);
-//// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-//                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-//                builder.setView(input);
-
-// Set up the buttons
-                builder.setPositiveButton("Masayı Kilitle", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        myHandler.sendEmptyMessage(0);
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
-                return false;
-            } else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır")) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Title");
-
-// Set up the input
-                final EditText input = new EditText(context);
-// Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                builder.setView(input);
-
-// Set up the buttons
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        m_Text = input.getText().toString();
-                        myHandler.sendEmptyMessage(0);
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
-            }
+        if (id == R.id.action_settings) {
+            return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void asyncResponse(String mesaj) {
-        message = mesaj;
-    }
 }
-
-

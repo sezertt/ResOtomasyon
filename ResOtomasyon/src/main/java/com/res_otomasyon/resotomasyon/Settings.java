@@ -11,6 +11,7 @@ import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -18,13 +19,13 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import ekclasslar.ShowAlertDialog;
 import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 
 
 public class Settings extends Activity implements View.OnClickListener {
 
-    EditText editText;
     Button btnSave;
     Button btnCancel;
     ShowAlertDialog showAlertDialog;
@@ -106,27 +107,18 @@ public class Settings extends Activity implements View.OnClickListener {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            kacinci++;
-                            dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
+                    kacinci++;
+                    dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
 
-                            if (kacinci == 1 || kacinci <= kacDosya)
-                                mTcpClient.sendMessage(dosyaIsteKomutu);
-                            else
-                                onDestroy();
-                        }
-                    });
+                    if (kacinci == 1 || kacinci <= kacDosya)
+                        mTcpClient.sendMessage(dosyaIsteKomutu);
+                    else
+                        onDestroy();
+
                     break;
                 case 1:
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
-                            mTcpClient.sendMessage(dosyaIsteKomutu);
-                        }
-                    });
+                    dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
+                    mTcpClient.sendMessage(dosyaIsteKomutu);
                     break;
                 default:
                     break;
@@ -137,6 +129,9 @@ public class Settings extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_settings);
         btnSave = (Button) findViewById(R.id.button);
         btnCancel = (Button) findViewById(R.id.btnIptal);
@@ -185,14 +180,13 @@ public class Settings extends Activity implements View.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
         if (id == R.id.action_settings) {
             mTcpClient = ConnectTCP.getInstance().getmTCPClient();
             try {
-                mTcpClient.stopClient();
+                if(mTcpClient!=null)
+                    mTcpClient.stopClient();
             } catch (IOException e) {
                 e.printStackTrace();
             }

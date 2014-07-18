@@ -1,33 +1,21 @@
 package TCPClientSide;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Base64;
 import android.util.Log;
-import android.util.Xml;
 
-import com.res_otomasyon.resotomasyon.BitConverter;
+import ekclasslar.BitConverter;
 
 import org.apache.http.util.EncodingUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
@@ -43,7 +31,7 @@ public class TCPClient {
     public boolean mRun = false;
     public InputStream stream;
     Socket socket;
-    PrintWriter out;
+    public PrintWriter out;
     BufferedReader in;
     InetAddress serverAddr;
 

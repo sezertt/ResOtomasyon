@@ -19,13 +19,13 @@ public class CommonAsyncTask extends AsyncTask<Handler,String,String>{
 
     OnAsyncRequestComplete caller;
     public Context context;
-    String mesaj;
     String method = "GET";
     List<NameValuePair> parameters = null;
-    ProgressDialog pDialog = null;
     public TCPClient client;
     LocalBroadcastManager localBroadcastManager;
+    android.os.Handler myHandler;
     // Three Constructors
+
     public CommonAsyncTask(Activity a, String m, List<NameValuePair> p) {
         caller = (OnAsyncRequestComplete) a;
         context = a;
@@ -39,10 +39,11 @@ public class CommonAsyncTask extends AsyncTask<Handler,String,String>{
         method = m;
     }
 
-    public CommonAsyncTask(Activity a) {
+    public CommonAsyncTask(Activity a,android.os.Handler myHandler) {
         caller = (OnAsyncRequestComplete) a;
         context = a;
         localBroadcastManager = LocalBroadcastManager.getInstance(context);
+        this.myHandler = myHandler;
     }
 
     public interface OnAsyncRequestComplete {
@@ -60,6 +61,7 @@ public class CommonAsyncTask extends AsyncTask<Handler,String,String>{
                 localBroadcastManager.sendBroadcastSync(intent);
             }
         });
+        myHandler.sendEmptyMessage(2);
         client.run();
         return null;
     }

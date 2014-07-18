@@ -11,9 +11,10 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.File;
+
+import ekclasslar.UrunBilgileri;
 
 /**
  * Created by sezer on 08.07.2014.
@@ -21,11 +22,11 @@ import java.io.File;
 
 public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private final SparseArray<listGroup> groups;
+    private final SparseArray<UrunBilgileri> groups;
     public LayoutInflater inflater;
     public Activity activity;
 
-    public MyExpandableListAdapter(Activity act, SparseArray<listGroup> groups) {
+    public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups) {
         activity = act;
         this.groups = groups;
         inflater = act.getLayoutInflater();
@@ -60,7 +61,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         ImageView image;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.listrow_details, null);
+            convertView = inflater.inflate(R.layout.urun_gorunumu, null);
         }
 
         text = (TextView) convertView.findViewById(R.id.textViewChildPrice);
@@ -128,9 +129,9 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.listrow_group, null);
+            convertView = inflater.inflate(R.layout.katalog_gorunumu, null);
         }
-        listGroup group = (listGroup) getGroup(groupPosition);
+        UrunBilgileri group = (UrunBilgileri) getGroup(groupPosition);
 
         CheckedTextView textGroupProductName;
         textGroupProductName = (CheckedTextView) convertView.findViewById(R.id.textViewProductGroupHeader);
