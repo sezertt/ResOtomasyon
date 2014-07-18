@@ -67,6 +67,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     public String srvrMessage;
     public boolean mesajGeldi = false;
     public boolean firstRun = false;
+    boolean masaKilitliMi = false;
     ArrayList<Employee> lstEmployees;
     //
     CollectionPagerAdapter collectionPagerAdapter;
@@ -127,7 +128,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             kapananMasaDepartman = collection.get("departmanAdi");
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
                                     .getCurrentItem()];
-                            fragment[0].startKapananMasa(kapananMasa,acilanMasaDepartman);
+                            fragment[0].startKapananMasa(kapananMasa, acilanMasaDepartman);
                             break;
                         case siparis:
                             mesajGeldi = false;
@@ -140,7 +141,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             acilanMasaDepartman = collection.get("departmanAdi");
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
                                     .getCurrentItem()];
-                            fragment[0].startAcilanMasa(acilanMasa,acilanMasaDepartman);
+                            fragment[0].startAcilanMasa(acilanMasa, acilanMasaDepartman);
                             break;
                         case departman:
                             mesajGeldi = false;
@@ -191,11 +192,10 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
 
                     mTcpClient = commonAsyncTask.client;
 
-                    if (mTcpClient != null){
-                        if(mTcpClient.out != null)
+                    if (mTcpClient != null) {
+                        if (mTcpClient.out != null)
                             mTcpClient.sendMessage(girisKomutu);
-                        else
-                        {
+                        else {
                             hataVer();
                         }
                     }
@@ -205,10 +205,20 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             }
         }
     };
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            commonAsyncTask = new CommonAsyncTask(this, myHandler);
+            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
+            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+            mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
+            mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
+            commonAsyncTask.execute((android.os.Handler[]) null);
+        } catch (Exception e) {
+        }
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -260,15 +270,14 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 actionBar.addTab(tab);
             }
         }
-
-        try {
-            commonAsyncTask = new CommonAsyncTask(this, myHandler);
-            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-            mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
-            mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
-            commonAsyncTask.execute((android.os.Handler[]) null);
-        } catch (Exception e) { }
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+        if(preferences.getBoolean("MasaKilitli",masaKilitliMi))
+        {
+            this.setVisible(false);
+            intent = new Intent(MasaEkrani.this, MenuEkrani.class);
+            intent.putExtra("lstEmployees", lstEmployees);
+            startActivity(intent);
+        }
     }
 
     BroadcastReceiver rec = new BroadcastReceiver() {
@@ -291,29 +300,26 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                     Komutlar komut = Komutlar.valueOf(gelenkomut);
                     final String baglanti = collection.get("sonuc");
 
-                    if(komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili"))
-                    {
+                    if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
                         mesajGeldi = true;
                         myHandler.sendEmptyMessage(0);
+                    } else if (komut.toString().contentEquals("giris")&&!baglanti.contentEquals("basarili")){
+                        hataVerIsim();
                     }
-                    else
-                    {
+                    else {
                         hataVer();
                     }
                 }
-            }
-            else
-            {
+            } else {
                 myHandler.sendEmptyMessage(1);
             }
         }
     };
 
-    private void hataVer()
-    {
+    private void hataVerIsim() {
         AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
         aBuilder.setTitle("Bağlantı Hatası");
-        aBuilder.setMessage("Bilgisayar adı kullanılıyor veya sunucuya bağlanırken bir hata ile karşılaşıldı. Lütfen tekrar deneyiniz").setCancelable(false)
+        aBuilder.setMessage("Bilgisayar adı kullanımda.Lütfen ayarları kullanarak kullanıcı adınızı değiştirip tekrar deneniyiniz.").setCancelable(false)
                 .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -323,7 +329,20 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         AlertDialog alertDialog = aBuilder.create();
         alertDialog.show();
     }
-
+    private void hataVer() {
+        AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
+        aBuilder.setTitle("Bağlantı Hatası");
+        aBuilder.setMessage("Sunucuya bağlanırken bir hata ile karşılaşıldı. Lütfen tekrar deneyiniz")
+                .setCancelable(false)
+                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MasaEkrani.this.finish();
+                    }
+                });
+        AlertDialog alertDialog = aBuilder.create();
+        alertDialog.show();
+    }
     @Override
     public void asyncResponse(String mesaj) {
 
@@ -348,21 +367,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi;
     }
 
-    @Override
-    protected void onStop() {
-        if (mTcpClient != null) {
-            try {
-                mTcpClient.stopClient();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
-        mTcpClient = null;
-        commonAsyncTask = null;
-
-        super.onStop();
-    }
 
     @Override
     protected void onDestroy() {

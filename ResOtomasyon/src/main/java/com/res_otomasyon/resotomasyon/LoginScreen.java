@@ -58,8 +58,9 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         if(MasaKilitliMi)
         {
             this.setVisible(false);
-            Button btn = (Button) findViewById(R.id.btnGiris);
-            btn.callOnClick();
+            intent = new Intent(LoginScreen.this, MasaEkrani.class);
+            intent.putExtra("lstEmployees", lstEmployees);
+            startActivity(intent);
         }
         else {
             this.setVisible(true);
@@ -201,7 +202,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 //                    e.Title = lstEmployees.get(getCurrentEmployee).Title;
                     lstEmployees.removeAll(lstEmployees);
                     lstEmployees.add(e);
-                    intent = new Intent(LoginScreen.this, MasaEkrani.class);
+                    intent = new Intent(LoginScreen.this, MenuEkrani.class);
                     intent.putExtra("lstEmployees", lstEmployees);
                     startActivity(intent);
                 } else {

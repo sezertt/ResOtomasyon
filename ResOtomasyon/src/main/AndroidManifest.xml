@@ -18,6 +18,7 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
+            android:windowSoftInputMode="stateVisible"
             android:name=".LoginScreen"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
