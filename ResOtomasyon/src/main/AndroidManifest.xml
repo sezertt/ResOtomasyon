@@ -15,14 +15,13 @@
         <activity
             android:name=".MenuEkrani"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" >
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".LoginScreen"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".Settings"
@@ -37,11 +36,9 @@
         <activity
             android:name=".StartScreen"
             android:label="@string/title_activity_start_screen"
-            android:stateNotNeeded="true"
-            android:windowSoftInputMode="adjustResize">
+            android:stateNotNeeded="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -51,7 +48,7 @@
         <activity
             android:name=".HesapEkrani"
             android:label="@string/title_activity_hesap_ekrani"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
