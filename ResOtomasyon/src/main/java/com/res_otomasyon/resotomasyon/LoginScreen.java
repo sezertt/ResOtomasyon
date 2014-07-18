@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -103,10 +104,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             ReadXML readXML = new ReadXML();
             lstEmployees = readXML.readEmployees(files);
         }
-        preferences = this.getSharedPreferences("KilitliMasa",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.clear();
-        editor.commit();
 //        MasaKilitliMi = preferences.getBoolean("MasaKilitli",false);
 //        if(preferences !=null && MasaKilitliMi == true) {
 //            lstEmployees.get(0).PinCode = preferences.getString("PinCode", "0000");

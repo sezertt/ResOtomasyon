@@ -3,6 +3,7 @@ package com.res_otomasyon.resotomasyon;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -16,6 +17,12 @@ public class StartScreen extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        String sdcardReady = null;
+
+        while (!sdcardReady.contentEquals("mounted"))
+        {
+            sdcardReady = Environment.getExternalStorageState();
+        }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_start_screen);
