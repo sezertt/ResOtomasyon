@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import Entity.Siparis;
 import ekclasslar.FileIO;
 import ekclasslar.UrunBilgileri;
 import Entity.Employee;
@@ -42,6 +43,24 @@ import XMLReader.ReadXML;
 public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
 
     Menu menu;
+
+    String departmanAdi, masaAdi;
+    TCPClient mTCPClient;
+    String message;
+    private String m_Text = "";
+    ArrayList<Employee> lstEmployee;
+
+    boolean masaKilitliMi = false;
+    boolean passCorrect = false;
+    Context context = this;
+    MenuItem item;
+
+    ArrayList<Urunler> lstProducts;
+    ArrayList<Siparis> lstOrderedProducts;
+
+
+    // more efficient than HashMap for mapping integers to objects
+    SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
 
     public Handler myHandler = new Handler() {
 
@@ -64,8 +83,8 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
                                     editor.putString("LastName", lstEmployee.get(0).LastName);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     editor.putString("Title", lstEmployee.get(0).Title);
-                                    editor.putString("masaAdi",masaAdi);
-                                    editor.putString("departmanAdi",departmanAdi);
+                                    editor.putString("masaAdi", masaAdi);
+                                    editor.putString("departmanAdi", departmanAdi);
                                     Set<String> mySet = new HashSet<String>(Arrays.asList(lstEmployee.get
                                             (0).Permissions));
                                     editor.putStringSet("Permission", mySet);
@@ -122,27 +141,8 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
 
     @Override
     protected void onResume() {
-
         super.onResume();
     }
-
-
-    String departmanAdi, masaAdi;
-    TCPClient mTCPClient;
-    String message;
-    private String m_Text = "";
-    ArrayList<Employee> lstEmployee;
-
-    boolean masaKilitliMi = false;
-    boolean passCorrect = false;
-    Context context = this;
-    MenuItem item;
-
-    ArrayList<Urunler> lstProducts;
-
-
-    // more efficient than HashMap for mapping integers to objects
-    SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
 
     BroadcastReceiver rec = new BroadcastReceiver() {
 
@@ -180,8 +180,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
 
         createData();
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-        MyExpandableListAdapter adapter = new MyExpandableListAdapter(this,
-                groups);
+        MyExpandableListAdapter adapter = new MyExpandableListAdapter(this,groups,this);
         listView.setAdapter(adapter);
     }
 
@@ -293,6 +292,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
 
             case R.id.action_hesap:
                 Intent intent = new Intent(MenuEkrani.this, HesapEkrani.class);
+                intent.putExtra("lstOrderedProducts", lstOrderedProducts);
                 startActivity(intent);
                 break;
 

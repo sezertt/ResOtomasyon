@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import java.io.File;
 
+import Entity.Siparis;
 import ekclasslar.UrunBilgileri;
 
 /**
@@ -25,10 +26,12 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
     private final SparseArray<UrunBilgileri> groups;
     public LayoutInflater inflater;
     public Activity activity;
+    MenuEkrani menuEkrani;
 
-    public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups) {
+    public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups, MenuEkrani menuEkrani) {
         activity = act;
         this.groups = groups;
+        this.menuEkrani = menuEkrani;
         inflater = act.getLayoutInflater();
     }
 
@@ -64,8 +67,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.urun_gorunumu, null);
         }
 
-        text = (TextView) convertView.findViewById(R.id.textViewChildPrice);
-        text.setText(productPrice + "TL");
+        final TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewChildPrice);
+        textFiyat.setText(productPrice + "TL");
 
         text = (TextView) convertView.findViewById(R.id.textViewChildInfo);
         text.setText(productInfo);
@@ -74,14 +77,39 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         File file = new File("/mnt/sdcard/shared/Lenovo/Resimler/" + productName + ".png");
         Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
         image.setImageBitmap(bmp);
-        text = (TextView) convertView.findViewById(R.id.textViewChildHeader);
-        text.setText(productName);
-        final TextView textAdet = ((TextView) convertView.findViewById(R.id.textViewAdet));
+        final TextView textName = (TextView) convertView.findViewById(R.id.textViewChildHeader);
+        textName.setText(productName);
+        final TextView textAdet = (TextView) convertView.findViewById(R.id.textViewAdet);
+
         convertView.findViewById(R.id.buttonPlus).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textAdet.setText(String.valueOf(Integer.parseInt(textAdet.getText().toString()) + 1));
+                String miktar = String.valueOf(Integer.parseInt(textAdet.getText().toString()) + 1);
+                textAdet.setText(miktar);
 
+                int siparisVarMi = -1;
+
+                for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++)
+                {
+                    if(menuEkrani.lstOrderedProducts.get(i).yemekAdi.contentEquals(textName.getText().toString()))
+                    {
+                        siparisVarMi = i;
+                        break;
+                    }
+                }
+
+                if(siparisVarMi == -1)
+                {
+                    Siparis siparis = new Siparis();
+                    siparis.miktar = miktar;
+                    siparis.porsiyonFiyati = textFiyat.getText().toString();
+                    siparis.yemekAdi = textName.getText().toString();
+                    menuEkrani.lstOrderedProducts.add(siparis);
+                }
+                else
+                {
+                    menuEkrani.lstOrderedProducts.get(siparisVarMi).miktar = miktar;
+                }
             }
         });
         convertView.findViewById(R.id.buttonMinus).setOnClickListener(new View.OnClickListener() {

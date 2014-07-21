@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -392,6 +393,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         }
         LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
         mTcpClient = null;
+        commonAsyncTask.cancel(true);
         commonAsyncTask = null;
         super.onDestroy();
     }

@@ -57,7 +57,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
         @Override
         public void run() {
-            while (kapananMasa == null) {
+            while (_kapananMasa == null) {
 
             }
 
@@ -80,7 +80,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
         @Override
         public void run() {
-            while (acilanMasa == null) {
+            while (_acilanMasa == null) {
 
             }
             acilanMasa = this._acilanMasa;
@@ -159,12 +159,17 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     public void onAttach(Activity activity) {
         preferences = getActivity().getSharedPreferences("KilitliMasa",
                 Context.MODE_PRIVATE);
-        if (preferences.getBoolean("MasaKilitli", false)) {
-            Intent intent = new Intent(getActivity(), MenuEkrani.class);
-            intent.putExtra("DepartmanAdi", this.departmanAdi);
-            intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
-            intent.putExtra("lstEmployees", this.lstEmployees);
-            startActivity(intent);
+        this.departmanAdi = getArguments().getString("departmanAdi");
+        this.lstEmployees = (ArrayList<Employee>) getArguments().getSerializable("lstEmployees");
+
+        if (preferences.getString("departmanAdi", null).contentEquals(departmanAdi)) {
+            if (preferences.getBoolean("MasaKilitli", false)) {
+                Intent intent = new Intent(getActivity(), MenuEkrani.class);
+                intent.putExtra("DepartmanAdi", this.departmanAdi);
+                intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
+                intent.putExtra("lstEmployees", this.lstEmployees);
+                startActivity(intent);
+            }
         }
         super.onAttach(activity);
     }
