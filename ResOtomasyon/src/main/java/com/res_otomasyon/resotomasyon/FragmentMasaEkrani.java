@@ -162,7 +162,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         this.departmanAdi = getArguments().getString("departmanAdi");
         this.lstEmployees = (ArrayList<Employee>) getArguments().getSerializable("lstEmployees");
 
-        if (preferences.getString("departmanAdi", null).contentEquals(departmanAdi)) {
+        if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
             if (preferences.getBoolean("MasaKilitli", false)) {
                 Intent intent = new Intent(getActivity(), MenuEkrani.class);
                 intent.putExtra("DepartmanAdi", this.departmanAdi);

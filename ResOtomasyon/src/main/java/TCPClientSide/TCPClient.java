@@ -136,41 +136,11 @@ public class TCPClient {
                 Log.e("TCP Client", "C: Sent.");
 
                 Log.e("TCP Client", "C: Done.");
-
-//                //receive the message which the server sends back
-//                //in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//                inputStream = socket.getInputStream();
-//                //DataInputStream dis = new DataInputStream(inputStream);
-//                //in this while the client listens for the messages sent by the server
-//                while (mRun) {
-//                    byte firstByte = (byte) inputStream.read();
-//                    byte[] firsCharArray = new byte[1];
-//                    firsCharArray[0] = firstByte;
-//                    String firstChar = new String(firsCharArray, "UTF-8");
-//                    if (firstChar.contentEquals("<")) {
-//                        int availableBytes = inputStream.available();
-//                        byte[] serverMessageArray = new byte[availableBytes - 1];
-//                        inputStream.read(serverMessageArray, 0, availableBytes - 1);
-//                        byte[] lastByte = new byte[1];
-//                        lastByte[0] = (byte) inputStream.read();
-//                        String lastChar = new String(lastByte, "UTF-8");
-//                        if (!lastChar.contentEquals(">"))
-//                            return;
-//                        serverMessage = new String(serverMessageArray, "UTF-8");
-//                    }
-//                    if (serverMessage != null && mMessageListener != null) {
-//                        //call the method messageReceived from MyActivity class
-//                        mMessageListener.messageReceived(serverMessage);
-//                    }
-//                }
-
-                //<
                 byte FIRST_BYTE = (byte) 60;
                 //>
                 byte LAST_BYTE = (byte) 62;
 
                 stream = socket.getInputStream();
-                byte[] data = new byte[100];
 
                 while (mRun) {
                     int firstByte = stream.read();

@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,14 +20,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
 import android.support.v4.app.FragmentActivity;
-import android.view.Window;
 import android.view.WindowManager;
 
 import ekclasslar.CollectionPagerAdapter;
@@ -42,8 +39,7 @@ import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
 
 
-public class MasaEkrani extends FragmentActivity implements ActionBar.TabListener,
-        CommonAsyncTask.OnAsyncRequestComplete {
+public class MasaEkrani extends FragmentActivity implements ActionBar.TabListener, CommonAsyncTask.OnAsyncRequestComplete {
 
     final FragmentMasaEkrani[] fragment = {new FragmentMasaEkrani()};
     //
@@ -357,11 +353,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         alertDialog.show();
     }
 
-    @Override
-    public void asyncResponse(String mesaj) {
-
-    }
-
     public Fragment getVisibleFragment() {
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
 
@@ -375,28 +366,18 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         return visibleFragment;
     }
 
+    @Override
+    public void asyncResponse(String mesaj) {
+        //Hata veridir ve finish yap.
+        this.finish();
+    }
+
     public enum Komutlar {
         siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
         masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi;
     }
 
-
-    @Override
-    protected void onDestroy() {
-        if (mTcpClient != null) {
-            try {
-                mTcpClient.stopClient();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
-        mTcpClient = null;
-        commonAsyncTask.cancel(true);
-        commonAsyncTask = null;
-        super.onDestroy();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

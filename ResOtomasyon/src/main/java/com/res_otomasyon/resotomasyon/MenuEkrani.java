@@ -19,7 +19,6 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.RelativeLayout;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,13 +33,12 @@ import ekclasslar.UrunBilgileri;
 import Entity.Employee;
 import Entity.Urunler;
 import HashPassword.passwordHash;
-import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
 
 
-public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
+public class MenuEkrani extends Activity {
 
     Menu menu;
 
@@ -56,7 +54,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
     MenuItem item;
 
     ArrayList<Urunler> lstProducts;
-    ArrayList<Siparis> lstOrderedProducts;
+    ArrayList<Siparis> lstOrderedProducts = new ArrayList<Siparis>();
 
 
     // more efficient than HashMap for mapping integers to objects
@@ -206,20 +204,6 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
     }
 
     @Override
-    protected void onStop() {
-        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
-        super.onDestroy();
-    }
-
-
-    @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
     }
@@ -312,10 +296,7 @@ public class MenuEkrani extends Activity implements CommonAsyncTask.OnAsyncReque
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void asyncResponse(String mesaj) {
-        message = mesaj;
-    }
+
 }
 
 

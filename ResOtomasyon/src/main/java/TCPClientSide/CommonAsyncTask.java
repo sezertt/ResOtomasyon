@@ -24,20 +24,6 @@ public class CommonAsyncTask extends AsyncTask<Handler,String,String>{
     public TCPClient client;
     LocalBroadcastManager localBroadcastManager;
     android.os.Handler myHandler;
-    // Three Constructors
-
-    public CommonAsyncTask(Activity a, String m, List<NameValuePair> p) {
-        caller = (OnAsyncRequestComplete) a;
-        context = a;
-        method = m;
-        parameters = p;
-    }
-
-    public CommonAsyncTask(Activity a, String m) {
-        caller = (OnAsyncRequestComplete) a;
-        context = a;
-        method = m;
-    }
 
     public CommonAsyncTask(Activity a,android.os.Handler myHandler) {
         caller = (OnAsyncRequestComplete) a;
@@ -66,9 +52,9 @@ public class CommonAsyncTask extends AsyncTask<Handler,String,String>{
         return null;
     }
 
-//    @Override
-//    protected void onPostExecute(String message) {
-//        caller.asyncResponse(message);
-//        super.onPostExecute(message);
-//    }
+    @Override
+    protected void onPostExecute(String message) {
+        caller.asyncResponse(message);
+        super.onPostExecute(message);
+    }
 }

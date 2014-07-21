@@ -23,7 +23,6 @@ public class StartScreen extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         this.setVisible(false);
         String sdcardReady = Environment.getExternalStorageState();
