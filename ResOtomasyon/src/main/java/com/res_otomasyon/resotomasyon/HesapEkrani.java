@@ -40,7 +40,12 @@ public class HesapEkrani extends Activity {
         Boolean ikramMi;
 
         ListView list = (ListView) findViewById(R.id.listViewHesap);
-        ArrayList<HashMap<String, String>> mylist = new ArrayList<HashMap<String, String>>();
+
+        ArrayList<HashMap<String, String>> yazdirilacakListe = new ArrayList<HashMap<String, String>>();
+
+        ArrayList<Siparis> urunListesi = new ArrayList<Siparis>();
+        ArrayList<Siparis> urunListesiIkram = new ArrayList<Siparis>();
+
 
         for (int i = 0; i < Siparisler.length; i++) {
             String[] detaylari = Siparisler[i].split("-");
@@ -54,10 +59,19 @@ public class HesapEkrani extends Activity {
 
             if(!ikramMi) // ikram değilse
             {
-                for (int j = 0; j < mylist.size(); j++) {
-                    if(yemeginAdi.contentEquals(mylist.get(j).toString()))
+                for (int j = 0; j < urunListesi.size(); j++) {
+                    if(yemeginAdi.contentEquals(urunListesi.get(j).toString())) // listede yemek var
                     {
                         // tüm ürünleri unique olcak şekilde 2 listede topla, biri ikram olanlar diğeri ikram olmayanlar. sonra oların hepsini map 'e koy
+                        urunListesi.get(j).miktar = (Double.parseDouble(urunListesi.get(j).miktar) + kacPorsiyon) + "";
+                    }
+                    else // listede yemek yok
+                    {
+                        Siparis yeniSiparis = new Siparis();
+                        yeniSiparis.miktar = kacPorsiyon.toString();
+                        yeniSiparis.yemekAdi = yemeginAdi;
+                        yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
+                        urunListesi.add(yeniSiparis);
                     }
                 }
             }
@@ -72,10 +86,10 @@ public class HesapEkrani extends Activity {
             map.put("yemek", "101");
             map.put("adet", "6:30 AM");
             map.put("fiyat", "7:40 AM");
-            mylist.add(map);
+            yazdirilacakListe.add(map);
         }
 
-        SimpleAdapter adapter = new SimpleAdapter(this, mylist, R.layout.hesap_urun_gorunumu,
+        SimpleAdapter adapter = new SimpleAdapter(this, yazdirilacakListe, R.layout.hesap_urun_gorunumu,
                 new String[]{"yemek", "adet", "fiyat"}, new int[]{R.id.textViewYemekAdi, R.id.textViewAdet, R.id.textViewFiyat});
         list.setAdapter(adapter);
     }
