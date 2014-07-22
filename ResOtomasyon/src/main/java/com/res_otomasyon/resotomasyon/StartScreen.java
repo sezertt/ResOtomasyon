@@ -1,9 +1,15 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,13 +19,21 @@ import com.res_otomasyon.resotomasyon.LoginScreen;
 import com.res_otomasyon.resotomasyon.R;
 
 import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
+import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 
-public class StartScreen extends Activity {
+public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
 
     TCPClient mTcpClient;
+    CommonAsyncTask commonAsyncTask;
+    SharedPreferences preferences;
+    Context context = this;
+    String srvrMessage;
+    public boolean mesajGeldi = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,26 +45,87 @@ public class StartScreen extends Activity {
             sdcardReady = Environment.getExternalStorageState();
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        setContentView(R.layout.activity_start_screen);
+        GlobalApplication g = (GlobalApplication) getApplicationContext();
+        if(g.commonAsyncTask ==null) {
+            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+            g.activity = this;
+            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
+            g.connectServer(myHandler, rec);
+            commonAsyncTask = g.commonAsyncTask;
+            setContentView(R.layout.activity_start_screen);
+        }
     }
 
+    public Handler myHandler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    if (mTcpClient != null) {
+                    }
+                    break;
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+
+                    mTcpClient = commonAsyncTask.client;
+
+                    if (mTcpClient != null) {
+                        if (mTcpClient.out != null)
+                            mTcpClient.sendMessage(girisKomutu);
+                        else {
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    BroadcastReceiver rec = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //all events will be received here
+            //get message
+            srvrMessage = intent.getStringExtra("message");
+            if (srvrMessage != null) {
+                String[] parametreler = srvrMessage.split("&");
+                String[] esitlik;
+                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                for (String parametre : parametreler) {
+                    esitlik = parametre.split("=");
+                    if (esitlik.length == 2)
+                        collection.put(esitlik[0], esitlik[1]);
+                }
+                String gelenkomut = collection.get("komut");
+                Komutlar komut = Komutlar.valueOf(gelenkomut);
+                final String baglanti = collection.get("sonuc");
+
+                if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
+                    mesajGeldi = true;
+                    myHandler.sendEmptyMessage(0);
+                    LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+
+                } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
+
+                } else {
+
+                }
+            }
+        }
+    };
+
+    public enum Komutlar {
+        siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
+        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
+        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi;
+    }
 
     @Override
     protected void onStop() {
-        try {
-            mTcpClient = ConnectTCP.getInstance().getmTCPClient();
-            if (mTcpClient != null) {
-                try {
-                    mTcpClient.stopClient();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            mTcpClient = null;
-        } catch (Exception e) {
 
-        }
         super.onStop();
     }
 
@@ -80,5 +155,10 @@ public class StartScreen extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void asyncResponse(String mesaj) {
+
     }
 }

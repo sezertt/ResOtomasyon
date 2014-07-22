@@ -59,7 +59,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         if(MasaKilitliMi)
         {
             this.setVisible(false);
-            intent = new Intent(LoginScreen.this, MasaEkrani.class);
             lstEmployees.get(0).PinCode = preferences.getString("PinCode", "0000");
             lstEmployees.get(0).Title = preferences.getString("Title",null);
             Set<String> setPermissions = preferences.getStringSet("Permission",null);
@@ -67,6 +66,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             lstEmployees.get(0).UserName = preferences.getString("UserName",null);
             lstEmployees.get(0).Name = preferences.getString("Name", null);
             lstEmployees.get(0).LastName = preferences.getString("LastName",null);
+            intent = new Intent(LoginScreen.this, MasaEkrani.class);
             intent.putExtra("lstEmployees", lstEmployees);
             startActivity(intent);
         }
@@ -94,7 +94,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.activity_login_screen);
         btnGiris = (Button) findViewById(R.id.btnGiris);
         btnCikis = (Button) findViewById(R.id.btnCikis);

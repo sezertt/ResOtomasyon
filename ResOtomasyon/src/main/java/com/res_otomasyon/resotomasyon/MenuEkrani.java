@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputType;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,7 +56,7 @@ public class MenuEkrani extends Activity {
 
     ArrayList<Urunler> lstProducts;
     ArrayList<Siparis> lstOrderedProducts = new ArrayList<Siparis>();
-
+    SharedPreferences preferences = null;
 
     // more efficient than HashMap for mapping integers to objects
     SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
@@ -68,14 +69,11 @@ public class MenuEkrani extends Activity {
                 case 0:
                     try {
                         try {
-                            SharedPreferences preferences = context.getSharedPreferences("KilitliMasa",
-                                    Context.MODE_PRIVATE);
+                            preferences = context.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = preferences.edit();
                             if (!masaKilitliMi) {
-
                                 try {
-                                    if (!masaKilitliMi)
-                                        masaKilitliMi = true;
+                                    masaKilitliMi = true;
                                     editor.putString("PinCode", lstEmployee.get(0).PinCode);
                                     editor.putString("Name", lstEmployee.get(0).Name);
                                     editor.putString("LastName", lstEmployee.get(0).LastName);
@@ -88,24 +86,25 @@ public class MenuEkrani extends Activity {
                                     editor.putStringSet("Permission", mySet);
                                     editor.putString("UserName", lstEmployee.get(0).UserName);
                                     editor.commit();
+                                    item.setTitle(R.string.masa_ac);
                                 } catch (Exception e) {
 
                                 }
                             } else {
-//                                passCorrect = passwordHash.validatePassword(m_Text,
-//                                        lstEmployee.get(0).PinCode);
-//                                if (passCorrect && masaKilitliMi) {
+                                passCorrect = passwordHash.validatePassword(m_Text, lstEmployee.get(0).PinCode);
+                                if (passCorrect && masaKilitliMi) {
+                                    masaKilitliMi = false;
+                                    item.setTitle(R.string.masa_kilitle);
+                                    Log.e("Text:", "Masa Kilidini Kaldır");
+                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
+                                    editor.commit();
+                                }
+//                                if (masaKilitliMi) {
 //                                    masaKilitliMi = false;
 //                                    item.setTitle(R.string.masa_ac);
 //                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
 //                                    editor.commit();
 //                                }
-                                if (masaKilitliMi) {
-                                    masaKilitliMi = false;
-                                    item.setTitle(R.string.masa_ac);
-                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
-                                    editor.commit();
-                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -134,12 +133,8 @@ public class MenuEkrani extends Activity {
         if (masaKilitliMi)
             return;
         else
-            super.onBackPressed();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+         this.finish();
+        super.onBackPressed();
     }
 
     BroadcastReceiver rec = new BroadcastReceiver() {
@@ -178,10 +173,22 @@ public class MenuEkrani extends Activity {
 
         createData();
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-        MyExpandableListAdapter adapter = new MyExpandableListAdapter(this,groups,this);
+        MyExpandableListAdapter adapter = new MyExpandableListAdapter(this, groups, this);
         listView.setAdapter(adapter);
     }
 
+    @Override
+    protected void onStop() {
+        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
+        super.onDestroy();
+    }
 
     public void createData() {
         int j = 0;
@@ -213,11 +220,14 @@ public class MenuEkrani extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_ekrani, menu);
         this.menu = menu;
-        masaKilitliMi = context.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE).getBoolean
-                ("MasaKilitli", masaKilitliMi);
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+        masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+//        masaKilitliMi = context.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE).getBoolean
+//                ("MasaKilitli", masaKilitliMi);
         if (masaKilitliMi) {
             this.item = menu.findItem(R.id.action_lockTable);
             item.setTitle(R.string.masa_ac);
+            Log.e("Text:", "Masa Kilidini Kaldır");
         }
         return true;
     }
@@ -247,7 +257,7 @@ public class MenuEkrani extends Activity {
                         }
                     });
                     builder.show();
-                    return false;
+//                    return false;
                 } else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle("Title");

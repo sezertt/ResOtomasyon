@@ -49,6 +49,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     //
     TCPClient mTcpClient;
     CommonAsyncTask commonAsyncTask;
+    Intent intent;
     //
     ArrayList<Departman> lstDepartmanlar;
     ArrayList<MasaDizayn> lstMasaDizayn;
@@ -96,11 +97,11 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             switch (msg.what) {
                 case 0:
                     firstRun = true;
+                    ConnectTCP.getInstance().setmTCPClient(mTcpClient);
                     String departmanKomutu = "<komut=departman&departmanAdi=" + lstDepartmanlar.get(0).DepartmanAdi + ">";
                     if (mTcpClient != null) {
                         mTcpClient.sendMessage(departmanKomutu);
                     }
-                    ConnectTCP.getInstance().setmTCPClient(mTcpClient);
                     break;
                 case 1:
                     String[] parametreler = srvrMessage.split("&");
@@ -202,18 +203,24 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             }
         }
     };
-    Intent intent;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            commonAsyncTask = new CommonAsyncTask(this, myHandler);
+            GlobalApplication g = (GlobalApplication) getApplicationContext();
+            commonAsyncTask = g.commonAsyncTask;
             LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-            mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
-            mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
-            commonAsyncTask.execute((android.os.Handler[]) null);
+//            if(commonAsyncTask==null) {
+//                commonAsyncTask = new CommonAsyncTask(this, myHandler);
+//                preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+//                mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
+//                mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
+//                commonAsyncTask.execute((android.os.Handler[]) null);
+//            }
+            mTcpClient = g.commonAsyncTask.client;
         } catch (Exception e) {
         }
 
@@ -233,7 +240,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         //Giriş ekranından gelen çalışan bilgilerini alır.
         Bundle extras = getIntent().getExtras();
         lstEmployees = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
-        Log.e("OnCreate", "mesajGeldi=true");
         Object lockObject = new Object();
         synchronized (lockObject) {
             setContentView(R.layout.activity_masa_ekrani);
@@ -272,6 +278,8 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 actionBar.addTab(tab);
             }
         }
+//        ConnectTCP.getInstance().setmTCPClient(mTcpClient);
+
     }
 
     @Override
@@ -295,32 +303,32 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             //all events will be received here
             //get message
             srvrMessage = intent.getStringExtra("message");
-            if (firstRun == false) {
-                if (srvrMessage != null) {
-                    String[] parametreler = srvrMessage.split("&");
-                    String[] esitlik;
-                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
-                    for (String parametre : parametreler) {
-                        esitlik = parametre.split("=");
-                        if (esitlik.length == 2)
-                            collection.put(esitlik[0], esitlik[1]);
-                    }
-                    String gelenkomut = collection.get("komut");
-                    Komutlar komut = Komutlar.valueOf(gelenkomut);
-                    final String baglanti = collection.get("sonuc");
-
-                    if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
-                        mesajGeldi = true;
-                        myHandler.sendEmptyMessage(0);
-                    } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
-                        hataVerIsim();
-                    } else {
-                        hataVer();
-                    }
-                }
-            } else {
+//            if (firstRun == false) {
+//                if (srvrMessage != null) {
+//                    String[] parametreler = srvrMessage.split("&");
+//                    String[] esitlik;
+//                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+//                    for (String parametre : parametreler) {
+//                        esitlik = parametre.split("=");
+//                        if (esitlik.length == 2)
+//                            collection.put(esitlik[0], esitlik[1]);
+//                    }
+//                    String gelenkomut = collection.get("komut");
+//                    Komutlar komut = Komutlar.valueOf(gelenkomut);
+//                    final String baglanti = collection.get("sonuc");
+//
+//                    if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
+//                        mesajGeldi = true;
+//                        myHandler.sendEmptyMessage(0);
+//                    } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
+//                        hataVerIsim();
+//                    } else {
+//                        hataVer();
+//                    }
+//                }
+//            } else {
                 myHandler.sendEmptyMessage(1);
-            }
+//            }
         }
     };
 
@@ -355,7 +363,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
 
     public Fragment getVisibleFragment() {
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-
         Fragment visibleFragment = new Fragment();
         for (Fragment fragment : allFragments) {
             if (fragment.getUserVisibleHint()) {
@@ -369,7 +376,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     @Override
     public void asyncResponse(String mesaj) {
         //Hata veridir ve finish yap.
-        this.finish();
     }
 
     public enum Komutlar {

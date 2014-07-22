@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.res_otomasyon.resotomasyon.StartScreen;
+
 import org.apache.http.NameValuePair;
 
 import java.util.List;
