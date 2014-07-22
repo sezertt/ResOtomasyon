@@ -24,7 +24,9 @@ import android.widget.ExpandableListView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +47,6 @@ public class MenuEkrani extends Activity {
 
     String departmanAdi, masaAdi;
     TCPClient mTCPClient;
-    String message;
     private String m_Text = "";
     ArrayList<Employee> lstEmployee;
 
@@ -143,7 +144,35 @@ public class MenuEkrani extends Activity {
         public void onReceive(Context context, Intent intent) {
             //all events will be received here
             //get message
-            String message = intent.getStringExtra("message");
+            String srvrMessage = intent.getStringExtra("message");
+
+            if (srvrMessage != null) {
+                String[] parametreler = srvrMessage.split("&");
+                String[] esitlik;
+                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                for (String parametre : parametreler) {
+                    esitlik = parametre.split("=");
+                    if (esitlik.length == 2)
+                        collection.put(esitlik[0], esitlik[1]);
+                }
+
+                String gelenkomut = collection.get("komut");
+                MasaEkrani.Komutlar komut = MasaEkrani.Komutlar.valueOf(gelenkomut);
+
+                switch (komut)
+                {
+                    case LoadSiparis:
+                        String siparisler = collection.get("siparisBilgileri");
+                        Intent hesapEkrani = new Intent(MenuEkrani.this, HesapEkrani.class);
+                        hesapEkrani.putExtra("lstOrderedProducts", lstOrderedProducts);
+                        hesapEkrani.putExtra("siparisler", siparisler);
+                        hesapEkrani.putExtra("DepartmanAdi", departmanAdi);
+                        hesapEkrani.putExtra("MasaAdi", masaAdi);
+                        hesapEkrani.putExtra("lstEmployees", lstEmployee);
+                        startActivity(hesapEkrani);
+                        break;
+                }
+            }
         }
     };
 
@@ -285,9 +314,7 @@ public class MenuEkrani extends Activity {
                 break;
 
             case R.id.action_hesap:
-                Intent intent = new Intent(MenuEkrani.this, HesapEkrani.class);
-                intent.putExtra("lstOrderedProducts", lstOrderedProducts);
-                startActivity(intent);
+                mTCPClient.sendMessage("<komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + ">");
                 break;
 
             case R.id.action_masaTemizleyin:

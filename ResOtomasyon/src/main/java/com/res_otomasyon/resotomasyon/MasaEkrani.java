@@ -49,7 +49,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     //
     TCPClient mTcpClient;
     CommonAsyncTask commonAsyncTask;
-    Intent intent;
     //
     ArrayList<Departman> lstDepartmanlar;
     ArrayList<MasaDizayn> lstMasaDizayn;
@@ -116,6 +115,17 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                     Komutlar komut = Komutlar.valueOf(gelenkomut);
 
                     switch (komut) {
+                        case giris:
+                            final String baglanti = collection.get("sonuc");
+
+                            if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
+                                mesajGeldi = true;
+                                myHandler.sendEmptyMessage(0);
+                            } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
+                                hataVerIsim();
+                            } else {
+                                hataVer();
+                            }
                         case iptal:
                             mesajGeldi = false;
                             break;
@@ -303,32 +313,8 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             //all events will be received here
             //get message
             srvrMessage = intent.getStringExtra("message");
-//            if (firstRun == false) {
-//                if (srvrMessage != null) {
-//                    String[] parametreler = srvrMessage.split("&");
-//                    String[] esitlik;
-//                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
-//                    for (String parametre : parametreler) {
-//                        esitlik = parametre.split("=");
-//                        if (esitlik.length == 2)
-//                            collection.put(esitlik[0], esitlik[1]);
-//                    }
-//                    String gelenkomut = collection.get("komut");
-//                    Komutlar komut = Komutlar.valueOf(gelenkomut);
-//                    final String baglanti = collection.get("sonuc");
-//
-//                    if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
-//                        mesajGeldi = true;
-//                        myHandler.sendEmptyMessage(0);
-//                    } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
-//                        hataVerIsim();
-//                    } else {
-//                        hataVer();
-//                    }
-//                }
-//            } else {
-                myHandler.sendEmptyMessage(1);
-//            }
+
+            myHandler.sendEmptyMessage(1);
         }
     };
 
@@ -376,6 +362,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     @Override
     public void asyncResponse(String mesaj) {
         //Hata veridir ve finish yap.
+        this.finish();
     }
 
     public enum Komutlar {

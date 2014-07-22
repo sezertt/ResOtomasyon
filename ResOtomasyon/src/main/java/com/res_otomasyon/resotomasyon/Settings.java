@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.Dictionary;
@@ -110,10 +111,13 @@ public class Settings extends Activity implements View.OnClickListener {
                     kacinci++;
                     dosyaIsteKomutu = "<komut=veriGonder&kacinci=" + kacinci + ">";
 
-                    if (kacinci == 1 || kacinci <= kacDosya)
+                    if (kacinci == 1 || kacinci <= kacDosya) {
                         mTcpClient.sendMessage(dosyaIsteKomutu);
-                    else
+                    }
+                    else {
+                        Toast.makeText(context,"Dosya Alımı Tamamlandı",Toast.LENGTH_SHORT).show();
                         onDestroy();
+                    }
 
                     break;
                 case 1:

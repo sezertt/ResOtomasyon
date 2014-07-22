@@ -112,11 +112,43 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                 }
             }
         });
+
         convertView.findViewById(R.id.buttonMinus).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Integer.parseInt(textAdet.getText().toString()) > 0)
-                    textAdet.setText(String.valueOf(Integer.parseInt(textAdet.getText().toString()) - 1));
+                String miktar = String.valueOf(Integer.parseInt(textAdet.getText().toString()) - 1);
+
+                if (Integer.parseInt(textAdet.getText().toString()) < 1)
+                    return;
+
+                textAdet.setText(miktar);
+
+                int siparisVarMi = -1;
+
+                for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++)
+                {
+                    if(menuEkrani.lstOrderedProducts.get(i).yemekAdi.contentEquals(textName.getText().toString()))
+                    {
+                        siparisVarMi = i;
+                        break;
+                    }
+                }
+
+                if(siparisVarMi == -1)
+                {
+                    Siparis siparis = new Siparis();
+                    siparis.miktar = miktar;
+                    siparis.porsiyonFiyati = textFiyat.getText().toString();
+                    siparis.yemekAdi = textName.getText().toString();
+                    menuEkrani.lstOrderedProducts.add(siparis);
+                }
+                else
+                {
+                    if(miktar.contentEquals("0"))
+                        menuEkrani.lstOrderedProducts.remove(siparisVarMi);
+                    else
+                        menuEkrani.lstOrderedProducts.get(siparisVarMi).miktar = miktar;
+                }
 
             }
         });

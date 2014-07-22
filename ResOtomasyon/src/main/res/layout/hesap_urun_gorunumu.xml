@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="25dp"
+    android:clickable="true"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:id="@+id/view"
+        android:layout_toStartOf="@+id/textViewAdet"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/textViewYemekAdi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="false"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:maxLines="2"
+        android:lines="1"
+        android:text="Fırında Makarna"
+        android:layout_marginLeft="10dp"
+        android:textSize="18sp"
+        android:layout_toStartOf="@+id/textViewAdet"
+        android:layout_toLeftOf="@+id/textViewAdet">
+    </TextView>
+
+    <TextView
+        android:id="@+id/textViewFiyat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dp"
+        android:inputType="textNoSuggestions"
+        android:text="5 TL"
+        android:textSize="18sp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
+    </TextView>
+
+    <TextView
+        android:id="@+id/textViewAdet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
+        android:text="x1"
+        android:textSize="18sp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_toStartOf="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/textView">
+    </TextView>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
+        android:text="   -   "
+        android:textSize="18sp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_toStartOf="@+id/textViewFiyat"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/textViewFiyat" />
+
+
+</RelativeLayout>
