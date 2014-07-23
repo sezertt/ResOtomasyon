@@ -95,12 +95,12 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    firstRun = true;
-                    ConnectTCP.getInstance().setmTCPClient(mTcpClient);
-                    String departmanKomutu = "<komut=departman&departmanAdi=" + lstDepartmanlar.get(0).DepartmanAdi + ">";
-                    if (mTcpClient != null) {
-                        mTcpClient.sendMessage(departmanKomutu);
-                    }
+//                    firstRun = true;
+//                    ConnectTCP.getInstance().setmTCPClient(mTcpClient);
+//                    String departmanKomutu = "<komut=departman&departmanAdi=" + lstDepartmanlar.get(0).DepartmanAdi + ">";
+//                    if (mTcpClient != null) {
+//                        mTcpClient.sendMessage(departmanKomutu);
+//                    }
                     break;
                 case 1:
                     String[] parametreler = srvrMessage.split("&");
@@ -223,15 +223,9 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             GlobalApplication g = (GlobalApplication) getApplicationContext();
             commonAsyncTask = g.commonAsyncTask;
             LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-//            if(commonAsyncTask==null) {
-//                commonAsyncTask = new CommonAsyncTask(this, myHandler);
-//                preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-//                mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
-//                mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
-//                commonAsyncTask.execute((android.os.Handler[]) null);
-//            }
             mTcpClient = g.commonAsyncTask.client;
         } catch (Exception e) {
+
         }
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -280,16 +274,21 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 }
             });
 
-            actionBar = getActionBar();
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-            for (Departman departman : lstDepartmanlar) {
-                tab = actionBar.newTab().setText(departman.DepartmanAdi);
-                tab.setTabListener(this);
-                actionBar.addTab(tab);
-            }
         }
 //        ConnectTCP.getInstance().setmTCPClient(mTcpClient);
 
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        for (Departman departman : lstDepartmanlar) {
+            tab = actionBar.newTab().setText(departman.DepartmanAdi);
+            tab.setTabListener(this);
+            actionBar.addTab(tab);
+        }
     }
 
     @Override
@@ -313,7 +312,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             //all events will be received here
             //get message
             srvrMessage = intent.getStringExtra("message");
-
             myHandler.sendEmptyMessage(1);
         }
     };

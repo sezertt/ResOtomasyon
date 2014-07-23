@@ -27,9 +27,7 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
     public String kilitliMasaAdi;
     public String kilitliDepartmanAdi;
 
-    public static FragmentMasaEkrani newInstance(ArrayList<String> masalar, String DepartmanAdi,
-                                                 ArrayList<Employee> lstEmployees, String kilitliMasaAdi,
-                                                 String kilitliDepartmanAdi) {
+    public static FragmentMasaEkrani newInstance(ArrayList<String> masalar, String DepartmanAdi, ArrayList<Employee> lstEmployees, String kilitliMasaAdi, String kilitliDepartmanAdi) {
         FragmentMasaEkrani myFragment = new FragmentMasaEkrani();
         Bundle args = new Bundle();
         args.putStringArrayList("masalar", masalar);

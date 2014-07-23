@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputType;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -96,7 +95,6 @@ public class MenuEkrani extends Activity {
                                 if (passCorrect && masaKilitliMi) {
                                     masaKilitliMi = false;
                                     item.setTitle(R.string.masa_kilitle);
-                                    Log.e("Text:", "Masa Kilidini Kaldır");
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     editor.commit();
                                 }
@@ -135,7 +133,6 @@ public class MenuEkrani extends Activity {
             return;
         else
          this.finish();
-        super.onBackPressed();
     }
 
     BroadcastReceiver rec = new BroadcastReceiver() {
@@ -256,7 +253,6 @@ public class MenuEkrani extends Activity {
         if (masaKilitliMi) {
             this.item = menu.findItem(R.id.action_lockTable);
             item.setTitle(R.string.masa_ac);
-            Log.e("Text:", "Masa Kilidini Kaldır");
         }
         return true;
     }

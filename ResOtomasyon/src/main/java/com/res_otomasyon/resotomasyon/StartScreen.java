@@ -15,15 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-import com.res_otomasyon.resotomasyon.LoginScreen;
-import com.res_otomasyon.resotomasyon.R;
-
-import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 import TCPClientSide.CommonAsyncTask;
-import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 
 public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
@@ -61,10 +56,6 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 0:
-                    if (mTcpClient != null) {
-                    }
-                    break;
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
