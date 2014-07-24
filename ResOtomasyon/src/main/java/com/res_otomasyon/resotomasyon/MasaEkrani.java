@@ -94,14 +94,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 0:
-//                    firstRun = true;
-//                    ConnectTCP.getInstance().setmTCPClient(mTcpClient);
-//                    String departmanKomutu = "<komut=departman&departmanAdi=" + lstDepartmanlar.get(0).DepartmanAdi + ">";
-//                    if (mTcpClient != null) {
-//                        mTcpClient.sendMessage(departmanKomutu);
-//                    }
-                    break;
                 case 1:
                     String[] parametreler = srvrMessage.split("&");
                     String[] esitlik;
@@ -112,26 +104,13 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             collection.put(esitlik[0], esitlik[1]);
                     }
                     String gelenkomut = collection.get("komut");
-                    Komutlar komut = Komutlar.valueOf(gelenkomut);
-
+                    GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
                     switch (komut) {
-                        case giris:
-                            final String baglanti = collection.get("sonuc");
-
-                            if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
-                                mesajGeldi = true;
-                                myHandler.sendEmptyMessage(0);
-                            } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
-                                hataVerIsim();
-                            } else {
-                                hataVer();
-                            }
                         case iptal:
                             mesajGeldi = false;
                             break;
                         case masaKapandi:
                             mesajGeldi = false;
-
                             kapananMasa = collection.get("masa");
                             kapananMasaDepartman = collection.get("departmanAdi");
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
@@ -141,10 +120,8 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                         case siparis:
                             mesajGeldi = false;
                             break;
-
                         case masaAcildi:
                             mesajGeldi = false;
-
                             acilanMasa = collection.get("masa");
                             acilanMasaDepartman = collection.get("departmanAdi");
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
@@ -154,7 +131,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                         case departman:
                             mesajGeldi = false;
                             acikMasalar = null;
-
                             try {
                                 acikMasalar = collection.get("masa").split("\\*");
                             } catch (Exception e) {
@@ -362,13 +338,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         //Hata veridir ve finish yap.
         this.finish();
     }
-
-    public enum Komutlar {
-        siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
-        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi;
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
