@@ -154,7 +154,7 @@ public class MenuEkrani extends Activity {
                 }
 
                 String gelenkomut = collection.get("komut");
-                MasaEkrani.Komutlar komut = MasaEkrani.Komutlar.valueOf(gelenkomut);
+                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
 
                 switch (komut)
                 {

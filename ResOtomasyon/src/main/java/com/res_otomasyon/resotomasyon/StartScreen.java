@@ -91,7 +91,7 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
                         collection.put(esitlik[0], esitlik[1]);
                 }
                 String gelenkomut = collection.get("komut");
-                Komutlar komut = Komutlar.valueOf(gelenkomut);
+                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
                 final String baglanti = collection.get("sonuc");
 
                 if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
@@ -107,12 +107,6 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
             }
         }
     };
-
-    public enum Komutlar {
-        siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
-        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi;
-    }
 
     @Override
     protected void onStop() {

@@ -1,5 +1,7 @@
 package TCPClientSide;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import ekclasslar.BitConverter;
@@ -32,8 +34,8 @@ public class TCPClient {
     public InputStream stream;
     Socket socket;
     public PrintWriter out;
-    BufferedReader in;
     InetAddress serverAddr;
+    Boolean aktarimVar = false;
 
     /**
      * Constructor of the class. OnMessagedReceived listens for the messages received from server
@@ -133,6 +135,7 @@ public class TCPClient {
                 //send the message to the server
                 out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 
+                String copyOfServerMessage = "";
                 Log.e("TCP Client", "C: Sent.");
 
                 Log.e("TCP Client", "C: Done.");
@@ -142,30 +145,54 @@ public class TCPClient {
 
                 stream = socket.getInputStream();
 
+                Boolean dosyaAlimiBasariliMi = false;
+
                 while (mRun) {
-                    int firstByte = stream.read();
 
-                    if ((byte) firstByte != FIRST_BYTE) {
-                        //Başlangıç byte'ı değil, bu karakteri atla!
-                        continue;
+                    if(!aktarimVar)
+                    {
+                        int firstByte = stream.read();
+
+                        if ((byte) firstByte != FIRST_BYTE) {
+                            //Başlangıç byte'ı değil, bu karakteri atla!
+                            continue;
+                        }
+
+                        //Mesajı oku
+                        ArrayList<Byte> bList = new ArrayList<Byte>();
+
+                        while ((byte) (firstByte = stream.read()) != LAST_BYTE) {
+                            bList.add((byte) firstByte);
+                        }
+
+                        byte[] result = new byte[bList.size()];
+
+                        for (int i = 0; i < bList.size(); i++) {
+                            result[i] = bList.get(i).byteValue();
+                        }
+                        serverMessage = new String(result, "UTF-8");
+                        copyOfServerMessage = serverMessage;
+                    }
+                    else
+                    {
+                        dosyaAlimiBasariliMi = getFolder();
+                        serverMessage += "&aktarim=" + dosyaAlimiBasariliMi;
+                        copyOfServerMessage = "";
+                        aktarimVar = false;
+                    }
+                    if(copyOfServerMessage.length()>13) {
+                        if (copyOfServerMessage.substring(0, 14).contentEquals("komut=dosyalar")) {
+                            aktarimVar = true;
+                            continue;
+                        }
+                    }
+                    else if(serverMessage.contentEquals("komut=aktarimTamamlandi"))
+                    {
+                        aktarimVar = false;
                     }
 
-                    //Mesajı oku
-                    ArrayList<Byte> bList = new ArrayList<Byte>();
-
-                    while ((byte) (firstByte = stream.read()) != LAST_BYTE) {
-                        bList.add((byte) firstByte);
-                    }
-
-                    byte[] result = new byte[bList.size()];
-
-                    for (int i = 0; i < bList.size(); i++) {
-                        result[i] = bList.get(i).byteValue();
-                    }
-
-                    serverMessage = new String(result, "UTF-8");
-
-                    if (serverMessage != null && mMessageListener != null) {
+                    if (serverMessage != null && mMessageListener != null)
+                    {
                         mMessageListener.messageReceived(serverMessage);
                     }
                 }

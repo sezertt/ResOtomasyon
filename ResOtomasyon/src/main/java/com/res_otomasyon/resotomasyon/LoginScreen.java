@@ -2,12 +2,12 @@ package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +20,8 @@ import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +40,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     ArrayList<Employee> lstEmployees;
     boolean MasaKilitliMi = false;
     SharedPreferences preferences = null;
+
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {

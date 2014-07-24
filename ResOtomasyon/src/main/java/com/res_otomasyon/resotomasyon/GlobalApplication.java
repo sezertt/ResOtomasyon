@@ -22,6 +22,12 @@ public class GlobalApplication extends Application {
     TCPClient mTcpClient;
     Activity activity;
 
+    public enum Komutlar {
+        siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
+        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
+        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat,aktarimTamamlandi;
+    }
+
     public void connectServer(Handler myHandler,BroadcastReceiver rec) {
         try {
             commonAsyncTask = new CommonAsyncTask(activity, myHandler);
