@@ -106,6 +106,7 @@ public class ReadXML {
                             NodeList nListPorsiyonFiyati = ((Element) elementNodeUrunler.getElementsByTagName("porsiyonFiyati").item(0)).getElementsByTagName("string");
                             NodeList nListUrunAciklamasi = ((Element) elementNodeUrunler.getElementsByTagName("urunAciklamasi").item(0)).getElementsByTagName("string");
                             NodeList nListUrunKDV = ((Element) elementNodeUrunler.getElementsByTagName("urunKDV").item(0)).getElementsByTagName("int");
+                            NodeList nListUrunPorsiyonu = ((Element) elementNodeUrunler.getElementsByTagName("urunPorsiyonu").item(0)).getElementsByTagName("int");
 
                             for (int k = 0; k < nListUrunAdi.getLength(); k++) {
                                 Urunler u = new Urunler();
@@ -114,6 +115,7 @@ public class ReadXML {
                                 u.porsiyonFiyati = nListPorsiyonFiyati.item(k).getTextContent().toString();
                                 u.urunAciklamasi = nListUrunAciklamasi.item(k).getTextContent().toString();
                                 u.urunKDV = Integer.parseInt(nListUrunKDV.item(k).getTextContent().toString());
+                                u.urunPorsiyonu = Double.parseDouble(nListUrunPorsiyonu.item(k).getTextContent().toString());
                                 u.urunKategorisi = elementNodeUrunler.getElementsByTagName("kategorininAdi").item(0).getTextContent();
                                 lstUrunler.add(u);
                             }

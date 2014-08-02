@@ -8,5 +8,6 @@ public class Urunler {
     public String porsiyonFiyati;
     public String urunKategorisi;
     public String urunAciklamasi;
+    public Double urunPorsiyonu;
     public int urunKDV;
 }

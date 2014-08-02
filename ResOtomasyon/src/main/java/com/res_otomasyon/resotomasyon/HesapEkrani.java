@@ -39,12 +39,11 @@ public class HesapEkrani extends Activity {
         String yemeginAdi, Garson;
         Boolean ikramMi;
 
-        ListView list = (ListView) findViewById(R.id.listViewHesap);
-
-        ArrayList<HashMap<String, String>> yazdirilacakListe = new ArrayList<HashMap<String, String>>();
+        ListView hesapListesi = (ListView) findViewById(R.id.listViewHesap);
 
         ArrayList<Siparis> urunListesi = new ArrayList<Siparis>();
         ArrayList<Siparis> urunListesiIkram = new ArrayList<Siparis>();
+        ArrayList<Siparis> urunListesiToplam = new ArrayList<Siparis>();
 
 
         for (int i = 0; i < Siparisler.length; i++) {
@@ -62,38 +61,60 @@ public class HesapEkrani extends Activity {
                 for (int j = 0; j < urunListesi.size(); j++) {
                     if(yemeginAdi.contentEquals(urunListesi.get(j).toString())) // listede yemek var
                     {
-                        // tüm ürünleri unique olcak şekilde 2 listede topla, biri ikram olanlar diğeri ikram olmayanlar. sonra oların hepsini map 'e koy
-                        urunListesi.get(j).miktar = (Double.parseDouble(urunListesi.get(j).miktar) + kacPorsiyon) + "";
+                        gruptaYeniGelenSiparisVarMi = j;
+                        break;
                     }
-                    else // listede yemek yok
-                    {
-                        Siparis yeniSiparis = new Siparis();
-                        yeniSiparis.miktar = kacPorsiyon.toString();
-                        yeniSiparis.yemekAdi = yemeginAdi;
-                        yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
-                        urunListesi.add(yeniSiparis);
-                    }
+                }
+
+                if(gruptaYeniGelenSiparisVarMi != -1) // listede yemek var
+                {
+                    urunListesi.get(gruptaYeniGelenSiparisVarMi).miktar = (Double.parseDouble(urunListesi.get(gruptaYeniGelenSiparisVarMi).miktar) + kacPorsiyon) + "";
+                }
+                else // listede yemek yok
+                {
+                    Siparis yeniSiparis = new Siparis();
+                    yeniSiparis.miktar = kacPorsiyon.toString();
+                    yeniSiparis.yemekAdi = yemeginAdi;
+                    yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
+                    urunListesi.add(yeniSiparis);
                 }
             }
             else // ikramsa
             {
+                for (int j = 0; j < urunListesiIkram.size(); j++) {
+                    if(yemeginAdi.contentEquals(urunListesiIkram.get(j).toString())) // listede yemek var
+                    {
+                        gruptaYeniGelenSiparisVarMi = j;
+                        break;
+                    }
+                }
 
+                if(gruptaYeniGelenSiparisVarMi != -1) // listede yemek var
+                {
+                    urunListesiIkram.get(gruptaYeniGelenSiparisVarMi).miktar = (Double.parseDouble(urunListesiIkram.get(gruptaYeniGelenSiparisVarMi).miktar) + kacPorsiyon) + "";
+                }
+                else // listede yemek yok
+                {
+                    Siparis yeniSiparis = new Siparis();
+                    yeniSiparis.miktar = kacPorsiyon.toString();
+                    yeniSiparis.yemekAdi = yemeginAdi;
+                    yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
+                    urunListesiIkram.add(yeniSiparis);
+                }
             }
-
-
-
-            HashMap<String, String> map = new HashMap<String, String>();
-            map.put("yemek", "101");
-            map.put("adet", "6:30 AM");
-            map.put("fiyat", "7:40 AM");
-            yazdirilacakListe.add(map);
         }
+        urunListesiToplam = concat(urunListesi, urunListesiIkram);
 
-        SimpleAdapter adapter = new SimpleAdapter(this, yazdirilacakListe, R.layout.hesap_urun_gorunumu,
-                new String[]{"yemek", "adet", "fiyat"}, new int[]{R.id.textViewYemekAdi, R.id.textViewAdet, R.id.textViewFiyat});
-        list.setAdapter(adapter);
+        MyListAdapter adapter = new MyListAdapter(urunListesiToplam,this);
+        hesapListesi.setAdapter(adapter);
     }
 
+    ArrayList<Siparis> concat(ArrayList<Siparis> A, ArrayList<Siparis> B) {
+        ArrayList<Siparis> C= new ArrayList<Siparis>();
+        System.arraycopy(A, 0, C, 0, A.size());
+        System.arraycopy(B, 0, C, A.size(), B.size());
+        return C;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

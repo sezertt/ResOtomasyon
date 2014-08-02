@@ -2,7 +2,11 @@ package TCPClientSide;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
+
+import com.res_otomasyon.resotomasyon.GlobalApplication;
 
 import ekclasslar.BitConverter;
 
@@ -17,9 +21,13 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Mustafa on 20.5.2014.
@@ -32,24 +40,53 @@ public class TCPClient {
     private OnMessageReceived mMessageListener = null;
     public boolean mRun = false;
     public InputStream stream;
-    Socket socket;
+    public Socket socket;
     public PrintWriter out;
-    InetAddress serverAddr;
+    public InetAddress serverAddr;
     Boolean aktarimVar = false;
+    boolean serverStatus = false;
+    Handler myHandler;
 
     /**
      * Constructor of the class. OnMessagedReceived listens for the messages received from server
      */
-    public TCPClient(OnMessageReceived listener) {
+    public TCPClient(OnMessageReceived listener, Handler myHandler) {
         mMessageListener = listener;
+        this.myHandler = myHandler;
     }
 
+    //Bağlantının kopup kopmadığını anlamak için server a ping at.
+    Timer timer = new Timer();
 
-    /**
-     * Sends the message entered by client to the server
-     *
-     * @param message text entered by client
-     */
+    class pingToServer extends TimerTask {
+        @Override
+        public void run() {
+            try {
+                serverStatus = serverAddr.isReachable(100);
+                if (!serverStatus) {
+                    mRun = false;
+                    if (socket != null && socket.isConnected()) {
+                        stream.close();
+                        socket.close();
+                        Log.e("Soket&Stream", "kapandı");
+                    }
+                    callStopPing();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void callPingToServer() {
+        timer.schedule(new pingToServer(), 1500, 5000);
+    }
+
+    //Eğer bağlantı kopmuş ise ping atmayı durdur.
+    void callStopPing() {
+        timer.cancel();
+    }
+
     public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
             out.println(message);
@@ -64,13 +101,11 @@ public class TCPClient {
             int fileNameLen = BitConverter.toInt32(buffer, 0);
             String fileName = EncodingUtils.getString(buffer, 4, fileNameLen, Charset.defaultCharset().name());
 
-            String [] uzanti = fileName.split("\\.");
+            String[] uzanti = fileName.split("\\.");
 
-            if(uzanti[1].contentEquals("png"))
-            {
+            if (uzanti[1].contentEquals("png")) {
                 File folder = new File("/mnt/sdcard/shared/Lenovo/resimler/");
-                if(!folder.exists())
-                {
+                if (!folder.exists()) {
                     folder.mkdirs();
                 }
                 File file = new File("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "");
@@ -82,12 +117,9 @@ public class TCPClient {
                 }
                 FileOutputStream out = new FileOutputStream("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "");
                 out.write(buffer, 4 + fileNameLen, receivedBytesLength - 4 - fileNameLen);
-            }
-            else
-            {
+            } else {
                 File folder = new File("/mnt/sdcard/shared/Lenovo/");
-                if(!folder.exists())
-                {
+                if (!folder.exists()) {
                     folder.mkdirs();
                 }
                 File file = new File("/mnt/sdcard/shared/Lenovo/" + fileName + "");
@@ -122,19 +154,24 @@ public class TCPClient {
     public void run() {
 
         mRun = true;
-
         try {
             //here you must put your computer's IP address.
             serverAddr = InetAddress.getByName(SERVERIP);
-
-            Log.e("TCP Client", "C: Connecting...");
-
+            //Server'a ping atmayı başlat.
+            callPingToServer();
             //create a socket to make the connection with the server
-            socket = new Socket(serverAddr, SERVERPORT);
+            socket = new Socket();
+            SocketAddress socketAddress = new InetSocketAddress(serverAddr, SERVERPORT);
+            Log.e("TCP Client", "C: Connecting...");
+            socket.connect(socketAddress, 1500);
+            //Eğer soket bağlantısı kurulabilirse handler'a mesaj gönder.
+            if (socket.isConnected())
+                myHandler.sendEmptyMessage(2);
             try {
+                socket.setKeepAlive(true);
                 //send the message to the server
                 out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-
+                Log.e("client.out", "Oluştu");
                 String copyOfServerMessage = "";
                 Log.e("TCP Client", "C: Sent.");
 
@@ -144,13 +181,10 @@ public class TCPClient {
                 byte LAST_BYTE = (byte) 62;
 
                 stream = socket.getInputStream();
-
                 Boolean dosyaAlimiBasariliMi = false;
 
                 while (mRun) {
-
-                    if(!aktarimVar)
-                    {
+                    if (!aktarimVar) {
                         int firstByte = stream.read();
 
                         if ((byte) firstByte != FIRST_BYTE) {
@@ -172,27 +206,22 @@ public class TCPClient {
                         }
                         serverMessage = new String(result, "UTF-8");
                         copyOfServerMessage = serverMessage;
-                    }
-                    else
-                    {
+                    } else {
                         dosyaAlimiBasariliMi = getFolder();
                         serverMessage += "&aktarim=" + dosyaAlimiBasariliMi;
                         copyOfServerMessage = "";
                         aktarimVar = false;
                     }
-                    if(copyOfServerMessage.length()>13) {
+                    if (copyOfServerMessage.length() > 13) {
                         if (copyOfServerMessage.substring(0, 14).contentEquals("komut=dosyalar")) {
                             aktarimVar = true;
                             continue;
                         }
-                    }
-                    else if(serverMessage.contentEquals("komut=aktarimTamamlandi"))
-                    {
+                    } else if (serverMessage.contentEquals("komut=aktarimTamamlandi")) {
                         aktarimVar = false;
                     }
 
-                    if (serverMessage != null && mMessageListener != null)
-                    {
+                    if (serverMessage != null && mMessageListener != null) {
                         mMessageListener.messageReceived(serverMessage);
                     }
                 }
@@ -200,19 +229,25 @@ public class TCPClient {
                 Log.e("RESPONSE FROM SERVER", "S: Received Message: '" + serverMessage + "'");
 
             } catch (Exception e) {
-
                 Log.e("TCP", "S: Error", e);
+                //Bağlantı kopar veya bir hata oluşur ise ping atmayı durdur.
+                callStopPing();
+                mRun = false;
 
             } finally {
                 //the socket must be closed. It is not possible to reconnect to this socket
                 // after it is closed, which means a new socket instance has to be created.
                 socket.close();
+                //Bağlantı kopar veya bir hata oluşur ise ping atmayı durdur.
+                callStopPing();
+                mRun = false;
             }
 
         } catch (Exception e) {
-
             Log.e("TCP", "C: Error", e);
-
+            //Bağlantı kopar veya bir hata oluşur ise ping atmayı durdur.
+            callStopPing();
+            mRun = false;
         }
 
     }
@@ -223,6 +258,3 @@ public class TCPClient {
         public void messageReceived(String message);
     }
 }
-
-
-

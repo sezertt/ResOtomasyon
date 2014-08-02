@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.res_otomasyon.resotomasyon.HesapEkrani">
+
     <RelativeLayout
         android:background="#FFFFFF"
         android:layout_height="0dp"
@@ -16,7 +17,7 @@
             android:layout_marginTop="2dp"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Seçilen Siparişleriniz"
+            android:text="Seçtiğiniz Siparişleriniz"
             android:id="@+id/textSiparis" />
 
         <ScrollView
@@ -28,12 +29,11 @@
             android:layout_below="@+id/textSiparis">
 
             <ListView android:id="@+id/listViewSecilenSiparisler"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             </ListView>
 
         </ScrollView>
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -60,12 +60,11 @@
             android:layout_below="@+id/textHesap">
 
             <ListView android:id="@+id/listViewHesap"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             </ListView>
 
         </ScrollView>
-
     </RelativeLayout>
 
 </LinearLayout>

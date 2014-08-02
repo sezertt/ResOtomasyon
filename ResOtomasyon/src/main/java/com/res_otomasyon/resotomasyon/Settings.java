@@ -150,7 +150,18 @@ public class Settings extends Activity implements View.OnClickListener {
                         collection.put(esitlik[0], esitlik[1]);
                 }
                 String gelenkomut = collection.get("komut");
-                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+
+                GlobalApplication.Komutlar komut;
+
+                try
+                {
+                    komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+                }
+                catch (Exception ex)
+                {
+                    komut = GlobalApplication.Komutlar.Default;
+                }
+
                 switch (komut)
                 {
                     case guncellemeyiBaslat:
@@ -169,7 +180,6 @@ public class Settings extends Activity implements View.OnClickListener {
                         g.commonAsyncTask.client.sendMessage("<komut=veriGonder&kacinci=" + kacinci + ">");
                         break;
                     case aktarimTamamlandi:
-
                         alertDialog.show();
                         break;
                     default:

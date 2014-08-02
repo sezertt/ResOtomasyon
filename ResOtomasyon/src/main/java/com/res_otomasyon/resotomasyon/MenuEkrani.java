@@ -45,24 +45,24 @@ public class MenuEkrani extends Activity {
     Menu menu;
 
     String departmanAdi, masaAdi;
-    TCPClient mTCPClient;
     private String m_Text = "";
     ArrayList<Employee> lstEmployee;
 
     boolean masaKilitliMi = false;
     boolean passCorrect = false;
+    boolean acitivityVisible = true;
     Context context = this;
     MenuItem item;
 
     ArrayList<Urunler> lstProducts;
     ArrayList<Siparis> lstOrderedProducts = new ArrayList<Siparis>();
     SharedPreferences preferences = null;
+    GlobalApplication g;
 
     // more efficient than HashMap for mapping integers to objects
     SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
 
     public Handler myHandler = new Handler() {
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -121,10 +121,18 @@ public class MenuEkrani extends Activity {
     };
 
     @Override
+    protected void onResume() {
+        acitivityVisible = true;
+        super.onResume();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        if (!masaKilitliMi)
+        acitivityVisible = false;
+        if (!masaKilitliMi) {
             this.finish();
+        }
     }
 
     @Override
@@ -132,8 +140,30 @@ public class MenuEkrani extends Activity {
         if (masaKilitliMi)
             return;
         else
-         this.finish();
+            this.finish();
     }
+
+    //Tekrar bağlan durumunda.
+    public Handler handlerTekrarBaglan = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    preferences = MenuEkrani.this.getSharedPreferences("MyPreferences",
+                            Context.MODE_PRIVATE);
+                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    if (g.commonAsyncTask.client != null) {
+                        if (g.commonAsyncTask.client.out != null) {
+                            g.commonAsyncTask.client.sendMessage(girisKomutu);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     BroadcastReceiver rec = new BroadcastReceiver() {
 
@@ -156,13 +186,34 @@ public class MenuEkrani extends Activity {
                 String gelenkomut = collection.get("komut");
                 GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
 
-                switch (komut)
-                {
+                switch (komut) {
+                    case baglanti:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (acitivityVisible) {
+                                    AlertDialog.Builder aBuilder = new AlertDialog.Builder(MenuEkrani.this);
+                                    aBuilder.setTitle("Bağlantı Hatası");
+                                    aBuilder.setMessage("Sunucu bağlantısı koptu." +
+                                            ". Lütfen tekrar bağlanmayı deneyiniz")
+                                            .setCancelable(false)
+                                            .setPositiveButton("Tekrar bağlan", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    g.connectServer(handlerTekrarBaglan);
+                                                }
+                                            });
+                                    AlertDialog alertDialog = aBuilder.create();
+                                    alertDialog.show();
+                                }
+                            }
+                        });
+                        break;
                     case LoadSiparis:
                         String siparisler = collection.get("siparisBilgileri");
                         Intent hesapEkrani = new Intent(MenuEkrani.this, HesapEkrani.class);
-                        hesapEkrani.putExtra("lstOrderedProducts", lstOrderedProducts);
-                        hesapEkrani.putExtra("siparisler", siparisler);
+                        hesapEkrani.putExtra("lstOrderedProducts", lstOrderedProducts); // yeni verilecek olan siparişler
+                        hesapEkrani.putExtra("siparisler", siparisler); // eski siparişler
                         hesapEkrani.putExtra("DepartmanAdi", departmanAdi);
                         hesapEkrani.putExtra("MasaAdi", masaAdi);
                         hesapEkrani.putExtra("lstEmployees", lstEmployee);
@@ -175,11 +226,9 @@ public class MenuEkrani extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mTCPClient = ConnectTCP.getInstance().getmTCPClient();
         super.onCreate(savedInstanceState);
-
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+        g = (GlobalApplication) getApplicationContext();
         setContentView(R.layout.activity_menu_ekrani);
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
@@ -205,13 +254,13 @@ public class MenuEkrani extends Activity {
 
     @Override
     protected void onStop() {
-        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
+        acitivityVisible = false;
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        ConnectTCP.getInstance().setmTCPClient(mTCPClient);
+        acitivityVisible = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
         super.onDestroy();
     }
@@ -225,6 +274,8 @@ public class MenuEkrani extends Activity {
                     group.productName.add(lstProducts.get(i).urunAdi);
                     group.productPrice.add(lstProducts.get(i).porsiyonFiyati);
                     group.productInfo.add(lstProducts.get(i).urunAciklamasi);
+                    group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
+                    group.productCount.add("0");
 
                     i++;
                     if (i + 1 >= lstProducts.size())
@@ -310,7 +361,8 @@ public class MenuEkrani extends Activity {
                 break;
 
             case R.id.action_hesap:
-                mTCPClient.sendMessage("<komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + ">");
+                g.commonAsyncTask.client.sendMessage("<komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" +
+                        departmanAdi + ">");
                 break;
 
             case R.id.action_masaTemizleyin:
@@ -328,8 +380,4 @@ public class MenuEkrani extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
 }
-
-

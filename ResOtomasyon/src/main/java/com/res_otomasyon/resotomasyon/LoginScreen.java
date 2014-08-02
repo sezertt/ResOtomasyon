@@ -6,9 +6,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.KeyEvent;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,66 +39,55 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     Intent intent;
     Button btnGiris;
     Button btnCikis;
-    Context context = this;
+    final Context context = this;
     ArrayList<Employee> lstEmployees;
     boolean MasaKilitliMi = false;
     SharedPreferences preferences = null;
-
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-
-        if ((event.getKeyCode() == KeyEvent.KEYCODE_HOME)) {
-            return true;
-
-        } else {
-            return super.dispatchKeyEvent(event);
-        }
-
-    }
+    boolean acitivityVisible = true;
+    GlobalApplication g;
 
     @Override
     protected void onResume() {
-        preferences = this.getSharedPreferences("KilitliMasa",Context.MODE_PRIVATE);
-        MasaKilitliMi = preferences.getBoolean("MasaKilitli",false);
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+        MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
 
-        if(MasaKilitliMi)
-        {
+        if (MasaKilitliMi) {
             this.setVisible(false);
             lstEmployees.get(0).PinCode = preferences.getString("PinCode", "0000");
-            lstEmployees.get(0).Title = preferences.getString("Title",null);
-            Set<String> setPermissions = preferences.getStringSet("Permission",null);
+            lstEmployees.get(0).Title = preferences.getString("Title", null);
+            Set<String> setPermissions = preferences.getStringSet("Permission", null);
             lstEmployees.get(0).Permissions = setPermissions.toArray(new String[setPermissions.size()]);
-            lstEmployees.get(0).UserName = preferences.getString("UserName",null);
+            lstEmployees.get(0).UserName = preferences.getString("UserName", null);
             lstEmployees.get(0).Name = preferences.getString("Name", null);
-            lstEmployees.get(0).LastName = preferences.getString("LastName",null);
+            lstEmployees.get(0).LastName = preferences.getString("LastName", null);
             intent = new Intent(LoginScreen.this, MasaEkrani.class);
             intent.putExtra("lstEmployees", lstEmployees);
             startActivity(intent);
-        }
-        else {
+        } else {
             this.setVisible(true);
             ((EditText) findViewById(R.id.editTextPin)).setText("");
         }
+        acitivityVisible = true;
         super.onResume();
     }
 
     @Override
-    protected void onRestart() {
-//        preferences = this.getSharedPreferences("KilitliMasa",Context.MODE_PRIVATE);
-//        MasaKilitliMi = preferences.getBoolean("MasaKilitli",false);
-//        if(MasaKilitliMi)
-//        {
-//            Button btn = (Button) findViewById(R.id.btnGiris);
-//            btn.callOnClick();
-//        }
-        super.onRestart();
+    protected void onPause() {
+        acitivityVisible = false;
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        acitivityVisible = false;
+        super.onStop();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        g = (GlobalApplication) getApplicationContext();
+        LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login_screen);
         btnGiris = (Button) findViewById(R.id.btnGiris);
@@ -110,23 +102,85 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             intent = new Intent(LoginScreen.this, Settings.class);
             startActivity(intent);
         }
-
         if (files != null) {
             ReadXML readXML = new ReadXML();
             lstEmployees = readXML.readEmployees(files);
         }
-//        MasaKilitliMi = preferences.getBoolean("MasaKilitli",false);
-//        if(preferences !=null && MasaKilitliMi == true) {
-//            lstEmployees.get(0).PinCode = preferences.getString("PinCode", "0000");
-//            lstEmployees.get(0).Title = preferences.getString("Title",null);
-//            Set<String> setPermissions = preferences.getStringSet("Permissions",null);
-//            lstEmployees.get(0).Permissions = (String[]) setPermissions.toArray();
-//            lstEmployees.get(0).UserName = preferences.getString("UserName",null);
-//            lstEmployees.get(0).Name = preferences.getString("Name", null);
-//            lstEmployees.get(0).LastName = preferences.getString("LastName",null);
-//        }
+
     }
 
+    BroadcastReceiver rec = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            //all events will be received here
+            //get message
+            String srvrMessage = intent.getStringExtra("message");
+            if (srvrMessage != null) {
+                String[] parametreler = srvrMessage.split("&");
+                String[] esitlik;
+                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                for (String parametre : parametreler) {
+                    esitlik = parametre.split("=");
+                    if (esitlik.length == 2)
+                        collection.put(esitlik[0], esitlik[1]);
+                }
+                final String gelenkomut = collection.get("komut");
+                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+                final String baglanti = collection.get("durum");
+
+                if (komut.toString().contentEquals("baglanti") && baglanti.contentEquals("koptu")) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (acitivityVisible) {
+                                AlertDialog.Builder aBuilder = new AlertDialog.Builder(LoginScreen.this);
+                                aBuilder.setTitle("Bağlantı Hatası");
+                                aBuilder.setMessage("Sunucuya bağlanırken bir hata ile karşılaşıldı. Lütfen tekrar bağlanmayı deneyiniz veya " +
+                                        "ayarları kontrol ediniz.")
+                                        .setCancelable(false)
+                                        .setPositiveButton("Tekrar bağlan", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                g.connectServer(myHandler);
+                                            }
+                                        });
+                                AlertDialog alertDialog = aBuilder.create();
+                                alertDialog.show();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    };
+
+
+    public Handler myHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    preferences = LoginScreen.this.getSharedPreferences("MyPreferences",
+                            Context.MODE_PRIVATE);
+                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    EditText e = (EditText) findViewById(R.id.editTextPin);
+
+                    if (g.commonAsyncTask.client != null) {
+                        if (g.commonAsyncTask.client.out != null) {
+                            g.commonAsyncTask.client.sendMessage(girisKomutu);
+                            e.setFocusableInTouchMode(true);
+                            e.setFocusable(true);
+                        } else {
+                            e.setFocusable(false);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -134,8 +188,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         getMenuInflater().inflate(R.menu.login_screen, menu);
         return true;
     }
-
-    MenuItem item;
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -162,15 +214,10 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnGiris:
-//                intent = new Intent(LoginScreen.this, MainScreen.class);
-//                intent.putExtra("lstEmployees", lstEmployees);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
                 boolean passCorrect = false;
                 int getCurrentEmployee = 0;
                 String pass = ((EditText) findViewById(R.id.editTextPin)).getText().toString();
                 try {
-
                     if (!pass.contentEquals("")) {
                         for (int i = 0; i < lstEmployees.size(); i++) {
                             passCorrect = passwordHash.validatePassword(pass, lstEmployees.get(i).PinCode);

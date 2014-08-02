@@ -38,7 +38,6 @@
         android:text="10 numara yemek"
         android:textSize="18sp"
         android:layout_marginTop="5dp"
-        android:layout_marginLeft="5dp"
         android:layout_toLeftOf="@+id/buttonPlus"
         android:layout_toStartOf="@+id/buttonPlus"
         android:layout_below="@+id/textViewChildHeader"
@@ -80,6 +79,34 @@
         android:layout_marginTop="12dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/buttonstyle3"
+        android:id="@+id/buttonYarim"
+        android:visibility="invisible"
+        android:textSize="16sp"
+        android:text="+\n.50"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/buttonMinus"
+        android:layout_toStartOf="@+id/buttonMinus" />
+
+    <Button
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/buttonstyle3"
+        android:id="@+id/buttonCeyrek"
+        android:visibility="invisible"
+        android:textSize="16sp"
+        android:text="+\n.25"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/buttonYarim"
+        android:layout_toStartOf="@+id/buttonYarim" />
 
     <Button
         android:layout_width="50dp"

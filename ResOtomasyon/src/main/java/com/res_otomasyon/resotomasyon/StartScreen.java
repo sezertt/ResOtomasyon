@@ -24,11 +24,11 @@ import TCPClientSide.TCPClient;
 public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
 
     TCPClient mTcpClient;
-    CommonAsyncTask commonAsyncTask;
     SharedPreferences preferences;
     Context context = this;
     String srvrMessage;
     public boolean mesajGeldi = false;
+    GlobalApplication g;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,31 +40,31 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
             sdcardReady = Environment.getExternalStorageState();
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        GlobalApplication g = (GlobalApplication) getApplicationContext();
-        if(g.commonAsyncTask ==null) {
-            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-            g.activity = this;
-            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-            g.connectServer(myHandler, rec);
-            commonAsyncTask = g.commonAsyncTask;
-            setContentView(R.layout.activity_start_screen);
+        g = (GlobalApplication) getApplicationContext();
+        preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+        if (preferences == null) {
+            Intent intent = new Intent(StartScreen.this, Settings.class);
+            startActivity(intent);
+        } else {
+            if (g.commonAsyncTask == null) {
+                g.activity = this;
+                LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
+                g.connectServer(myHandler);
+                setContentView(R.layout.activity_start_screen);
+            }
         }
     }
 
     public Handler myHandler = new Handler() {
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
-
-                    mTcpClient = commonAsyncTask.client;
-
-                    if (mTcpClient != null) {
-                        if (mTcpClient.out != null)
-                            mTcpClient.sendMessage(girisKomutu);
+                    if (g.commonAsyncTask.client != null) {
+                        if (g.commonAsyncTask.client.out != null)
+                            g.commonAsyncTask.client.sendMessage(girisKomutu);
                         else {
                         }
                     }
@@ -95,9 +95,9 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
                 final String baglanti = collection.get("sonuc");
 
                 if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
-                    mesajGeldi = true;
-                    myHandler.sendEmptyMessage(0);
-                    LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+//                    mesajGeldi = true;
+//                    myHandler.sendEmptyMessage(0);
+//                    LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
 
                 } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
 
