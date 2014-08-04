@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import Entity.Employee;
 import Entity.Siparis;
@@ -35,7 +40,7 @@ public class HesapEkrani extends Activity {
         String siparisler = extras.getString("siparisler");
         String[] Siparisler = siparisler.split("\\*");
 
-        Double kacPorsiyon, yemeginFiyati;
+        Double kacPorsiyon, yemeginFiyati, toplamHesap = 0d;
         String yemeginAdi, Garson;
         Boolean ikramMi;
 
@@ -48,8 +53,27 @@ public class HesapEkrani extends Activity {
 
         for (int i = 0; i < Siparisler.length; i++) {
             String[] detaylari = Siparisler[i].split("-");
-            yemeginFiyati = Double.parseDouble(detaylari[0]);
-            kacPorsiyon = Double.parseDouble(detaylari[1]);
+
+            NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+            Number number = null;
+
+            //burası virgüllü stringi double a convert etme çevirme kısmı
+            try {
+                number = format.parse(detaylari[0]);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            yemeginFiyati = number.doubleValue();
+
+            try {
+                number = format.parse(detaylari[1]);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            kacPorsiyon =number.doubleValue();
+
             yemeginAdi = detaylari[2];
             ikramMi = Boolean.parseBoolean(detaylari[3]);
             Garson = detaylari[4];
@@ -78,6 +102,7 @@ public class HesapEkrani extends Activity {
                     yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
                     urunListesi.add(yeniSiparis);
                 }
+                toplamHesap += yemeginFiyati * kacPorsiyon;
             }
             else // ikramsa
             {
@@ -98,22 +123,26 @@ public class HesapEkrani extends Activity {
                     Siparis yeniSiparis = new Siparis();
                     yeniSiparis.miktar = kacPorsiyon.toString();
                     yeniSiparis.yemekAdi = yemeginAdi;
-                    yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
+                    yeniSiparis.porsiyonFiyati = "ikram";
                     urunListesiIkram.add(yeniSiparis);
                 }
             }
         }
-        urunListesiToplam = concat(urunListesi, urunListesiIkram);
+        urunListesiToplam.addAll(urunListesi);
+        urunListesiToplam.addAll(urunListesiIkram);
+
+        Button hesapButton = (Button) findViewById(R.id.buttonHesap);
+
+        hesapButton.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+
+            }
+        });
+
+                hesapButton.setText("Hesap İste  /  Toplam = " + toplamHesap + " TL");
 
         MyListAdapter adapter = new MyListAdapter(urunListesiToplam,this);
         hesapListesi.setAdapter(adapter);
-    }
-
-    ArrayList<Siparis> concat(ArrayList<Siparis> A, ArrayList<Siparis> B) {
-        ArrayList<Siparis> C= new ArrayList<Siparis>();
-        System.arraycopy(A, 0, C, 0, A.size());
-        System.arraycopy(B, 0, C, A.size(), B.size());
-        return C;
     }
 
     @Override

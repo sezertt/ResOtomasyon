@@ -42,7 +42,9 @@
         android:textSize="18sp"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_alignParentEnd="true"
+        android:minWidth="100dp"
+        android:gravity="right">
     </TextView>
 
     <TextView
@@ -63,12 +65,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textNoSuggestions"
-        android:text="   -   "
+        android:text="       "
         android:textSize="18sp"
         android:layout_alignWithParentIfMissing="false"
         android:layout_toStartOf="@+id/textViewFiyat"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@+id/textViewFiyat" />
-
+        android:layout_toLeftOf="@+id/textViewFiyat"
+        android:minWidth="40dp"
+        android:gravity="right" />
 
 </RelativeLayout>

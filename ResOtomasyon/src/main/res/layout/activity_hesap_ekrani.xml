@@ -20,26 +20,19 @@
             android:text="Seçtiğiniz Siparişleriniz"
             android:id="@+id/textSiparis" />
 
-        <ScrollView
+        <ListView android:id="@+id/listViewSecilenSiparisler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/scrollView"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
+            android:layout_height="fill_parent"
             android:layout_below="@+id/textSiparis">
+        </ListView>
 
-            <ListView android:id="@+id/listViewSecilenSiparisler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </ListView>
-
-        </ScrollView>
     </RelativeLayout>
 
     <RelativeLayout
         android:background="#AAAAAA"
         android:layout_height="0dp"
         android:layout_width="match_parent"
+        android:id="@+id/hesapLayout"
         android:layout_weight="1" >
 
         <TextView
@@ -51,20 +44,24 @@
             android:text="Hesabınız"
             android:id="@+id/textHesap" />
 
-        <ScrollView
+        <ListView android:id="@+id/listViewHesap"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/scrollView2"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
+            android:layout_height="fill_parent"
             android:layout_below="@+id/textHesap">
+        </ListView>
 
-            <ListView android:id="@+id/listViewHesap"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-            </ListView>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:text="Hesap İste  /  Toplam = 87.50 TL"
+            android:id="@+id/buttonHesap"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
-        </ScrollView>
     </RelativeLayout>
 
 </LinearLayout>
