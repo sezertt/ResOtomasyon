@@ -1,12 +1,19 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,10 +22,13 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -37,6 +47,7 @@ public class HesapEkrani extends Activity {
     MyListAdapter adapterSecilenSiparisler;
     ArrayList<Siparis> urunListesiToplam = new ArrayList<Siparis>();
     int selectedSiparisItemPosition = -1;
+    int count = -1;
 
     Double kacPorsiyon, yemeginFiyati, toplamHesap = 0d;
 
@@ -312,23 +323,95 @@ public class HesapEkrani extends Activity {
 
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
                 menu.setHeaderTitle(urunListesiToplam.get(info.position).yemekAdi);
+
+                if(urunListesiToplam.get(info.position).porsiyonFiyati.contentEquals("ikram"))
+                    menu.getItem(1).setTitle("İkramı İptal Et");
+                else
+                    menu.getItem(1).setTitle("Ürünü İkram Et");
             }
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        String baslik;
+
         switch(item.getItemId()) {
             case R.id.iptal:
-                // burada alertdialogla kaç adet olması gerektiğini sor
-                return true;
+                baslik = "Kaç adet ürün iptal edilecek? Bulunan :" + urunListesiToplam.get(info.position).miktar + " adet";
+                break;
             case R.id.ikram:
-                // burada alertdialogla kaç adet olması gerektiğini sor
-                return true;
+                baslik = "Kaç adet ürün ikram edilecek? Bulunan :" + urunListesiToplam.get(info.position).miktar + " adet";
+                break;
             default:
                 return super.onContextItemSelected(item);
         }
+        AlertDialog.Builder builder = new AlertDialog.Builder(HesapEkrani.this);
+        builder.setTitle(baslik);
+
+        final EditText input = new EditText(HesapEkrani.this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+
+        input.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+
+                double girilenSayi;
+                try
+                {
+                    String x= s.toString();
+                    girilenSayi = Double.parseDouble(x);
+                }
+                catch (Exception ex)
+                {  return; }
+
+                if(girilenSayi>Double.parseDouble(urunListesiToplam.get(info.position).miktar))
+                {
+                    input.setText(urunListesiToplam.get(info.position).miktar);
+                }
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+        });
+
+        builder.setView(input);
+
+        builder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String [] x = input.getText().toString().split("\\.");
+                if(x.length == 2)
+                {
+                    if(!x[1].contentEquals("25")&&!x[1].contentEquals("50")&&!x[1].contentEquals("75"))
+                    {
+                        AlertDialog.Builder aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                        aBuilder.setTitle("Porsiyon Hatası");
+                        aBuilder.setMessage("Porsiyon hatalı girildiği için işlem gerçekleştirilemedi\nGirilen Porsiyon :" + input.getText()).setCancelable(false)
+                                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                });
+                        AlertDialog alertDialog = aBuilder.create();
+                        alertDialog.show();
+                    }
+                }
+            }
+        });
+        builder.setNegativeButton("Vazgeç", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+        return true;
     }
 
     @Override

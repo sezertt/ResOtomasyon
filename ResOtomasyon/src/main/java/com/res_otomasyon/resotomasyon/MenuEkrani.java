@@ -282,6 +282,7 @@ public class MenuEkrani extends Activity {
                     group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                     group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
                     group.productCount.add("0");
+                    group.productPortionStyle.add("T");
 
                     i++;
                     if (i + 1 >= lstProducts.size())
@@ -295,6 +296,7 @@ public class MenuEkrani extends Activity {
                 group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                 group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
                 group.productCount.add("0");
+                group.productPortionStyle.add("T");
             }
             groups.append(j, group);
             j++;

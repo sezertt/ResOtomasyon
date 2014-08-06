@@ -18,5 +18,7 @@
     <string name="title_activity_start_screen">StartScreen</string>
     <string name="title_activity_hesap_ekrani">HesapEkrani</string>
     <string name="title_activity_masa_sec_ekrani">MasaSecEkrani</string>
+    <string name="hesap"><u>Hesabınız</u></string>
+    <string name="siparis"><u>Seçtiğiniz Siparişler</u></string>
 
 </resources>
