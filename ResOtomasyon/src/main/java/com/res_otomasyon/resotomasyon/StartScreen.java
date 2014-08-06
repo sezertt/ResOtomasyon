@@ -130,9 +130,8 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     protected void onResume() {
         super.onResume();
         this.setVisible(false);
-        Intent intent = new Intent(getApplicationContext(), MasaSecEkrani.class);
-
-//        Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
+//        Intent intent = new Intent(getApplicationContext(), MasaSecEkrani.class);
+        Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
