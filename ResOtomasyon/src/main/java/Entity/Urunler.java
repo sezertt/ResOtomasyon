@@ -1,9 +1,11 @@
 package Entity;
 
+import java.io.Serializable;
+
 /**
  * Created by sezer on 07.07.2014.
  */
-public class Urunler {
+public class Urunler implements Serializable{
     public String urunAdi;
     public String porsiyonFiyati;
     public String urunKategorisi;

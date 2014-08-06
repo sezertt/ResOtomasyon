@@ -1,10 +1,15 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -22,11 +27,21 @@ public class MyListAdapter extends BaseAdapter {
     public LayoutInflater inflater;
     public Activity activity;
     ArrayList<Siparis> siparisListesi = new ArrayList<Siparis>();
+    Boolean hesapMi;
+    private int selectedIndex;
+    private int selectedColor = Color.WHITE;
 
-    public MyListAdapter(ArrayList<Siparis> siparisListesi,Activity act) {
+    public MyListAdapter(ArrayList<Siparis> siparisListesi,Activity act, Boolean hesapMi) {
         activity = act;
         inflater = act.getLayoutInflater();
         this.siparisListesi = siparisListesi;
+        this.hesapMi = hesapMi;
+        selectedIndex = -1;
+    }
+    public void setSelectedIndex(int ind)
+    {
+        selectedIndex = ind;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -43,9 +58,6 @@ public class MyListAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
-
-    Double toplamFiyat = 0d;
-    Double toplamFiyatM = 0d;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -81,6 +93,21 @@ public class MyListAdapter extends BaseAdapter {
         textYemekAdi.setText(siparisListesi.get(position).yemekAdi);
         textAdet.setText("x"+result);
 
+        if(selectedIndex!= -1 && position == selectedIndex)
+        {
+            convertView.setBackgroundColor(Color.rgb(51,181,229));
+        }
+        else
+        {
+            convertView.setBackgroundColor(selectedColor);
+        }
+
         return convertView;
+    }
+
+    @Override
+    public boolean isEnabled(int position)
+    {
+        return true;
     }
 }

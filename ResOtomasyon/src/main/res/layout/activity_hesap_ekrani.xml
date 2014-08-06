@@ -6,7 +6,7 @@
     tools:context="com.res_otomasyon.resotomasyon.HesapEkrani">
 
     <RelativeLayout
-        android:background="#FFFFFF"
+        android:background="#AAAAAA"
         android:layout_height="0dp"
         android:layout_width="match_parent"
         android:layout_weight="1">
@@ -14,17 +14,98 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/white"
             android:layout_marginTop="2dp"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Seçtiğiniz Siparişleriniz"
             android:id="@+id/textSiparis" />
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/buttonstyle3"
+            android:text="Not Ekle"
+            android:textColor="@android:color/white"
+            android:id="@+id/buttonNot"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentBottom="true"
+            android:textSize="20sp"
+            android:minWidth="150dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_toRightOf="@+id/buttonArttir"
+            android:layout_toEndOf="@+id/buttonArttir"
+            android:layout_alignTop="@+id/buttonAzalt" />
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/buttonstyle2"
+            android:id="@+id/buttonAzalt"
+            android:textSize="40sp"
+            android:drawableLeft="@drawable/minus"
+            android:layout_marginTop="1dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="1dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignTop="@+id/button"
+            android:layout_toRightOf="@+id/buttonPorsiyon"
+            android:layout_toEndOf="@+id/buttonPorsiyon" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:background="@drawable/buttonstyle3"
+            android:text="Sepeti Onayla"
+            android:id="@+id/buttonSepetOnayla"
+            android:textSize="20sp"
+            android:layout_toRightOf="@+id/buttonNot"
+            android:layout_toEndOf="@+id/buttonNot"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignBottom="@+id/buttonArttir"
+            android:layout_alignTop="@+id/buttonNot" />
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:textColor="@android:color/white"
+            android:id="@+id/buttonArttir"
+            android:textSize="40sp"
+            android:drawableStart="@drawable/plus"
+            android:background="@drawable/buttonstyle2"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="1dp"
+            android:layout_toRightOf="@+id/buttonAzalt"
+            android:layout_toEndOf="@+id/buttonAzalt"
+            android:layout_alignTop="@+id/buttonNot" />
+
         <ListView android:id="@+id/listViewSecilenSiparisler"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/textSiparis">
+            android:choiceMode="singleChoice"
+            android:layout_below="@+id/textSiparis"
+            android:layout_above="@+id/buttonAzalt">
         </ListView>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/buttonstyle3"
+            android:text="Tam"
+            android:id="@+id/buttonPorsiyon"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:textSize="20sp"
+            android:layout_alignBottom="@+id/buttonAzalt"/>
 
     </RelativeLayout>
 
@@ -39,6 +120,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
+            android:background="@android:color/white"
             android:gravity="center"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Hesabınız"
@@ -47,15 +129,22 @@
         <ListView android:id="@+id/listViewHesap"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:layout_below="@+id/textHesap">
+            android:layout_below="@+id/textHesap"
+            android:layout_above="@+id/buttonHesap">
         </ListView>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
+            android:background="@drawable/buttonstyle2"
+            android:textColor="@android:color/white"
             android:text="Hesap İste  /  Toplam = 87.50 TL"
             android:id="@+id/buttonHesap"
+            android:textSize="20sp"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="100dp"
+            android:layout_marginBottom="1dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"

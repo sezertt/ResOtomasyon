@@ -8,11 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 import Entity.Siparis;
 import ekclasslar.UrunBilgileri;
@@ -79,7 +81,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         final TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewChildPrice);
-        textFiyat.setText(productPrice + "TL");
+        textFiyat.setText(productPrice + " TL");
 
         text = (TextView) convertView.findViewById(R.id.textViewChildInfo);
         text.setText(productInfo);
@@ -110,7 +112,12 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.buttonYarim).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String miktar = String.valueOf(Double.parseDouble(textAdet.getText().toString()) + 0.5);
+                DecimalFormat df = new DecimalFormat();
+                df.setMaximumFractionDigits(2);
+                df.setMinimumFractionDigits(0);
+                df.setGroupingUsed(false);
+
+                String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) + 0.5);
 
                 productCount = miktar;
                 textAdet.setText(miktar);
@@ -125,8 +132,11 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                 }
 
                 Siparis siparis = new Siparis();
+
+                siparis.porsiyonSinifi = porsiyonSinifiBelirle(productPortion);
+
                 siparis.miktar = miktar;
-                siparis.porsiyonFiyati = textFiyat.getText().toString();
+                siparis.porsiyonFiyati = textFiyat.getText().toString().substring(0, textFiyat.getText().length() - 3);
                 siparis.yemekAdi = textName.getText().toString();
                 menuEkrani.lstOrderedProducts.add(siparis);
             }
@@ -135,7 +145,13 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         convertView.findViewById(R.id.buttonCeyrek).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String miktar = String.valueOf(Double.parseDouble(textAdet.getText().toString()) + 0.25);
+
+                DecimalFormat df = new DecimalFormat();
+                df.setMaximumFractionDigits(2);
+                df.setMinimumFractionDigits(0);
+                df.setGroupingUsed(false);
+
+                String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) + 0.25);
 
                 productCount = miktar;
                 textAdet.setText(miktar);
@@ -148,10 +164,12 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                         return;
                     }
                 }
-
                 Siparis siparis = new Siparis();
+
+                siparis.porsiyonSinifi = porsiyonSinifiBelirle(productPortion);
+
                 siparis.miktar = miktar;
-                siparis.porsiyonFiyati = textFiyat.getText().toString();
+                siparis.porsiyonFiyati = textFiyat.getText().toString().substring(0, textFiyat.getText().length() - 3);
                 siparis.yemekAdi = textName.getText().toString();
                 menuEkrani.lstOrderedProducts.add(siparis);
             }
@@ -161,7 +179,13 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
 
-                String miktar = String.valueOf(Double.parseDouble(textAdet.getText().toString()) + 1);
+                DecimalFormat df = new DecimalFormat();
+                df.setMaximumFractionDigits(2);
+                df.setMinimumFractionDigits(0);
+                df.setGroupingUsed(false);
+
+                String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) + 1);
+
                 productCount = miktar;
                 textAdet.setText(miktar);
                 groups.get(groupPosition).productCount.set(childPosition,miktar);
@@ -175,8 +199,11 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                 }
 
                 Siparis siparis = new Siparis();
+
+                siparis.porsiyonSinifi = porsiyonSinifiBelirle(productPortion);
+
                 siparis.miktar = miktar;
-                siparis.porsiyonFiyati = textFiyat.getText().toString();
+                siparis.porsiyonFiyati = textFiyat.getText().toString().substring(0,textFiyat.getText().length() - 3);
                 siparis.yemekAdi = textName.getText().toString();
                 menuEkrani.lstOrderedProducts.add(siparis);
             }
@@ -186,7 +213,12 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View v) {
 
-            String miktar = String.valueOf(Double.parseDouble(textAdet.getText().toString()) - 1);
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+            df.setMinimumFractionDigits(0);
+            df.setGroupingUsed(false);
+
+            String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) - 1);
 
             if(Double.parseDouble(textAdet.getText().toString()) - 1 < 0)
                 miktar = "0";
@@ -211,6 +243,16 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
             }
         });
         return convertView;
+    }
+
+    private double porsiyonSinifiBelirle(double productPortion)
+    {
+        if(productPortion == 0)
+            return 0;
+        else if(productPortion == 1)
+            return 1;
+        else
+            return 2;
     }
 
     @Override

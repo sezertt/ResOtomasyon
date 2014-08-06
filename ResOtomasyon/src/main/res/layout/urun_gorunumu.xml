@@ -37,10 +37,12 @@
         android:lines="5"
         android:text="10 numara yemek"
         android:textSize="18sp"
-        android:layout_toLeftOf="@+id/buttonPlus"
-        android:layout_toStartOf="@+id/buttonPlus"
+        android:layout_marginRight="20dp"
+        android:layout_toStartOf="@+id/buttonCeyrek"
         android:layout_alignLeft="@+id/textViewChildHeader"
-        android:layout_below="@+id/textViewChildHeader">
+        android:layout_below="@+id/textViewChildHeader"
+        android:layout_alignRight="@+id/textViewChildHeader"
+        android:layout_alignEnd="@+id/textViewChildHeader">
     </TextView>
 
     <View
@@ -86,10 +88,10 @@
         android:visibility="invisible"
         android:textSize="16sp"
         android:text="+\n.50"
-        android:layout_marginRight="20dp"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/buttonMinus"
-        android:layout_toStartOf="@+id/buttonMinus" />
+        android:layout_marginRight="5dp"
+        android:layout_alignBottom="@+id/buttonMinus"
+        android:layout_alignRight="@+id/textViewChildHeader"
+        android:layout_alignEnd="@+id/textViewChildHeader" />
 
     <Button
         android:layout_width="40dp"
@@ -99,11 +101,11 @@
         android:id="@+id/buttonCeyrek"
         android:visibility="invisible"
         android:textSize="16sp"
+        android:layout_marginRight="5dp"
         android:text="+\n.25"
-        android:layout_marginRight="10dp"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/buttonYarim"
-        android:layout_toStartOf="@+id/buttonYarim" />
+        android:layout_alignTop="@+id/buttonPlus"
+        android:layout_alignRight="@+id/textViewChildHeader"
+        android:layout_alignEnd="@+id/textViewChildHeader" />
 
     <Button
         android:layout_width="50dp"
