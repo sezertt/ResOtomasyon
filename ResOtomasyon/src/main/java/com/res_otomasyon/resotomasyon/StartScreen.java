@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -33,6 +34,7 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_start_screen);
         this.setVisible(false);
         String sdcardReady = Environment.getExternalStorageState();
 
@@ -50,11 +52,12 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
                 g.activity = this;
                 LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
                 g.connectServer(myHandler);
-                setContentView(R.layout.activity_start_screen);
             }
         }
     }
 
+    int counterGiris = 0;
+    String girisKomutu;
     public Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -62,6 +65,8 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    counterGiris++;
+                    Log.e("counterGiris", String.valueOf(counterGiris));
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null)
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
@@ -125,7 +130,9 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     protected void onResume() {
         super.onResume();
         this.setVisible(false);
-        Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
+        Intent intent = new Intent(getApplicationContext(), MasaSecEkrani.class);
+
+//        Intent intent = new Intent(getApplicationContext(), LoginScreen.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

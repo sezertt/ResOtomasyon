@@ -49,13 +49,17 @@ public class CommonAsyncTask extends AsyncTask<Handler, String, String> {
                 intent.putExtra("message", message);
                 localBroadcastManager.sendBroadcastSync(intent);
             }
-        },myHandler);
-        myHandler.sendEmptyMessage(2);
+        }, myHandler);
         client.run();
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Intent intent = new Intent("myevent");
         intent.putExtra("message", "komut=baglanti&durum=koptu");
         localBroadcastManager.sendBroadcastSync(intent);
-        Log.e("BroadCast:","Baglanti Koptu.");
+        Log.e("BroadCast:", "Baglanti Koptu.");
         return "komut=baglanti&durum=koptu";
     }
 

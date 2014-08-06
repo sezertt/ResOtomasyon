@@ -85,6 +85,7 @@ public class TCPClient {
     //Eğer bağlantı kopmuş ise ping atmayı durdur.
     void callStopPing() {
         timer.cancel();
+        timer.purge();
     }
 
     public void sendMessage(String message) {
@@ -165,12 +166,13 @@ public class TCPClient {
             Log.e("TCP Client", "C: Connecting...");
             socket.connect(socketAddress, 1500);
             //Eğer soket bağlantısı kurulabilirse handler'a mesaj gönder.
-            if (socket.isConnected())
-                myHandler.sendEmptyMessage(2);
+
             try {
                 socket.setKeepAlive(true);
                 //send the message to the server
                 out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                if (socket.isConnected())
+                    myHandler.sendEmptyMessage(2);
                 Log.e("client.out", "Oluştu");
                 String copyOfServerMessage = "";
                 Log.e("TCP Client", "C: Sent.");

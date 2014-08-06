@@ -32,6 +32,7 @@ import ekclasslar.FileIO;
 import Entity.Employee;
 import HashPassword.passwordHash;
 import XMLReader.ReadXML;
+import ekclasslar.TryConnection;
 
 
 public class LoginScreen extends Activity implements View.OnClickListener {
@@ -43,8 +44,10 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     ArrayList<Employee> lstEmployees;
     boolean MasaKilitliMi = false;
     SharedPreferences preferences = null;
-    boolean acitivityVisible = true;
+    boolean activityVisible = true;
     GlobalApplication g;
+    Menu menu;
+    TryConnection t;
 
     @Override
     protected void onResume() {
@@ -67,29 +70,33 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             this.setVisible(true);
             ((EditText) findViewById(R.id.editTextPin)).setText("");
         }
-        acitivityVisible = true;
+        activityVisible = true;
+        if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
+        {
+            t.startTimer();
+        }
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        acitivityVisible = false;
+        activityVisible = false;
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        acitivityVisible = false;
+        activityVisible = false;
         super.onStop();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login_screen);
         g = (GlobalApplication) getApplicationContext();
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_login_screen);
         btnGiris = (Button) findViewById(R.id.btnGiris);
         btnCikis = (Button) findViewById(R.id.btnCikis);
         btnGiris.setOnClickListener(this);
@@ -106,7 +113,15 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             ReadXML readXML = new ReadXML();
             lstEmployees = readXML.readEmployees(files);
         }
+        if (g.commonAsyncTask.client != null) {
+            if (g.commonAsyncTask.client.out != null) {
+                getActionBar().setTitle(getString(R.string.app_name) + "(on)");
+            } else {
+                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
 
+            }
+        }
+        t = new TryConnection(g, myHandler);
     }
 
     BroadcastReceiver rec = new BroadcastReceiver() {
@@ -132,27 +147,25 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (acitivityVisible) {
-                                AlertDialog.Builder aBuilder = new AlertDialog.Builder(LoginScreen.this);
-                                aBuilder.setTitle("Bağlantı Hatası");
-                                aBuilder.setMessage("Sunucuya bağlanırken bir hata ile karşılaşıldı. Lütfen tekrar bağlanmayı deneyiniz veya " +
-                                        "ayarları kontrol ediniz.")
-                                        .setCancelable(false)
-                                        .setPositiveButton("Tekrar bağlan", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                g.connectServer(myHandler);
-                                            }
-                                        });
-                                AlertDialog alertDialog = aBuilder.create();
-                                alertDialog.show();
+                            if (activityVisible) {
+                                if (!t.timerRunning)
+                                    t.startTimer();
+                                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                EditText e = (EditText) findViewById(R.id.editTextPin);
+                                e.setFocusable(false);
                             }
+
                         }
                     });
                 }
             }
         }
     };
+
+
+    @Override
+    public void onBackPressed() {
+    }
 
 
     public Handler myHandler = new Handler() {
@@ -165,14 +178,15 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                             Context.MODE_PRIVATE);
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
                     EditText e = (EditText) findViewById(R.id.editTextPin);
-
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
                             e.setFocusableInTouchMode(true);
                             e.setFocusable(true);
-                        } else {
-                            e.setFocusable(false);
+                            getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            if (t != null && t.timer != null) {
+                                t.stopTimer();
+                            }
                         }
                     }
                     break;
@@ -186,6 +200,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.login_screen, menu);
+        this.menu = menu;
         return true;
     }
 

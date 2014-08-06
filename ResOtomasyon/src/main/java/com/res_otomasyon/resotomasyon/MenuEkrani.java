@@ -31,6 +31,7 @@ import java.util.Set;
 
 import Entity.Siparis;
 import ekclasslar.FileIO;
+import ekclasslar.TryConnection;
 import ekclasslar.UrunBilgileri;
 import Entity.Employee;
 import Entity.Urunler;
@@ -50,7 +51,7 @@ public class MenuEkrani extends Activity {
 
     boolean masaKilitliMi = false;
     boolean passCorrect = false;
-    boolean acitivityVisible = true;
+    boolean activityVisible = true;
     Context context = this;
     MenuItem item;
 
@@ -58,7 +59,7 @@ public class MenuEkrani extends Activity {
     ArrayList<Siparis> lstOrderedProducts = new ArrayList<Siparis>();
     SharedPreferences preferences = null;
     GlobalApplication g;
-
+    TryConnection t;
     // more efficient than HashMap for mapping integers to objects
     SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
 
@@ -122,14 +123,18 @@ public class MenuEkrani extends Activity {
 
     @Override
     protected void onResume() {
-        acitivityVisible = true;
+        if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
+        {
+            t.startTimer();
+        }
+        activityVisible = true;
         super.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        acitivityVisible = false;
+        activityVisible = false;
         if (!masaKilitliMi) {
             this.finish();
         }
@@ -191,21 +196,13 @@ public class MenuEkrani extends Activity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (acitivityVisible) {
-                                    AlertDialog.Builder aBuilder = new AlertDialog.Builder(MenuEkrani.this);
-                                    aBuilder.setTitle("Bağlantı Hatası");
-                                    aBuilder.setMessage("Sunucu bağlantısı koptu." +
-                                            ". Lütfen tekrar bağlanmayı deneyiniz")
-                                            .setCancelable(false)
-                                            .setPositiveButton("Tekrar bağlan", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    g.connectServer(handlerTekrarBaglan);
-                                                }
-                                            });
-                                    AlertDialog alertDialog = aBuilder.create();
-                                    alertDialog.show();
-                                }
+                                    if (activityVisible) {
+                                        if (!t.timerRunning)
+                                            t.startTimer();
+                                        getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                        EditText e = (EditText) findViewById(R.id.editTextPin);
+                                        e.setFocusable(false);
+                                    }
                             }
                         });
                         break;
@@ -250,17 +247,26 @@ public class MenuEkrani extends Activity {
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
         MyExpandableListAdapter adapter = new MyExpandableListAdapter(this, groups, this);
         listView.setAdapter(adapter);
+        if (g.commonAsyncTask.client != null) {
+            if (g.commonAsyncTask.client.out != null) {
+                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+            } else {
+                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+
+            }
+        }
+        t = new TryConnection(g, myHandler);
     }
 
     @Override
     protected void onStop() {
-        acitivityVisible = false;
+        activityVisible = false;
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        acitivityVisible = false;
+        activityVisible = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
         super.onDestroy();
     }
@@ -281,6 +287,14 @@ public class MenuEkrani extends Activity {
                     if (i + 1 >= lstProducts.size())
                         break;
                 }
+            }
+            if(i+1<lstProducts.size())
+            {
+                group.productName.add(lstProducts.get(i).urunAdi);
+                group.productPrice.add(lstProducts.get(i).porsiyonFiyati);
+                group.productInfo.add(lstProducts.get(i).urunAciklamasi);
+                group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
+                group.productCount.add("0");
             }
             groups.append(j, group);
             j++;

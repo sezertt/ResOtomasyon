@@ -35,9 +35,9 @@ import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
 import TCPClientSide.CommonAsyncTask;
-import TCPClientSide.ConnectTCP;
 import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
+import ekclasslar.TryConnection;
 
 
 public class MasaEkrani extends FragmentActivity implements ActionBar.TabListener, CommonAsyncTask.OnAsyncRequestComplete {
@@ -49,7 +49,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     ViewPager mViewPager;
     //
     TCPClient mTcpClient;
-    CommonAsyncTask commonAsyncTask;
     //
     ArrayList<Departman> lstDepartmanlar;
     ArrayList<MasaDizayn> lstMasaDizayn;
@@ -65,13 +64,14 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     public String srvrMessage;
     public boolean mesajGeldi = false;
     public boolean firstRun = false;
-    boolean acitivityVisible = true;
+    boolean activityVisible = true;
     boolean masaKilitliMi = false;
     ArrayList<Employee> lstEmployees;
     //
     CollectionPagerAdapter collectionPagerAdapter;
     Context context = this;
     GlobalApplication g;
+    TryConnection t;
 
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
@@ -99,8 +99,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             switch (msg.what) {
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences",
-                            Context.MODE_PRIVATE);
+                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences",Context.MODE_PRIVATE);
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
@@ -136,19 +135,10 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (acitivityVisible) {
-                                        AlertDialog.Builder aBuilder = new AlertDialog.Builder(MasaEkrani.this);
-                                        aBuilder.setTitle("Bağlantı Hatası");
-                                        aBuilder.setMessage("Sunucu bağlantısı koptu. Lütfen tekrar bağlanmayı deneyiniz.")
-                                                .setCancelable(false)
-                                                .setPositiveButton("Tekrar bağlan", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        g.connectServer(handlerTekrarBaglan);
-                                                    }
-                                                });
-                                        AlertDialog alertDialog = aBuilder.create();
-                                        alertDialog.show();
+                                    if (activityVisible) {
+                                        if (!t.timerRunning)
+                                            t.startTimer();
+                                        getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                     }
                                 }
                             });
@@ -186,44 +176,20 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
                             fragment[0].startSendAcikMasalar(acikMasalar, tabName);
                             break;
-
-                        case hesapOdeniyor:
-                            break;
-                        case masaGirilebilirMi:
-                            break;
-                        case masaDegistir:
-                            break;
-                        case urunTasindi:
-                            break;
-                        case ikram:
-                            break;
-                        case ikramIptal:
-                            break;
-                        case BulunanYazicilar:
-                            break;
-                        case IndirimOnay:
-                            break;
-                        case OdemeOnay:
-                            break;
-                        case LoadSiparis:
-                            break;
-                        case OdenenleriGonder:
-                            break;
-                        case toplumesaj:
-                            break;
-                        case AdisyonNotu:
-                            break;
-                        case IslemHatasi:
-                            break;
                     }
                     break;
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences",Context.MODE_PRIVATE);
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
 
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null)
+                        {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
+                            getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            t.stopTimer();}
+
                         else {
                             hataVer();
                         }
@@ -241,7 +207,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         super.onCreate(savedInstanceState);
         try {
             g = (GlobalApplication) getApplicationContext();
-            commonAsyncTask = g.commonAsyncTask;
             LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         } catch (Exception e) {
 
@@ -290,7 +255,15 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
 
                 }
             });
+            t = new TryConnection(g, myHandler);
+            if (g.commonAsyncTask.client != null) {
+                if (g.commonAsyncTask.client.out != null) {
+                    getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                } else {
+                    getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
 
+                }
+            }
         }
     }
 
@@ -323,13 +296,17 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
 
     @Override
     protected void onPause() {
-        acitivityVisible = false;
+        activityVisible = false;
+        if(t.timerRunning)
+            t.stopTimer();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        acitivityVisible = false;
+        activityVisible = false;
+        if(t.timerRunning)
+            t.stopTimer();
         super.onStop();
     }
 
@@ -342,6 +319,16 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             myHandler.sendEmptyMessage(1);
         }
     };
+
+    @Override
+    protected void onResume() {
+        if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
+        {
+            t.startTimer();
+        }
+        activityVisible = true;
+        super.onResume();
+    }
 
     private void hataVerIsim() {
         AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
