@@ -194,18 +194,13 @@ public class MenuEkrani extends Activity {
 
                 switch (komut) {
                     case baglanti:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                    if (activityVisible) {
-                                        if (!t.timerRunning)
-                                            t.startTimer();
-                                        getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-                                        EditText e = (EditText) findViewById(R.id.editTextPin);
-                                        e.setFocusable(false);
-                                    }
-                            }
-                        });
+                        if (activityVisible) {
+                            if (!t.timerRunning)
+                                t.startTimer();
+                            getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                            EditText e = (EditText) findViewById(R.id.editTextPin);
+                            e.setFocusable(false);
+                        }
                         break;
                     case LoadSiparis:
                         String siparisler = collection.get("siparisBilgileri");

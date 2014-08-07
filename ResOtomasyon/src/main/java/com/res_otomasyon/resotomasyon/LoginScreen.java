@@ -146,29 +146,23 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                 final String baglanti = collection.get("durum");
 
                 if (komut.toString().contentEquals("baglanti") && baglanti.contentEquals("koptu")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (activityVisible) {
-                                if (!t.timerRunning)
-                                    t.startTimer();
-                                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-                                EditText e = (EditText) findViewById(R.id.editTextPin);
-                                btnGiris.setEnabled(false);
-                                e.setFocusable(false);
-                            }
-
-                        }
-                    });
+                    if (activityVisible) {
+                        if (!t.timerRunning)
+                            t.startTimer();
+                        getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                        EditText e = (EditText) findViewById(R.id.editTextPin);
+                        btnGiris.setEnabled(false);
+                        e.setFocusable(false);
+                    }
                 }
             }
         }
-    };
+   };
 
 
     @Override
     public void onBackPressed() {
-    }
+   }
 
 
     public Handler myHandler = new Handler() {

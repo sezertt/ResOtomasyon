@@ -57,7 +57,7 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     }
 
     int counterGiris = 0;
-    String girisKomutu;
+
     public Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {

@@ -58,22 +58,42 @@ public class TCPClient {
     //Bağlantının kopup kopmadığını anlamak için server a ping at.
     Timer timer = new Timer();
 
+    static Boolean IsSocketConnected(Socket s) throws IOException {
+        //The long, but simpler-to-understand version:
+
+        Boolean part1 = s.isOutputShutdown();
+        Boolean part2 = (s.getInputStream().available() == 0);
+        if ((part1 && part2 ) || !s.isConnected())
+            return false;
+        else
+            return true;
+    }
+
+
     class pingToServer extends TimerTask {
         @Override
         public void run() {
             try {
-                serverStatus = serverAddr.isReachable(100);
-                if (!serverStatus) {
-                    mRun = false;
-                    if (socket != null && socket.isConnected()) {
+                //serverStatus = serverAddr.isReachable(100);
+                serverStatus = IsSocketConnected(socket);
+
+            } catch (IOException e) {
+                mRun = false;
+                Log.e("Soket", "Bağlantı Koptu");
+
+                if (socket != null && socket.isConnected()) {
+                    try {
                         stream.close();
                         socket.close();
                         Log.e("Soket&Stream", "kapandı");
                     }
-                    callStopPing();
+                    catch (Exception ex)
+                    {
+                        Log.e("Soket&Stream", "Kapanırken Hata Verdi");
+                        e.printStackTrace();
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                callStopPing();
             }
         }
     }

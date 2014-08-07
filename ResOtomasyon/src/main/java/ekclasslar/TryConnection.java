@@ -14,7 +14,7 @@ public class TryConnection extends TimerTask {
 
     public GlobalApplication globalApplication;
     public Handler handler;
-    public Timer timer;
+    public Timer timer = new Timer();
     public boolean timerRunning = false;
 
     public TryConnection(GlobalApplication globalApplication, Handler handler) {
@@ -28,7 +28,6 @@ public class TryConnection extends TimerTask {
     }
 
     public boolean startTimer() {
-        timer = new Timer();
         timer.schedule(new TryConnection(globalApplication, handler), 0, 10000);
         timerRunning = true;
         return timerRunning;
