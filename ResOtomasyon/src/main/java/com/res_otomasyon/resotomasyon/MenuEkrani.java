@@ -136,7 +136,7 @@ public class MenuEkrani extends Activity {
         super.onPause();
         activityVisible = false;
         if (!masaKilitliMi) {
-            this.finish();
+//            this.finish();
         }
     }
 
@@ -161,6 +161,7 @@ public class MenuEkrani extends Activity {
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
+                            t.stopTimer();
                         }
                     }
                     break;
@@ -282,8 +283,8 @@ public class MenuEkrani extends Activity {
                     group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                     group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
                     group.productCount.add("0");
-                    group.productPortionStyle.add("T");
-
+					group.productPortionStyle.add("T");
+					
                     i++;
                     if (i + 1 >= lstProducts.size())
                         break;
@@ -296,7 +297,7 @@ public class MenuEkrani extends Activity {
                 group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                 group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
                 group.productCount.add("0");
-                group.productPortionStyle.add("T");
+				group.productPortionStyle.add("T");
             }
             groups.append(j, group);
             j++;
@@ -342,7 +343,7 @@ public class MenuEkrani extends Activity {
                             myHandler.sendEmptyMessage(0);
                         }
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton("Çıkış", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
@@ -352,21 +353,21 @@ public class MenuEkrani extends Activity {
 //                    return false;
                 } else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("Title");
+                    builder.setTitle("Masa kilitlensin mi?");
 
                     final EditText input = new EditText(context);
                     // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     builder.setView(input);
 
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             m_Text = input.getText().toString();
                             myHandler.sendEmptyMessage(0);
                         }
                     });
-                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton("Çıkış", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
