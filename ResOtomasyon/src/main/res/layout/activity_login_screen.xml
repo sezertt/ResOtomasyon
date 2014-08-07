@@ -37,26 +37,16 @@
             android:layout_weight="1"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:weightSum="2">
+            android:weightSum="1">
 
             <Button
                 android:id="@+id/btnGiris"
-                android:layout_width="match_parent"
+                android:layout_width="200dp"
+                android:layout_marginLeft="200dp"
                 android:layout_height="fill_parent"
-                android:layout_marginLeft="20dp"
-                android:layout_weight="1"
                 android:background="@drawable/buttonstylelogin"
                 android:text="@string/btnGirisText"/>
 
-            <Button
-                android:id="@+id/btnCikis"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_weight="1"
-                android:background="@drawable/buttonstylelogin"
-                android:text="@string/btnCikisText"/>
         </TableRow>
     </TableLayout>
 </RelativeLayout>

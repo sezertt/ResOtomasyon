@@ -99,7 +99,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             switch (msg.what) {
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences",Context.MODE_PRIVATE);
+                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
@@ -180,17 +180,15 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                     break;
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences",Context.MODE_PRIVATE);
+                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
                     String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
 
                     if (g.commonAsyncTask.client != null) {
-                        if (g.commonAsyncTask.client.out != null)
-                        {
+                        if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
                             getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-                            t.stopTimer();}
-
-                        else {
+                            t.stopTimer();
+                        } else {
                             hataVer();
                         }
                     }
@@ -246,10 +244,12 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
                 }
+
                 @Override
                 public void onPageSelected(int position) {
                     actionBar.setSelectedNavigationItem(position);
                 }
+
                 @Override
                 public void onPageScrollStateChanged(int state) {
 
@@ -297,7 +297,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     @Override
     protected void onPause() {
         activityVisible = false;
-        if(t.timerRunning)
+        if (t.timerRunning)
             t.stopTimer();
         super.onPause();
     }
@@ -305,7 +305,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     @Override
     protected void onStop() {
         activityVisible = false;
-        if(t.timerRunning)
+        if (t.timerRunning)
             t.stopTimer();
         super.onStop();
     }
@@ -322,8 +322,9 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
 
     @Override
     protected void onResume() {
-        if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
-        {
+        if (g == null)
+            g = (GlobalApplication) getApplicationContext();
+        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
         activityVisible = true;

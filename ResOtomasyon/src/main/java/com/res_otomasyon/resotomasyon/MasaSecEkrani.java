@@ -1,14 +1,20 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ListView;
 
 import com.res_otomasyon.resotomasyon.R;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +30,8 @@ public class MasaSecEkrani extends Activity {
     ArrayList<ArrayList<Departman>> asd;
     ArrayList<MasaDizayn> lstMasaDizayn;
     String[] masaPlanIsmi;
-    ArrayList<String> masaIsimleri;
+    ArrayList<DepartmanMasalari> dptMasalar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,24 +44,43 @@ public class MasaSecEkrani extends Activity {
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
         this.masaPlanIsmi = readXML.masaPlanIsimleri;
-        DepartmanMasalari departmanMasalari = new DepartmanMasalari();
+        dptMasalar = new ArrayList<DepartmanMasalari>();
         for (int j = 0; j < lstDepartmanlar.size(); j++) {
+            DepartmanMasalari departmanMasalari = new DepartmanMasalari();
+            departmanMasalari.DepartmanAdi = lstDepartmanlar.get(j).DepartmanAdi;
             for (Departman departman : lstDepartmanlar) {
                 if (departman.DepartmanEkrani.contentEquals(masaPlanIsmi[j])) {
-                    masaIsimleri = new ArrayList<String>();
+                    departmanMasalari.Masalar = new ArrayList<String>();
+                    departmanMasalari.mDurumu = new ArrayList<Boolean>();
                     for (MasaDizayn masaDizayn : lstMasaDizayn) {
                         if (masaDizayn.MasaPlanAdi.contentEquals(departman.DepartmanEkrani)) {
-                            masaIsimleri.add(masaDizayn.MasaAdi);
+                            departmanMasalari.Masalar.add(masaDizayn.MasaAdi);
+                            departmanMasalari.mDurumu.add(false);
                         }
                     }
-                    departmanMasalari.DepartmanWithMasa.add(masaIsimleri);
                 }
             }
+            dptMasalar.add(departmanMasalari);
         }
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-        MasaExpandableListAdapter masaExpandableListAdapter = new MasaExpandableListAdapter(this, departmanMasalari.DepartmanWithMasa,lstDepartmanlar);
+        final MasaExpandableListAdapter masaExpandableListAdapter = new MasaExpandableListAdapter(this, dptMasalar, lstDepartmanlar);
         listView.setAdapter(masaExpandableListAdapter);
+        listView.setChoiceMode(ExpandableListView.CHOICE_MODE_MULTIPLE);
+        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                String dAdi = lstDepartmanlar.get(groupPosition).DepartmanAdi;
+                String masaAdi = dptMasalar.get(groupPosition).Masalar.get(childPosition);
+                if (!dptMasalar.get(groupPosition).mDurumu.get(childPosition)) {
+                    dptMasalar.get(groupPosition).mDurumu.set(childPosition, true);
 
+                } else {
+                    dptMasalar.get(groupPosition).mDurumu.set(childPosition, false);
+                }
+                masaExpandableListAdapter.notifyDataSetChanged();
+                return true;
+            }
+        });
     }
 
 

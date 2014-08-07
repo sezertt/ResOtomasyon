@@ -39,7 +39,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
     Intent intent;
     Button btnGiris;
-    Button btnCikis;
     final Context context = this;
     ArrayList<Employee> lstEmployees;
     boolean MasaKilitliMi = false;
@@ -71,8 +70,9 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             ((EditText) findViewById(R.id.editTextPin)).setText("");
         }
         activityVisible = true;
-        if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
-        {
+        if (g == null)
+            g = (GlobalApplication) getApplicationContext();
+        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
         super.onResume();
@@ -81,12 +81,16 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     @Override
     protected void onPause() {
         activityVisible = false;
+        if (t.timerRunning)
+            t.stopTimer();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         activityVisible = false;
+        if (t.timerRunning)
+            t.stopTimer();
         super.onStop();
     }
 
@@ -98,9 +102,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         btnGiris = (Button) findViewById(R.id.btnGiris);
-        btnCikis = (Button) findViewById(R.id.btnCikis);
         btnGiris.setOnClickListener(this);
-        btnCikis.setOnClickListener(this);
         FileIO fileIO = new FileIO();
         List<File> files = null;
         try {
@@ -115,7 +117,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         }
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
-                getActionBar().setTitle(getString(R.string.app_name) + "(on)");
+                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
             } else {
                 getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
 
@@ -152,6 +154,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                                     t.startTimer();
                                 getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                 EditText e = (EditText) findViewById(R.id.editTextPin);
+                                btnGiris.setEnabled(false);
                                 e.setFocusable(false);
                             }
 
@@ -183,6 +186,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
                             e.setFocusableInTouchMode(true);
                             e.setFocusable(true);
+                            btnGiris.setEnabled(true);
                             getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
                             if (t != null && t.timer != null) {
                                 t.stopTimer();
@@ -285,9 +289,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                     AlertDialog alertDialog = aBuilder.create();
                     alertDialog.show();
                 }
-                break;
-            case R.id.btnCikis:
-                this.finish();
                 break;
         }
     }
