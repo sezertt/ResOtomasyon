@@ -132,11 +132,16 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                     GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
                     switch (komut) {
                         case baglanti:
-                            if (activityVisible) {
-                                if (!t.timerRunning)
-                                    t.startTimer();
-                                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (activityVisible) {
+                                        if (!t.timerRunning)
+                                            t.startTimer();
+                                        getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                    }
+                                }
+                            });
                             break;
                         case iptal:
                             mesajGeldi = false;
