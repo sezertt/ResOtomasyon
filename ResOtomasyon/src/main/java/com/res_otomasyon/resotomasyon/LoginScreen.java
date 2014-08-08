@@ -50,6 +50,19 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
     @Override
     protected void onResume() {
+        FileIO fileIO = new FileIO();
+        List<File> files = null;
+        try {
+            files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+        } catch (Exception ex) {
+            intent = new Intent(LoginScreen.this, Settings.class);
+            startActivity(intent);
+        }
+        if (files != null) {
+            ReadXML readXML = new ReadXML();
+            lstEmployees = readXML.readEmployees(files);
+        }
+
         preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
         MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
 
@@ -103,18 +116,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         btnGiris = (Button) findViewById(R.id.btnGiris);
         btnGiris.setOnClickListener(this);
-        FileIO fileIO = new FileIO();
-        List<File> files = null;
-        try {
-            files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
-        } catch (Exception ex) {
-            intent = new Intent(LoginScreen.this, Settings.class);
-            startActivity(intent);
-        }
-        if (files != null) {
-            ReadXML readXML = new ReadXML();
-            lstEmployees = readXML.readEmployees(files);
-        }
+
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
                 getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
