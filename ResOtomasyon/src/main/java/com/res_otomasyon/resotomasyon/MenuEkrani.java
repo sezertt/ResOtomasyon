@@ -36,8 +36,6 @@ import ekclasslar.UrunBilgileri;
 import Entity.Employee;
 import Entity.Urunler;
 import HashPassword.passwordHash;
-import TCPClientSide.ConnectTCP;
-import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
 
 
@@ -86,10 +84,10 @@ public class MenuEkrani extends Activity {
                                             (0).Permissions));
                                     editor.putStringSet("Permission", mySet);
                                     editor.putString("UserName", lstEmployee.get(0).UserName);
-                                    editor.commit();
+                                    editor.apply();
                                     item.setTitle(R.string.masa_ac);
-                                } catch (Exception e) {
-
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
                                 }
                             } else {
                                 passCorrect = passwordHash.validatePassword(m_Text, lstEmployee.get(0).PinCode);
@@ -97,7 +95,7 @@ public class MenuEkrani extends Activity {
                                     masaKilitliMi = false;
                                     item.setTitle(R.string.masa_kilitle);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
-                                    editor.commit();
+                                    editor.apply();
                                 }
 //                                if (masaKilitliMi) {
 //                                    masaKilitliMi = false;
@@ -106,13 +104,11 @@ public class MenuEkrani extends Activity {
 //                                    editor.commit();
 //                                }
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
-
                     } catch (Exception ex) {
-
-
+                        ex.printStackTrace();
                     }
                     break;
                 default:
@@ -135,16 +131,11 @@ public class MenuEkrani extends Activity {
     protected void onPause() {
         super.onPause();
         activityVisible = false;
-        if (!masaKilitliMi) {
-//            this.finish();
-        }
     }
 
     @Override
     public void onBackPressed() {
-        if (masaKilitliMi)
-            return;
-        else
+        if (!masaKilitliMi)
             this.finish();
     }
 
@@ -233,6 +224,7 @@ public class MenuEkrani extends Activity {
         try {
             files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
         } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         ReadXML readUrun = new ReadXML();
