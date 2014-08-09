@@ -18,6 +18,7 @@ public class GlobalApplication extends Application {
     SharedPreferences preferences;
     TCPClient mTcpClient;
     Activity activity;
+    String adisyonNotu = "";
 
     public enum Komutlar {
         Default,siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,

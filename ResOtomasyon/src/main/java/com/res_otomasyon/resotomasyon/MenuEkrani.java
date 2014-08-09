@@ -14,9 +14,13 @@ import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputType;
 import android.util.SparseArray;
+import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 
@@ -275,8 +279,7 @@ public class MenuEkrani extends Activity {
                     group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                     group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
                     group.productCount.add("0");
-					group.productPortionStyle.add("T");
-					
+
                     i++;
                     if (i + 1 >= lstProducts.size())
                         break;
@@ -289,7 +292,6 @@ public class MenuEkrani extends Activity {
                 group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                 group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
                 group.productCount.add("0");
-				group.productPortionStyle.add("T");
             }
             groups.append(j, group);
             j++;

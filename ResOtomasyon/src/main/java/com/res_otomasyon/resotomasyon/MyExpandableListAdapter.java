@@ -1,20 +1,28 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.SparseArray;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import java.io.File;
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import Entity.Siparis;
 import ekclasslar.UrunBilgileri;
@@ -29,9 +37,14 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
     public LayoutInflater inflater;
     public Activity activity;
     MenuEkrani menuEkrani;
-    Double porsiyonArtisi = 1d;
-    Button buttonPorsiyon;
-    String productCount, productPortionStyle;
+    String productCount;
+    String[] items;
+
+    ArrayList<Siparis> tamPorsiyon = new ArrayList<Siparis>();
+    ArrayList<Siparis> yarimPorsiyon = new ArrayList<Siparis>();
+    ArrayList<Siparis> ceyrekPorsiyon = new ArrayList<Siparis>();
+    ArrayList<Siparis> ucCeyrekPorsiyon = new ArrayList<Siparis>();
+    ArrayList<Siparis> birBucukPorsiyon = new ArrayList<Siparis>();
 
     public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups, MenuEkrani menuEkrani) {
         activity = act;
@@ -61,10 +74,6 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         return groups.get(groupPosition).productPortion.get(childPosition);
     }
 
-    public Object getChild6(int groupPosition, int childPosition) {
-        return groups.get(groupPosition).productPortionStyle.get(childPosition);
-    }
-
     @Override
     public long getChildId(int groupPosition, int childPosition) {
         return 0;
@@ -78,9 +87,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         final String productInfo = (String) getChild3(groupPosition, childPosition);
         productCount = (String) getChild4(groupPosition, childPosition);
         final Double productPortion = (Double)getChild5(groupPosition, childPosition);
-        productPortionStyle = (String) getChild6(groupPosition,childPosition);
 
-        TextView text;
+        final TextView text;
         final ImageView image;
 
         if (convertView == null) {
@@ -103,126 +111,345 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         final TextView textAdet = (TextView) convertView.findViewById(R.id.textViewAdet);
         textAdet.setText(productCount);
 
-        buttonPorsiyon = (Button) convertView.findViewById(R.id.buttonPorsiyon);
-
-        buttonPorsiyon.setText(productPortionStyle);
-
-        if (productPortion == 0) // tam porsiyon
-        {
-            convertView.findViewById(R.id.buttonPorsiyon).setVisibility(View.INVISIBLE);
-        } else // yarım porsiyon çeyrek porsiyon
-        {
-            convertView.findViewById(R.id.buttonPorsiyon).setVisibility(View.VISIBLE);
-        }
-
-        convertView.findViewById(R.id.buttonPorsiyon).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(groups.get(groupPosition).productPortionStyle.get(childPosition).equals("T"))
-                {
-                    groups.get(groupPosition).productPortionStyle.set(childPosition,"Y");
-                    porsiyonArtisi = 0.5;
-                }
-                else if(groups.get(groupPosition).productPortionStyle.get(childPosition).equals("Y"))
-
-                {
-                    if(productPortion == 1)
-                    {
-                        groups.get(groupPosition).productPortionStyle.set(childPosition,"T");
-                        porsiyonArtisi = 1d;
-                    }
-                    else
-                    {
-                        groups.get(groupPosition).productPortionStyle.set(childPosition,"Ç");
-                        porsiyonArtisi = 0.25;
-                    }
-                }
-                else
-                {
-                    groups.get(groupPosition).productPortionStyle.set(childPosition,"T");
-                    porsiyonArtisi = 1d;
-                }
-                notifyDataSetChanged();
-            }
-        });
-
         convertView.findViewById(R.id.buttonPlus).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(productPortion == 0)
+                    porsiyonEkle(groupPosition,childPosition,textAdet,textName,textFiyat,productPortion,1d);
+                else
+                {
+                    ArrayList<String> porsiyonlar = new ArrayList<String>();
+                    porsiyonlar.add("1.5 Porsiyon");
+                    porsiyonlar.add("1 Porsiyon");
 
-                DecimalFormat df = new DecimalFormat();
-                df.setMaximumFractionDigits(2);
-                df.setMinimumFractionDigits(0);
-                df.setGroupingUsed(false);
-
-                String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) + porsiyonArtisi);
-
-                textAdet.setText(miktar);
-                groups.get(groupPosition).productCount.set(childPosition,miktar);
-                notifyDataSetChanged();
-
-                for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++) {
-                    if (menuEkrani.lstOrderedProducts.get(i).yemekAdi.contentEquals(textName.getText().toString())) {
-                        menuEkrani.lstOrderedProducts.get(i).miktar = miktar;
-                        return;
+                    if(productPortion == 2)
+                    {
+                        porsiyonlar.add("0.75 Porsiyon");
                     }
+
+                    porsiyonlar.add("0.5 Porsiyon");
+
+                    if(productPortion == 2)
+                    {
+                        porsiyonlar.add("0.25 Porsiyon");
+                    }
+
+                    items = new String[porsiyonlar.size()];
+
+                    for(int i = 0; i < porsiyonlar.size();i++)
+                        items[i] = porsiyonlar.get(i);
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,items);
+
+                    final AlertDialog alert = new AlertDialog.Builder(activity)
+                            .setTitle("Porsiyon Seçiniz")
+                            .setCancelable(false)
+                            .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // porsiyon seçimi tamamlanınca yapılacaklar
+
+
+                                }
+                            })
+                            .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (items[item].charAt(0) == '-') {
+                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 4));
+                                        porsiyon *= -1;
+
+                                        if (porsiyon == 0.7)
+                                            porsiyon = 0.75;
+                                        else if (porsiyon == 0.2)
+                                            porsiyon = 0.25;
+                                        porsiyonCikar(groupPosition, childPosition, textAdet, textName, porsiyon);
+                                    } else {
+                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 3));
+                                        if (porsiyon == 0.7)
+                                            porsiyon = 0.75;
+                                        else if (porsiyon == 0.2)
+                                            porsiyon = 0.25;
+                                        porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, porsiyon);
+                                    }
+                                }
+                            })
+                            .create();
+
+                    alert.show();
                 }
-
-                Siparis siparis = new Siparis();
-
-                siparis.porsiyonSinifi = porsiyonSinifiBelirle(productPortion);
-
-                siparis.miktar = miktar;
-                siparis.porsiyonFiyati = textFiyat.getText().toString().substring(0,textFiyat.getText().length() - 3);
-                siparis.yemekAdi = textName.getText().toString();
-                menuEkrani.lstOrderedProducts.add(siparis);
             }
         });
 
         convertView.findViewById(R.id.buttonMinus).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                DecimalFormat df = new DecimalFormat();
-                df.setMaximumFractionDigits(2);
-                df.setMinimumFractionDigits(0);
-                df.setGroupingUsed(false);
-
-                String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) - porsiyonArtisi);
-
-                if(Double.parseDouble(textAdet.getText().toString()) - porsiyonArtisi < 0)
-                    miktar = "0";
-
-                if (!textAdet.getText().equals("0"))
+                if(productPortion == 0)
+                    porsiyonCikar(groupPosition,childPosition,textAdet,textName,1d);
+                else if(!textAdet.getText().equals("0"))
                 {
-                    for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++)
+                    ArrayList<String> porsiyonlar = new ArrayList<String>();
+
+                    if(birBucukPorsiyon.size()>0) // eğer önceden eklenmiş 1.5 porsiyon varsa
                     {
-                        if(menuEkrani.lstOrderedProducts.get(i).yemekAdi.contentEquals(textName.getText().toString()))
+                        for(int i=0;i<birBucukPorsiyon.size();i++)
                         {
-                            if(miktar.contentEquals("0"))
-                                menuEkrani.lstOrderedProducts.remove(i);
-                            else
-                                menuEkrani.lstOrderedProducts.get(i).miktar = miktar;
-                            textAdet.setText(miktar);
-                            groups.get(groupPosition).productCount.set(childPosition,miktar);
-                            notifyDataSetChanged();
-                            break;
+                            if(birBucukPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlar.add("-1.5 Porsiyon");
+                                break;
+                            }
                         }
                     }
+
+                    if(ucCeyrekPorsiyon.size()>0) // eğer önceden eklenmiş 0.75 porsiyon varsa
+                    {
+                        for(int i=0;i<ucCeyrekPorsiyon.size();i++)
+                        {
+                            if(ucCeyrekPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlar.add("-0.75 Porsiyon");
+                                break;
+                            }
+                        }
+                    }
+
+                    if(yarimPorsiyon.size()>0) // eğer önceden eklenmiş 0.5 porsiyon varsa
+                    {
+                        for(int i=0;i<yarimPorsiyon.size();i++)
+                        {
+                            if(yarimPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlar.add("-0.5 Porsiyon");
+                                break;
+                            }
+                        }
+                    }
+
+                    if(tamPorsiyon.size()>0)  // eğer önceden eklenmiş 1 porsiyon varsa
+                    {
+                        for(int i=0;i<tamPorsiyon.size();i++)
+                        {
+                            if(tamPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlar.add("-1 Porsiyon");
+                                break;
+                            }
+                        }
+                    }
+
+                    if(ceyrekPorsiyon.size()>0)  // eğer önceden eklenmiş 0.25 porsiyon varsa
+                    {
+                        for(int i=0;i<ceyrekPorsiyon.size();i++)
+                        {
+                            if(ceyrekPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlar.add("-0.25 Porsiyon");
+                                break;
+                            }
+                        }
+                    }
+
+                    items = new String[porsiyonlar.size()];
+
+                    for(int i = 0; i < porsiyonlar.size();i++)
+                        items[i] = porsiyonlar.get(i);
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,items);
+
+                    final AlertDialog alert = new AlertDialog.Builder(activity)
+                            .setTitle("Porsiyon Seçiniz")
+                            .setCancelable(false)
+                            .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // porsiyon seçimi tamamlanınca yapılacaklar
+
+
+                                }
+                            })
+                            .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (items[item].charAt(0) == '-') {
+                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 4));
+                                        porsiyon *= -1;
+
+                                        if (porsiyon == 0.7)
+                                            porsiyon = 0.75;
+                                        else if (porsiyon == 0.2)
+                                            porsiyon = 0.25;
+                                        porsiyonCikar(groupPosition, childPosition, textAdet, textName, porsiyon);
+                                    } else {
+                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 3));
+                                        if (porsiyon == 0.7)
+                                            porsiyon = 0.75;
+                                        else if (porsiyon == 0.2)
+                                            porsiyon = 0.25;
+                                        porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, porsiyon);
+                                    }
+                                }
+                            })
+                            .create();
+
+                    alert.show();
                 }
             }
         });
         return convertView;
     }
 
-    private double porsiyonSinifiBelirle(double productPortion)
+    private void porsiyonCikar(int groupPosition, int childPosition, TextView textAdet, TextView textName, Double azaltmaMiktari)
     {
-        if(productPortion == 0)
-            return 0;
-        else if(productPortion == 1)
-            return 1;
+        if (!textAdet.getText().equals("0"))
+        {
+            if(azaltmaMiktari == 1)
+            {
+                // eğer varsa azalt yoksa çık
+                if(porsiyonAzaltmaliMi(tamPorsiyon,textName.getText().toString()))
+                    return;
+            }
+            else if(azaltmaMiktari == 0.5)
+            {
+                // eğer varsa azalt
+                porsiyonAzaltmaliMi(yarimPorsiyon,textName.getText().toString());
+            }
+            else if(azaltmaMiktari == 0.25)
+            {
+                // eğer varsa azalt
+                porsiyonAzaltmaliMi(ceyrekPorsiyon,textName.getText().toString());
+            }
+            else if(azaltmaMiktari == 1.5)
+            {
+                // eğer varsa azalt
+                porsiyonAzaltmaliMi(birBucukPorsiyon,textName.getText().toString());
+            }
+            else
+            {
+                // eğer varsa azalt
+                porsiyonAzaltmaliMi(ucCeyrekPorsiyon,textName.getText().toString());
+            }
+
+            for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++)
+            {
+                if(menuEkrani.lstOrderedProducts.get(i).yemekAdi.contentEquals(textName.getText().toString()))
+                {
+                    DecimalFormat df = new DecimalFormat();
+                    df.setMaximumFractionDigits(2);
+                    df.setMinimumFractionDigits(0);
+                    df.setGroupingUsed(false);
+
+                    String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) - azaltmaMiktari);
+
+                    if(Double.parseDouble(textAdet.getText().toString()) - azaltmaMiktari < 0)
+                        miktar = "0";
+
+                    if(miktar.contentEquals("0"))
+                        menuEkrani.lstOrderedProducts.remove(i);
+                    else
+                        menuEkrani.lstOrderedProducts.get(i).miktar = miktar;
+                    textAdet.setText(miktar);
+                    groups.get(groupPosition).productCount.set(childPosition,miktar);
+                    notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+    }
+
+    private Boolean porsiyonAzaltmaliMi(ArrayList<Siparis> porsiyonArrayi, String yemekAdi)
+    {
+        int siparisVarMi= -1;
+        for(int i=0;i<porsiyonArrayi.size();i++)
+        {
+            if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
+            {
+                siparisVarMi = i;
+                break;
+            }
+        }
+
+        if(siparisVarMi == -1)
+            return true;
         else
-            return 2;
+        {
+            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar)-1);
+            if(porsiyonArrayi.get(siparisVarMi).miktar.contentEquals("0.0"))
+                porsiyonArrayi.remove(siparisVarMi);
+            return false;
+        }
+    }
+
+    private void porsiyonEkle(int groupPosition, int childPosition, TextView textAdet, TextView textName, TextView textFiyat,Double productPortion, Double arttirmaMiktari)
+    {
+        Siparis siparis = new Siparis();
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(0);
+        df.setGroupingUsed(false);
+
+        String miktar = df.format(Double.parseDouble(textAdet.getText().toString()) + arttirmaMiktari);
+
+        textAdet.setText(miktar);
+        groups.get(groupPosition).productCount.set(childPosition,miktar);
+        notifyDataSetChanged();
+
+        if(arttirmaMiktari == 1)
+        {
+            porsiyonArttir(tamPorsiyon,textName.getText().toString());
+        }
+        else if(arttirmaMiktari == 0.5)
+        {
+            porsiyonArttir(yarimPorsiyon,textName.getText().toString());
+        }
+        else if(arttirmaMiktari == 0.25)
+        {
+            porsiyonArttir(ceyrekPorsiyon,textName.getText().toString());
+        }
+        else if(arttirmaMiktari == 1.5)
+        {
+            porsiyonArttir(birBucukPorsiyon,textName.getText().toString());
+        }
+        else
+        {
+            porsiyonArttir(ucCeyrekPorsiyon,textName.getText().toString());
+        }
+
+        for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++) {
+            if (menuEkrani.lstOrderedProducts.get(i).yemekAdi.contentEquals(textName.getText().toString())) {
+                menuEkrani.lstOrderedProducts.get(i).miktar = miktar;
+                return;
+            }
+        }
+
+        siparis.porsiyonSinifi = productPortion;
+        siparis.miktar = miktar;
+        siparis.porsiyonFiyati = textFiyat.getText().toString().substring(0,textFiyat.getText().length() - 3);
+        siparis.yemekAdi = textName.getText().toString();
+        menuEkrani.lstOrderedProducts.add(siparis);
+    }
+
+    private void porsiyonArttir(ArrayList<Siparis> porsiyonArrayi,String yemekAdi)
+    {
+        Integer siparisVarMi= -1;
+        for(int i=0;i<porsiyonArrayi.size();i++)
+        {
+            if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
+            {
+                siparisVarMi = i;
+                break;
+            }
+        }
+        if(siparisVarMi != -1) // siparis listede var
+        {
+            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar) + 1);
+        }
+        else// listede yok
+        {
+            Siparis siparis = new Siparis();
+            siparis.yemekAdi = yemekAdi;
+            siparis.miktar = "1";
+            porsiyonArrayi.add(siparis);
+        }
     }
 
     @Override
