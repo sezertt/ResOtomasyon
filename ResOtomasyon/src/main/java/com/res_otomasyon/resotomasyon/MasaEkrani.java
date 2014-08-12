@@ -236,9 +236,20 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         super.onCreate(savedInstanceState);
         try {
             g = (GlobalApplication) getApplicationContext();
-            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-        } catch (Exception e) {
 
+            if(g.broadcastReceiver!=null) {
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(g.broadcastReceiver);
+
+            }
+            g.broadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    srvrMessage = intent.getStringExtra("message");
+                    myHandler.sendEmptyMessage(1);
+                }
+            };
+            LocalBroadcastManager.getInstance(context).registerReceiver(g.broadcastReceiver,new IntentFilter("myevent"));
+        } catch (Exception e) {
         }
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

@@ -114,6 +114,11 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     };
 
     @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
     protected void onStop() {
 
         super.onStop();

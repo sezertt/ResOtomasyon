@@ -2,9 +2,11 @@ package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import Entity.MasaninSiparisleri;
@@ -22,6 +24,8 @@ public class GlobalApplication extends Application {
     SharedPreferences preferences;
     TCPClient mTcpClient;
     Activity activity;
+    public LocalBroadcastManager localBroadcastManager;
+    public BroadcastReceiver broadcastReceiver;
 
     public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
     public ArrayList<MasaninSiparisleri> masaninSiparisleri = new ArrayList<MasaninSiparisleri>();
