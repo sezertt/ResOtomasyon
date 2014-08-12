@@ -27,8 +27,9 @@ import java.util.List;
 
 import android.support.v4.app.FragmentActivity;
 import android.view.WindowManager;
-import android.widget.EditText;
 
+import Entity.MasaninSiparisleri;
+import Entity.Siparis;
 import ekclasslar.CollectionPagerAdapter;
 import ekclasslar.FileIO;
 import Entity.Departman;
@@ -156,6 +157,32 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                             break;
                         case siparis:
                             mesajGeldi = false;
+                            if(activityVisible){
+                            if (g.secilenMasalar != null) {
+                                for (int i = 0; i < g.secilenMasalar.size(); i++) {
+                                    MasaninSiparisleri masaninSiparisleri = new MasaninSiparisleri();
+                                    masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
+                                    masaninSiparisleri.MasaAdi = collection.get("masa");
+                                    Siparis siparis = new Siparis();
+                                    if (g.secilenMasalar.get(i).DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
+                                        for (String masa : g.secilenMasalar.get(i).Masalar) {
+                                            if (masa.contentEquals(collection.get("masa"))) {
+                                                //process
+                                                siparis.miktar = collection.get("miktar");
+                                                siparis.porsiyonFiyati = collection.get("porsiyonFiyati");
+                                                siparis.porsiyonSinifi = Double.parseDouble(("1"));
+                                                siparis.yemekAdi = collection.get("yemekAdi");
+                                                masaninSiparisleri.siparisler.add(siparis);
+                                            }
+                                        }
+                                        g.masaninSiparisleri.add(masaninSiparisleri);
+                                    }
+                                }
+                            }
+                            else {
+                                //process
+                            }}
+
                             break;
                         case masaAcildi:
                             mesajGeldi = false;
@@ -199,6 +226,10 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         }
     };
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -324,6 +355,8 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     protected void onResume() {
         if (g == null)
             g = (GlobalApplication) getApplicationContext();
+        if(t == null)
+            t = new TryConnection(g,myHandler);
         if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }

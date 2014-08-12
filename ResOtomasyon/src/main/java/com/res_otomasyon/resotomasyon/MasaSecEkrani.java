@@ -1,20 +1,16 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ExpandableListView;
-import android.widget.ListView;
 
 import com.res_otomasyon.resotomasyon.R;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,14 +20,13 @@ import XMLReader.ReadXML;
 import ekclasslar.DepartmanMasalari;
 import ekclasslar.FileIO;
 
-public class MasaSecEkrani extends Activity {
+public class MasaSecEkrani extends Activity implements View.OnClickListener {
 
     ArrayList<Departman> lstDepartmanlar;
     ArrayList<ArrayList<Departman>> asd;
     ArrayList<MasaDizayn> lstMasaDizayn;
     String[] masaPlanIsmi;
     ArrayList<DepartmanMasalari> dptMasalar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +57,9 @@ public class MasaSecEkrani extends Activity {
             }
             dptMasalar.add(departmanMasalari);
         }
+
+        Button btnMasaKaydet = (Button) findViewById(R.id.masaKaydet);
+        btnMasaKaydet.setOnClickListener(this);
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
         final MasaExpandableListAdapter masaExpandableListAdapter = new MasaExpandableListAdapter(this, dptMasalar, lstDepartmanlar);
         listView.setAdapter(masaExpandableListAdapter);
@@ -69,8 +67,6 @@ public class MasaSecEkrani extends Activity {
         listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                String dAdi = lstDepartmanlar.get(groupPosition).DepartmanAdi;
-                String masaAdi = dptMasalar.get(groupPosition).Masalar.get(childPosition);
                 if (!dptMasalar.get(groupPosition).mDurumu.get(childPosition)) {
                     dptMasalar.get(groupPosition).mDurumu.set(childPosition, true);
 
@@ -101,5 +97,32 @@ public class MasaSecEkrani extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.masaKaydet:
+                GlobalApplication g = (GlobalApplication) getApplicationContext();
+                ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
+                int masaSayac = 0;
+                int dptSayac=0;
+                for (DepartmanMasalari dpt : dptMasalar) {
+                    DepartmanMasalari departmanMasalari = new DepartmanMasalari();
+                    masaSayac = 0;
+                    for (String masa : dpt.Masalar) {
+                        if (dpt.mDurumu.get(masaSayac)) {
+                            departmanMasalari.Masalar.add(masa);
+                            departmanMasalari.mDurumu.add(true);
+                        }
+                        masaSayac++;
+                    }
+                    departmanMasalari.DepartmanAdi = dpt.DepartmanAdi;
+                    dptSayac++;
+                    secilenMasalar.add(departmanMasalari);
+                }
+                g.secilenMasalar = secilenMasalar;
+                break;
+        }
     }
 }

@@ -85,6 +85,8 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         activityVisible = true;
         if (g == null)
             g = (GlobalApplication) getApplicationContext();
+        if(t==null)
+            t = new TryConnection(g,myHandler);
         if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
@@ -224,6 +226,12 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             intent = new Intent(LoginScreen.this, Settings.class);
+            startActivity(intent);
+            return true;
+        }
+        if(id == R.id.masaSec)
+        {
+            intent = new Intent(LoginScreen.this, MasaSecEkrani.class);
             startActivity(intent);
             return true;
         }

@@ -7,8 +7,8 @@
         android:showAsAction="never"
         android:title="@string/action_settings" />
     <item
-        android:title=""
-        android:id="@+id/baglantidurum"
-        android:showAsAction="always"
+        android:title="Masa Seç"
+        android:id="@+id/masaSec"
+        android:showAsAction="never"
         />
 </menu>
