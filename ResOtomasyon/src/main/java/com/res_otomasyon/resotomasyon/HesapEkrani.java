@@ -5,29 +5,21 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.TypedValue;
 import android.view.ContextMenu;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.NumberPicker;
-import android.widget.RelativeLayout;
-import android.widget.TableLayout;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -47,9 +39,13 @@ public class HesapEkrani extends Activity {
     MyListAdapter adapterSecilenSiparisler;
     ArrayList<Siparis> urunListesiToplam = new ArrayList<Siparis>();
     int selectedSiparisItemPosition = -1;
-    int count = -1;
+    GlobalApplication g;
+    ArrayList<String> porsiyonlarPozitif = new ArrayList<String>();
+    ArrayList<String> porsiyonlarNegatif = new ArrayList<String>();
 
     Double kacPorsiyon, yemeginFiyati, toplamHesap = 0d;
+    Button buttonSepet, buttonNot;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +60,8 @@ public class HesapEkrani extends Activity {
         lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
         lstOrderedProducts = (ArrayList<Siparis>) extras.getSerializable("lstOrderedProducts");
 
+        g = (GlobalApplication) getApplicationContext();
+
         preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
         MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
 
@@ -76,10 +74,11 @@ public class HesapEkrani extends Activity {
         ArrayList<Siparis> urunListesi = new ArrayList<Siparis>();
         ArrayList<Siparis> urunListesiIkram = new ArrayList<Siparis>();
 
-        Button hesapButton = (Button) findViewById(R.id.buttonHesap);
+        final Button hesapButton = (Button) findViewById(R.id.buttonHesap);
         Button buttonAzalt = (Button) findViewById(R.id.buttonAzalt);
         Button buttonArttir = (Button) findViewById(R.id.buttonArttir);
-        final Button buttonPorsiyon = (Button) findViewById(R.id.buttonPorsiyon);
+        buttonSepet = (Button) findViewById(R.id.buttonSepetOnayla);
+        buttonNot = (Button) findViewById(R.id.buttonNot);
 
         final String siparisler = extras.getString("siparisler");
 
@@ -87,8 +86,8 @@ public class HesapEkrani extends Activity {
         {
             String[] Siparisler = siparisler.split("\\*");
 
-            for (int i = 0; i < Siparisler.length; i++) {
-                String[] detaylari = Siparisler[i].split("-");
+            for (String aSiparisler : Siparisler) {
+                String[] detaylari = aSiparisler.split("-");
 
                 NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
                 Number number = null;
@@ -99,7 +98,10 @@ public class HesapEkrani extends Activity {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                yemeginFiyati = number.doubleValue();
+
+                if (number != null) {
+                    yemeginFiyati = number.doubleValue();
+                }
 
                 try {
                     number = format.parse(detaylari[1]);
@@ -107,7 +109,9 @@ public class HesapEkrani extends Activity {
                     e.printStackTrace();
                 }
 
-                kacPorsiyon = number.doubleValue();
+                if (number != null) {
+                    kacPorsiyon = number.doubleValue();
+                }
 
                 yemeginAdi = detaylari[2];
                 ikramMi = Boolean.parseBoolean(detaylari[3]);
@@ -190,48 +194,6 @@ public class HesapEkrani extends Activity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 selectedSiparisItemPosition = position;
                 adapterSecilenSiparisler.setSelectedIndex(position);
-                if(lstOrderedProducts.get(position).porsiyonSinifi == 0)
-                {
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) buttonPorsiyon.getLayoutParams();
-                    params.width = 0;
-                    params.leftMargin = 0;
-                    buttonPorsiyon.setLayoutParams(params);
-                }
-                else
-                {
-                    Resources r = HesapEkrani.this.getResources();
-                    int px = (int) TypedValue.applyDimension(
-                            TypedValue.COMPLEX_UNIT_DIP,
-                            60,
-                            r.getDisplayMetrics()
-                    );
-
-                    ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) buttonPorsiyon.getLayoutParams();
-
-                    params.leftMargin = px/12;
-                    params.width = px;
-                    buttonPorsiyon.setLayoutParams(params);
-                }
-            }
-        });
-
-        buttonPorsiyon.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-               if(buttonPorsiyon.getText().equals("Tam"))
-               {
-                   buttonPorsiyon.setText("Yar");
-               }
-               else if(buttonPorsiyon.getText().equals("Yar"))
-               {
-                   if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 1)
-                       buttonPorsiyon.setText("Tam");
-                   else
-                       buttonPorsiyon.setText("Çey");
-               }
-               else
-               {
-                   buttonPorsiyon.setText("Tam");
-               }
             }
         });
 
@@ -239,13 +201,139 @@ public class HesapEkrani extends Activity {
             public void onClick(View v) {
                 if(selectedSiparisItemPosition != -1)
                 {
-                    Double porsiyonSinifi=1d;
-                    if(buttonPorsiyon.getText().equals("Yar"))
-                        porsiyonSinifi = 0.5;
-                    else if (buttonPorsiyon.getText().equals("Çey"))
-                        porsiyonSinifi = 0.25;
-                    lstOrderedProducts.get(selectedSiparisItemPosition).miktar = String.format("%.2f", Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) + porsiyonSinifi);
-                    adapterSecilenSiparisler.notifyDataSetChanged();
+                    if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 0) // tam porsiyon
+                    {
+                        porsiyonEkle(1d);
+                    }
+                    else // diğer porsiyonlar
+                    {
+                        int varMi = -1;
+                        for(int i=0;i<g.birBucukPorsiyon.size();i++)
+                        {
+                            if(g.birBucukPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                            {
+                                porsiyonlarPozitif.add("1.5 Porsiyon x" + g.birBucukPorsiyon.get(i).miktar);
+                                varMi = i;
+                                break;
+                            }
+                        }
+
+                        if(varMi == -1)
+                            porsiyonlarPozitif.add("1.5 Porsiyon ");
+
+                        varMi = -1;
+
+                        for(int i=0;i<g.tamPorsiyon.size();i++)
+                        {
+                            if(g.tamPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                            {
+                                porsiyonlarPozitif.add("1 Porsiyon x" + g.tamPorsiyon.get(i).miktar);
+                                varMi = i;
+                                break;
+                            }
+                        }
+
+                        if(varMi == -1)
+                            porsiyonlarPozitif.add("1 Porsiyon ");
+
+                        if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 2d)
+                        {
+                            varMi = -1;
+
+                            for(int i=0;i<g.ucCeyrekPorsiyon.size();i++)
+                            {
+                                if(g.ucCeyrekPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                                {
+                                    porsiyonlarPozitif.add("0.75 Porsiyon x" + g.ucCeyrekPorsiyon.get(i).miktar);
+                                    varMi = i;
+                                    break;
+                                }
+                            }
+
+                            if(varMi == -1)
+                                porsiyonlarPozitif.add("0.75 Porsiyon ");
+                        }
+
+                        varMi = -1;
+
+                        for(int i=0;i<g.yarimPorsiyon.size();i++)
+                        {
+                            if(g.yarimPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                            {
+                                porsiyonlarPozitif.add("0.5 Porsiyon x" + g.yarimPorsiyon.get(i).miktar);
+                                varMi = i;
+                                break;
+                            }
+                        }
+
+                        if(varMi == -1)
+                            porsiyonlarPozitif.add("0.5 Porsiyon ");
+
+                        if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 2d)
+                        {
+                            varMi = -1;
+
+                            for(int i=0;i<g.ceyrekPorsiyon.size();i++)
+                            {
+                                if(g.ceyrekPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                                {
+                                    porsiyonlarPozitif.add("0.25 Porsiyon x" + g.ceyrekPorsiyon.get(i).miktar);
+                                    varMi = i;
+                                    break;
+                                }
+                            }
+
+                            if(varMi == -1)
+                                porsiyonlarPozitif.add("0.25 Porsiyon ");
+                        }
+
+                        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(HesapEkrani.this, android.R.layout.simple_list_item_1,porsiyonlarPozitif);
+
+                        final AlertDialog alert = new AlertDialog.Builder(HesapEkrani.this)
+                                .setTitle("Porsiyon Seçiniz")
+                                .setCancelable(false)
+                                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int item) {
+                                        // porsiyon seçimi tamamlanınca yapılacaklar
+                                        porsiyonlarPozitif.clear();
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int item) {
+                                        Double porsiyon;
+
+                                        try {
+                                            porsiyon = Double.parseDouble(porsiyonlarPozitif.get(item).substring(0, 3));
+                                        } catch (Exception ex) {
+                                            porsiyon = 1d;
+                                        }
+
+                                        if (porsiyon == 0.7)
+                                            porsiyon = 0.75;
+                                        else if (porsiyon == 0.2)
+                                            porsiyon = 0.25;
+
+                                        porsiyonEkle(porsiyon);
+
+                                        String [] urunBilgileri = porsiyonlarPozitif.get(item).split("x");
+
+                                        int adet = 0;
+
+                                        if(urunBilgileri.length > 1)
+                                            adet = Integer.parseInt(urunBilgileri[1]);
+
+                                        adet++;
+
+                                        porsiyonlarPozitif.set(item, urunBilgileri[0] +"x" + adet);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .create();
+
+                        alert.show();
+                    }
                 }
             }
         });
@@ -254,62 +342,264 @@ public class HesapEkrani extends Activity {
             public void onClick(View v) {
                 if(selectedSiparisItemPosition != -1)
                 {
-                    Double porsiyonSinifi=1d;
-                    if(buttonPorsiyon.getText().equals("Yar"))
-                        porsiyonSinifi = 0.5;
-                    else if (buttonPorsiyon.getText().equals("Çey"))
-                        porsiyonSinifi = 0.25;
-
-                    lstOrderedProducts.get(selectedSiparisItemPosition).miktar = String.format("%.2f", Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) - porsiyonSinifi);
-                    if(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) < 0)
-                        lstOrderedProducts.get(selectedSiparisItemPosition).miktar = "0.00";
-
-                    if(lstOrderedProducts.get(selectedSiparisItemPosition).miktar.contentEquals("0.00"))
+                    if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 0) // tam porsiyon
                     {
-                        lstOrderedProducts.remove(selectedSiparisItemPosition);
-                        if(selectedSiparisItemPosition == lstOrderedProducts.size())
-                        {
-                            selectedSiparisItemPosition = lstOrderedProducts.size() - 1;
-                            adapterSecilenSiparisler.setSelectedIndex(lstOrderedProducts.size() - 1);
-                        }
-                        else
-                        {
-                            adapterSecilenSiparisler.notifyDataSetChanged();
-                        }
+                        porsiyonCikar(1d);
                     }
-                    else
+                    else // diğer porsiyonlar
                     {
-                        adapterSecilenSiparisler.notifyDataSetChanged();
-                    }
-                    if(lstOrderedProducts.size() > 0)
-                    {
-                        if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 0)
+                        if(g.birBucukPorsiyon.size()>0) // eğer önceden eklenmiş 1.5 porsiyon varsa
                         {
-                            buttonPorsiyon.setText("Tam");
-                            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) buttonPorsiyon.getLayoutParams();
-                            params.width = 0;
-                            params.leftMargin = 0;
-                            buttonPorsiyon.setLayoutParams(params);
+                            for (Siparis aBirBucukPorsiyon : g.birBucukPorsiyon) {
+                                if (aBirBucukPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
+                                    porsiyonlarNegatif.add("-1.5 Porsiyon x" + aBirBucukPorsiyon.miktar);
+                                    break;
+                                }
+                            }
                         }
-                        else
+
+                        if(g.tamPorsiyon.size()>0)  // eğer önceden eklenmiş 1 porsiyon varsa
                         {
-                            Resources r = HesapEkrani.this.getResources();
-                            int px = (int) TypedValue.applyDimension(
-                                    TypedValue.COMPLEX_UNIT_DIP,
-                                    60,
-                                    r.getDisplayMetrics()
-                            );
-
-                            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) buttonPorsiyon.getLayoutParams();
-
-                            params.leftMargin = px/12;
-                            params.width = px;
-                            buttonPorsiyon.setLayoutParams(params);
+                            for (Siparis aTamPorsiyon : g.tamPorsiyon) {
+                                if (aTamPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
+                                    porsiyonlarNegatif.add("-1 Porsiyon x" + aTamPorsiyon.miktar);
+                                    break;
+                                }
+                            }
                         }
+
+                        if(g.ucCeyrekPorsiyon.size()>0) // eğer önceden eklenmiş 0.75 porsiyon varsa
+                        {
+                            for (Siparis anUcCeyrekPorsiyon : g.ucCeyrekPorsiyon) {
+                                if (anUcCeyrekPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
+                                    porsiyonlarNegatif.add("-0.75 Porsiyon x" + anUcCeyrekPorsiyon.miktar);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(g.yarimPorsiyon.size()>0) // eğer önceden eklenmiş 0.5 porsiyon varsa
+                        {
+                            for (Siparis aYarimPorsiyon : g.yarimPorsiyon) {
+                                if (aYarimPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
+                                    porsiyonlarNegatif.add("-0.5 Porsiyon x" + aYarimPorsiyon.miktar);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(g.ceyrekPorsiyon.size()>0)  // eğer önceden eklenmiş 0.25 porsiyon varsa
+                        {
+                            for (Siparis aCeyrekPorsiyon : g.ceyrekPorsiyon) {
+                                if (aCeyrekPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
+                                    porsiyonlarNegatif.add("-0.25 Porsiyon x" + aCeyrekPorsiyon.miktar);
+                                    break;
+                                }
+                            }
+                        }
+
+                        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(HesapEkrani.this, android.R.layout.simple_list_item_1,porsiyonlarNegatif);
+
+                        final AlertDialog alert = new AlertDialog.Builder(HesapEkrani.this)
+                                .setTitle("Porsiyon Seçiniz")
+                                .setCancelable(false)
+                                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int item) {
+                                        // porsiyon seçimi tamamlanınca yapılacaklar
+                                        porsiyonlarNegatif.clear();
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int item) {
+                                        Double porsiyon;
+                                        try {
+                                            porsiyon = Double.parseDouble(porsiyonlarNegatif.get(item).substring(0, 4));
+                                        } catch (Exception ex) {
+                                            porsiyon = -1d;
+                                        }
+
+                                        porsiyon *= -1;
+
+                                        if (porsiyon == 0.7)
+                                            porsiyon = 0.75;
+                                        else if (porsiyon == 0.2)
+                                            porsiyon = 0.25;
+                                        porsiyonCikar(porsiyon);
+
+                                        String[] urunBilgileri = porsiyonlarNegatif.get(item).split("x");
+
+                                        int adet = 1;
+
+                                        if (urunBilgileri.length > 1)
+                                            adet = Integer.parseInt(urunBilgileri[1]);
+
+                                        adet--;
+
+                                        if (adet != 0)
+                                        {
+                                            porsiyonlarNegatif.set(item, urunBilgileri[0] + "x" + adet);
+                                        }
+                                        else
+                                        {
+                                            porsiyonlarNegatif.remove(item);
+                                        }
+                                        adapter.notifyDataSetChanged();
+
+                                        if(porsiyonlarNegatif.size() < 1)
+                                        {
+                                            dialog.dismiss();
+                                        }
+                                    }
+                                })
+                                .create();
+
+                        alert.show();
                     }
                 }
             }
         });
+
+        if(lstOrderedProducts.size() < 1)
+        {
+            buttonSepet.setEnabled(false);
+            buttonNot.setEnabled(false);
+        }
+    }
+
+    private void porsiyonCikar(Double azaltmaMiktari)
+    {
+        if(azaltmaMiktari == 1)
+        {
+            // eğer varsa azalt
+            porsiyonAzaltmaliMi(g.tamPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else if(azaltmaMiktari == 0.5)
+        {
+            // eğer varsa azalt
+            porsiyonAzaltmaliMi(g.yarimPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else if(azaltmaMiktari == 0.25)
+        {
+            // eğer varsa azalt
+            porsiyonAzaltmaliMi(g.ceyrekPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else if(azaltmaMiktari == 1.5)
+        {
+            // eğer varsa azalt
+            porsiyonAzaltmaliMi(g.birBucukPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else
+        {
+            // eğer varsa azalt
+            porsiyonAzaltmaliMi(g.ucCeyrekPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(0);
+        df.setGroupingUsed(false);
+
+        lstOrderedProducts.get(selectedSiparisItemPosition).miktar =  df.format(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) - azaltmaMiktari);
+
+        if(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) == 0d)
+        {
+            lstOrderedProducts.remove(selectedSiparisItemPosition);
+            if(selectedSiparisItemPosition == lstOrderedProducts.size())
+            {
+                selectedSiparisItemPosition = lstOrderedProducts.size() - 1;
+                adapterSecilenSiparisler.setSelectedIndex(lstOrderedProducts.size() - 1);
+            }
+            else
+            {
+                adapterSecilenSiparisler.notifyDataSetChanged();
+            }
+            if(lstOrderedProducts.size() < 1)
+            {
+                buttonSepet.setEnabled(false);
+                buttonNot.setEnabled(false);
+            }
+        }
+        else
+        {
+            adapterSecilenSiparisler.notifyDataSetChanged();
+        }
+    }
+
+    private void porsiyonAzaltmaliMi(ArrayList<Siparis> porsiyonArrayi, String yemekAdi)
+    {
+        for(int i=0;i<porsiyonArrayi.size();i++)
+        {
+            if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
+            {
+                porsiyonArrayi.get(i).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(i).miktar)-1);
+                if(Double.parseDouble(porsiyonArrayi.get(i).miktar) == 0d)
+                    porsiyonArrayi.remove(i);
+                break;
+            }
+        }
+    }
+
+    private void porsiyonEkle(Double arttirmaMiktari)
+    {
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(0);
+        df.setGroupingUsed(false);
+
+        lstOrderedProducts.get(selectedSiparisItemPosition).miktar = df.format(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) + arttirmaMiktari);
+        adapterSecilenSiparisler.notifyDataSetChanged();
+
+        if(arttirmaMiktari == 1d)
+        {
+            porsiyonArttir(g.tamPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else if(arttirmaMiktari == 0.5)
+        {
+            porsiyonArttir(g.yarimPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else if(arttirmaMiktari == 0.25)
+        {
+            porsiyonArttir(g.ceyrekPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else if(arttirmaMiktari == 1.5)
+        {
+            porsiyonArttir(g.birBucukPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+        else
+        {
+            porsiyonArttir(g.ucCeyrekPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
+        }
+    }
+
+    private void porsiyonArttir(ArrayList<Siparis> porsiyonArrayi,String yemekAdi)
+    {
+        Integer siparisVarMi= -1;
+        for(int i=0;i<porsiyonArrayi.size();i++)
+        {
+            if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
+            {
+                siparisVarMi = i;
+                break;
+            }
+        }
+        if(siparisVarMi != -1) // siparis listede var
+        {
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+            df.setMinimumFractionDigits(0);
+            df.setGroupingUsed(false);
+
+            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(df.format(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar) + 1));
+        }
+        else// listede yok
+        {
+            Siparis siparis = new Siparis();
+            siparis.yemekAdi = yemekAdi;
+            siparis.miktar = "1";
+            porsiyonArrayi.add(siparis);
+        }
     }
 
     @Override
@@ -424,9 +714,6 @@ public class HesapEkrani extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 }

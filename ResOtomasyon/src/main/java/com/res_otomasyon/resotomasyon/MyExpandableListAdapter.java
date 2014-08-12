@@ -2,25 +2,19 @@ package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.SparseArray;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -38,16 +32,14 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
     public Activity activity;
     MenuEkrani menuEkrani;
     String productCount;
-    String[] items;
+    GlobalApplication g;
 
-    ArrayList<Siparis> tamPorsiyon = new ArrayList<Siparis>();
-    ArrayList<Siparis> yarimPorsiyon = new ArrayList<Siparis>();
-    ArrayList<Siparis> ceyrekPorsiyon = new ArrayList<Siparis>();
-    ArrayList<Siparis> ucCeyrekPorsiyon = new ArrayList<Siparis>();
-    ArrayList<Siparis> birBucukPorsiyon = new ArrayList<Siparis>();
+    ArrayList<String> porsiyonlarPozitif = new ArrayList<String>();
+    ArrayList<String> porsiyonlarNegatif = new ArrayList<String>();
 
-    public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups, MenuEkrani menuEkrani) {
+    public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups, MenuEkrani menuEkrani, GlobalApplication g) {
         activity = act;
+        this.g = g;
         this.groups = groups;
         this.menuEkrani = menuEkrani;
         inflater = act.getLayoutInflater();
@@ -118,59 +110,127 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                     porsiyonEkle(groupPosition,childPosition,textAdet,textName,textFiyat,productPortion,1d);
                 else
                 {
-                    ArrayList<String> porsiyonlar = new ArrayList<String>();
-                    porsiyonlar.add("1.5 Porsiyon");
-                    porsiyonlar.add("1 Porsiyon");
+                    int varMi = -1;
+                    for(int i=0;i<g.birBucukPorsiyon.size();i++)
+                    {
+                        if(g.birBucukPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                        {
+                            porsiyonlarPozitif.add("1.5 Porsiyon x" + g.birBucukPorsiyon.get(i).miktar);
+                            varMi = i;
+                            break;
+                        }
+                    }
+
+                    if(varMi == -1)
+                        porsiyonlarPozitif.add("1.5 Porsiyon ");
+
+                    varMi = -1;
+
+                    for(int i=0;i<g.tamPorsiyon.size();i++)
+                    {
+                        if(g.tamPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                        {
+                            porsiyonlarPozitif.add("1 Porsiyon x" + g.tamPorsiyon.get(i).miktar);
+                            varMi = i;
+                            break;
+                        }
+                    }
+
+                    if(varMi == -1)
+                        porsiyonlarPozitif.add("1 Porsiyon ");
 
                     if(productPortion == 2)
                     {
-                        porsiyonlar.add("0.75 Porsiyon");
+                        varMi = -1;
+
+                        for(int i=0;i<g.ucCeyrekPorsiyon.size();i++)
+                        {
+                            if(g.ucCeyrekPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlarPozitif.add("0.75 Porsiyon x" + g.ucCeyrekPorsiyon.get(i).miktar);
+                                varMi = i;
+                                break;
+                            }
+                        }
+
+                        if(varMi == -1)
+                            porsiyonlarPozitif.add("0.75 Porsiyon ");
                     }
 
-                    porsiyonlar.add("0.5 Porsiyon");
+                    varMi = -1;
+
+                    for(int i=0;i<g.yarimPorsiyon.size();i++)
+                    {
+                        if(g.yarimPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                        {
+                            porsiyonlarPozitif.add("0.5 Porsiyon x" + g.yarimPorsiyon.get(i).miktar);
+                            varMi = i;
+                            break;
+                        }
+                    }
+
+                    if(varMi == -1)
+                        porsiyonlarPozitif.add("0.5 Porsiyon ");
 
                     if(productPortion == 2)
                     {
-                        porsiyonlar.add("0.25 Porsiyon");
+                        varMi = -1;
+
+                        for(int i=0;i<g.ceyrekPorsiyon.size();i++)
+                        {
+                            if(g.ceyrekPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
+                            {
+                                porsiyonlarPozitif.add("0.25 Porsiyon x" + g.ceyrekPorsiyon.get(i).miktar);
+                                varMi = i;
+                                break;
+                            }
+                        }
+
+                        if(varMi == -1)
+                            porsiyonlarPozitif.add("0.25 Porsiyon ");
                     }
 
-                    items = new String[porsiyonlar.size()];
-
-                    for(int i = 0; i < porsiyonlar.size();i++)
-                        items[i] = porsiyonlar.get(i);
-
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,items);
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,porsiyonlarPozitif);
 
                     final AlertDialog alert = new AlertDialog.Builder(activity)
                             .setTitle("Porsiyon Seçiniz")
                             .setCancelable(false)
                             .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                                public void onClick(DialogInterface dialog, int item) {
                                     // porsiyon seçimi tamamlanınca yapılacaklar
-
-
+                                    porsiyonlarPozitif.clear();
+                                    adapter.notifyDataSetChanged();
                                 }
                             })
                             .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (items[item].charAt(0) == '-') {
-                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 4));
-                                        porsiyon *= -1;
+                                public void onClick(DialogInterface dialog, int item) {
+                                    Double porsiyon;
 
-                                        if (porsiyon == 0.7)
-                                            porsiyon = 0.75;
-                                        else if (porsiyon == 0.2)
-                                            porsiyon = 0.25;
-                                        porsiyonCikar(groupPosition, childPosition, textAdet, textName, porsiyon);
-                                    } else {
-                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 3));
-                                        if (porsiyon == 0.7)
-                                            porsiyon = 0.75;
-                                        else if (porsiyon == 0.2)
-                                            porsiyon = 0.25;
-                                        porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, porsiyon);
+                                    try {
+                                        porsiyon = Double.parseDouble(porsiyonlarPozitif.get(item).substring(0, 3));
+                                    } catch (Exception ex) {
+                                        porsiyon = 1d;
                                     }
+
+                                    if (porsiyon == 0.7)
+                                        porsiyon = 0.75;
+                                    else if (porsiyon == 0.2)
+                                        porsiyon = 0.25;
+
+                                    porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, porsiyon);
+
+                                    String [] urunBilgileri = porsiyonlarPozitif.get(item).split("x");
+
+                                    int adet = 0;
+
+                                    if(urunBilgileri.length > 1)
+                                        adet = Integer.parseInt(urunBilgileri[1]);
+
+                                    adet++;
+
+                                    porsiyonlarPozitif.set(item, urunBilgileri[0] +"x" + adet);
+                                    adapter.notifyDataSetChanged();
                                 }
                             })
                             .create();
@@ -185,106 +245,110 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 if(productPortion == 0)
                     porsiyonCikar(groupPosition,childPosition,textAdet,textName,1d);
-                else if(!textAdet.getText().equals("0"))
+                else if(!textAdet.getText().toString().contentEquals("0"))
                 {
-                    ArrayList<String> porsiyonlar = new ArrayList<String>();
-
-                    if(birBucukPorsiyon.size()>0) // eğer önceden eklenmiş 1.5 porsiyon varsa
+                    if(g.birBucukPorsiyon.size()>0) // eğer önceden eklenmiş 1.5 porsiyon varsa
                     {
-                        for(int i=0;i<birBucukPorsiyon.size();i++)
-                        {
-                            if(birBucukPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
-                            {
-                                porsiyonlar.add("-1.5 Porsiyon");
+                        for (Siparis aBirBucukPorsiyon : g.birBucukPorsiyon) {
+                            if (aBirBucukPorsiyon.yemekAdi.contentEquals(textName.getText())) {
+                                porsiyonlarNegatif.add("-1.5 Porsiyon x" + aBirBucukPorsiyon.miktar);
                                 break;
                             }
                         }
                     }
 
-                    if(ucCeyrekPorsiyon.size()>0) // eğer önceden eklenmiş 0.75 porsiyon varsa
+                    if(g.tamPorsiyon.size()>0)  // eğer önceden eklenmiş 1 porsiyon varsa
                     {
-                        for(int i=0;i<ucCeyrekPorsiyon.size();i++)
-                        {
-                            if(ucCeyrekPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
-                            {
-                                porsiyonlar.add("-0.75 Porsiyon");
+                        for (Siparis aTamPorsiyon : g.tamPorsiyon) {
+                            if (aTamPorsiyon.yemekAdi.contentEquals(textName.getText())) {
+                                porsiyonlarNegatif.add("-1 Porsiyon x" + aTamPorsiyon.miktar);
                                 break;
                             }
                         }
                     }
 
-                    if(yarimPorsiyon.size()>0) // eğer önceden eklenmiş 0.5 porsiyon varsa
+                    if(g.ucCeyrekPorsiyon.size()>0) // eğer önceden eklenmiş 0.75 porsiyon varsa
                     {
-                        for(int i=0;i<yarimPorsiyon.size();i++)
-                        {
-                            if(yarimPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
-                            {
-                                porsiyonlar.add("-0.5 Porsiyon");
+                        for (Siparis anUcCeyrekPorsiyon : g.ucCeyrekPorsiyon) {
+                            if (anUcCeyrekPorsiyon.yemekAdi.contentEquals(textName.getText())) {
+                                porsiyonlarNegatif.add("-0.75 Porsiyon x" + anUcCeyrekPorsiyon.miktar);
                                 break;
                             }
                         }
                     }
 
-                    if(tamPorsiyon.size()>0)  // eğer önceden eklenmiş 1 porsiyon varsa
+                    if(g.yarimPorsiyon.size()>0) // eğer önceden eklenmiş 0.5 porsiyon varsa
                     {
-                        for(int i=0;i<tamPorsiyon.size();i++)
-                        {
-                            if(tamPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
-                            {
-                                porsiyonlar.add("-1 Porsiyon");
+                        for (Siparis aYarimPorsiyon : g.yarimPorsiyon) {
+                            if (aYarimPorsiyon.yemekAdi.contentEquals(textName.getText())) {
+                                porsiyonlarNegatif.add("-0.5 Porsiyon x" + aYarimPorsiyon.miktar);
                                 break;
                             }
                         }
                     }
 
-                    if(ceyrekPorsiyon.size()>0)  // eğer önceden eklenmiş 0.25 porsiyon varsa
+                    if(g.ceyrekPorsiyon.size()>0)  // eğer önceden eklenmiş 0.25 porsiyon varsa
                     {
-                        for(int i=0;i<ceyrekPorsiyon.size();i++)
-                        {
-                            if(ceyrekPorsiyon.get(i).yemekAdi.contentEquals(textName.getText()))
-                            {
-                                porsiyonlar.add("-0.25 Porsiyon");
+                        for (Siparis aCeyrekPorsiyon : g.ceyrekPorsiyon) {
+                            if (aCeyrekPorsiyon.yemekAdi.contentEquals(textName.getText())) {
+                                porsiyonlarNegatif.add("-0.25 Porsiyon x" + aCeyrekPorsiyon.miktar);
                                 break;
                             }
                         }
                     }
 
-                    items = new String[porsiyonlar.size()];
-
-                    for(int i = 0; i < porsiyonlar.size();i++)
-                        items[i] = porsiyonlar.get(i);
-
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,items);
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,porsiyonlarNegatif);
 
                     final AlertDialog alert = new AlertDialog.Builder(activity)
                             .setTitle("Porsiyon Seçiniz")
                             .setCancelable(false)
                             .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                                public void onClick(DialogInterface dialog, int item) {
                                     // porsiyon seçimi tamamlanınca yapılacaklar
-
-
+                                    porsiyonlarNegatif.clear();
+                                    adapter.notifyDataSetChanged();
                                 }
                             })
                             .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (items[item].charAt(0) == '-') {
-                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 4));
-                                        porsiyon *= -1;
+                                public void onClick(DialogInterface dialog, int item) {
+                                    Double porsiyon;
+                                    try {
+                                        porsiyon = Double.parseDouble(porsiyonlarNegatif.get(item).substring(0, 4));
+                                    } catch (Exception ex) {
+                                        porsiyon = -1d;
+                                    }
 
-                                        if (porsiyon == 0.7)
-                                            porsiyon = 0.75;
-                                        else if (porsiyon == 0.2)
-                                            porsiyon = 0.25;
-                                        porsiyonCikar(groupPosition, childPosition, textAdet, textName, porsiyon);
-                                    } else {
-                                        Double porsiyon = Double.parseDouble(items[item].toString().substring(0, 3));
-                                        if (porsiyon == 0.7)
-                                            porsiyon = 0.75;
-                                        else if (porsiyon == 0.2)
-                                            porsiyon = 0.25;
-                                        porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, porsiyon);
+                                    porsiyon *= -1;
+
+                                    if (porsiyon == 0.7)
+                                        porsiyon = 0.75;
+                                    else if (porsiyon == 0.2)
+                                        porsiyon = 0.25;
+                                    porsiyonCikar(groupPosition, childPosition, textAdet, textName, porsiyon);
+
+                                    String[] urunBilgileri = porsiyonlarNegatif.get(item).split("x");
+
+                                    int adet = 1;
+
+                                    if (urunBilgileri.length > 1)
+                                        adet = Integer.parseInt(urunBilgileri[1]);
+
+                                    adet--;
+
+                                    if (adet != 0)
+                                    {
+                                        porsiyonlarNegatif.set(item, urunBilgileri[0] + "x" + adet);
+                                    }
+                                    else
+                                    {
+                                        porsiyonlarNegatif.remove(item);
+                                    }
+                                    adapter.notifyDataSetChanged();
+
+                                    if(porsiyonlarNegatif.size() < 1)
+                                    {
+                                        dialog.dismiss();
                                     }
                                 }
                             })
@@ -299,33 +363,32 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     private void porsiyonCikar(int groupPosition, int childPosition, TextView textAdet, TextView textName, Double azaltmaMiktari)
     {
-        if (!textAdet.getText().equals("0"))
+        if (!textAdet.getText().toString().contentEquals("0"))
         {
             if(azaltmaMiktari == 1)
             {
-                // eğer varsa azalt yoksa çık
-                if(porsiyonAzaltmaliMi(tamPorsiyon,textName.getText().toString()))
-                    return;
+                // eğer varsa azalt
+                porsiyonAzaltmaliMi(g.tamPorsiyon, textName.getText().toString());
             }
             else if(azaltmaMiktari == 0.5)
             {
                 // eğer varsa azalt
-                porsiyonAzaltmaliMi(yarimPorsiyon,textName.getText().toString());
+                porsiyonAzaltmaliMi(g.yarimPorsiyon,textName.getText().toString());
             }
             else if(azaltmaMiktari == 0.25)
             {
                 // eğer varsa azalt
-                porsiyonAzaltmaliMi(ceyrekPorsiyon,textName.getText().toString());
+                porsiyonAzaltmaliMi(g.ceyrekPorsiyon,textName.getText().toString());
             }
             else if(azaltmaMiktari == 1.5)
             {
                 // eğer varsa azalt
-                porsiyonAzaltmaliMi(birBucukPorsiyon,textName.getText().toString());
+                porsiyonAzaltmaliMi(g.birBucukPorsiyon,textName.getText().toString());
             }
             else
             {
                 // eğer varsa azalt
-                porsiyonAzaltmaliMi(ucCeyrekPorsiyon,textName.getText().toString());
+                porsiyonAzaltmaliMi(g.ucCeyrekPorsiyon,textName.getText().toString());
             }
 
             for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++)
@@ -355,26 +418,17 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         }
     }
 
-    private Boolean porsiyonAzaltmaliMi(ArrayList<Siparis> porsiyonArrayi, String yemekAdi)
+    private void porsiyonAzaltmaliMi(ArrayList<Siparis> porsiyonArrayi, String yemekAdi)
     {
-        int siparisVarMi= -1;
         for(int i=0;i<porsiyonArrayi.size();i++)
         {
             if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
             {
-                siparisVarMi = i;
+                porsiyonArrayi.get(i).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(i).miktar)-1);
+                if(Double.parseDouble(porsiyonArrayi.get(i).miktar) == 0d)
+                    porsiyonArrayi.remove(i);
                 break;
             }
-        }
-
-        if(siparisVarMi == -1)
-            return true;
-        else
-        {
-            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar)-1);
-            if(porsiyonArrayi.get(siparisVarMi).miktar.contentEquals("0.0"))
-                porsiyonArrayi.remove(siparisVarMi);
-            return false;
         }
     }
 
@@ -393,25 +447,25 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         groups.get(groupPosition).productCount.set(childPosition,miktar);
         notifyDataSetChanged();
 
-        if(arttirmaMiktari == 1)
+        if(arttirmaMiktari == 1d)
         {
-            porsiyonArttir(tamPorsiyon,textName.getText().toString());
+            porsiyonArttir(g.tamPorsiyon,textName.getText().toString());
         }
         else if(arttirmaMiktari == 0.5)
         {
-            porsiyonArttir(yarimPorsiyon,textName.getText().toString());
+            porsiyonArttir(g.yarimPorsiyon,textName.getText().toString());
         }
         else if(arttirmaMiktari == 0.25)
         {
-            porsiyonArttir(ceyrekPorsiyon,textName.getText().toString());
+            porsiyonArttir(g.ceyrekPorsiyon,textName.getText().toString());
         }
         else if(arttirmaMiktari == 1.5)
         {
-            porsiyonArttir(birBucukPorsiyon,textName.getText().toString());
+            porsiyonArttir(g.birBucukPorsiyon,textName.getText().toString());
         }
         else
         {
-            porsiyonArttir(ucCeyrekPorsiyon,textName.getText().toString());
+            porsiyonArttir(g.ucCeyrekPorsiyon,textName.getText().toString());
         }
 
         for(int i = 0 ; i< menuEkrani.lstOrderedProducts.size();i++) {
@@ -441,7 +495,12 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         }
         if(siparisVarMi != -1) // siparis listede var
         {
-            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar) + 1);
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+            df.setMinimumFractionDigits(0);
+            df.setGroupingUsed(false);
+
+            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(df.format(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar) + 1));
         }
         else// listede yok
         {

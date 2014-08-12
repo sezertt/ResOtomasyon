@@ -6,8 +6,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
 
+import java.util.ArrayList;
+import Entity.MasaninSiparisleri;
+import Entity.Siparis;
 import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.TCPClient;
+import ekclasslar.DepartmanMasalari;
 
 /**
  * Created by Mustafa on 22.7.2014.
@@ -18,7 +22,16 @@ public class GlobalApplication extends Application {
     SharedPreferences preferences;
     TCPClient mTcpClient;
     Activity activity;
-    String adisyonNotu = "";
+
+    public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
+    public ArrayList<MasaninSiparisleri> masaninSiparisleri = new ArrayList<MasaninSiparisleri>();
+
+
+    public ArrayList<Siparis> tamPorsiyon = new ArrayList<Siparis>();
+    public ArrayList<Siparis> yarimPorsiyon = new ArrayList<Siparis>();
+    public ArrayList<Siparis> ceyrekPorsiyon = new ArrayList<Siparis>();
+    public ArrayList<Siparis> ucCeyrekPorsiyon = new ArrayList<Siparis>();
+    public ArrayList<Siparis> birBucukPorsiyon = new ArrayList<Siparis>();
 
     public enum Komutlar {
         Default,siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,

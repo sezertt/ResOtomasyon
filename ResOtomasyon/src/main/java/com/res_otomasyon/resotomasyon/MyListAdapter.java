@@ -13,7 +13,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import Entity.Siparis;
@@ -80,7 +83,18 @@ public class MyListAdapter extends BaseAdapter {
         }
         catch (Exception ex)
         {
-            textFiyat.setText("ikram");
+            NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+            Number number = null;
+            //burası virgüllü stringi double a convert etme çevirme kısmı
+            try {
+                number = format.parse(siparisListesi.get(position).porsiyonFiyati);
+                doubleFiyat = number.doubleValue();
+                textFiyat.setText(String.format("%.2f", doubleFiyat)+" TL"); // 2 hane virgülden sonra virgül den
+
+            } catch (ParseException e) {
+                e.printStackTrace();
+                textFiyat.setText("ikram");
+            }
         }
 
         DecimalFormat df = new DecimalFormat();

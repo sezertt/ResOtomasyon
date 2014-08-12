@@ -50,9 +50,8 @@
             android:layout_marginLeft="5dp"
             android:layout_marginBottom="1dp"
             android:layout_alignParentBottom="true"
-            android:layout_alignTop="@+id/button"
-            android:layout_toRightOf="@+id/buttonPorsiyon"
-            android:layout_toEndOf="@+id/buttonPorsiyon" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <Button
             android:layout_width="wrap_content"
@@ -94,18 +93,6 @@
             android:layout_below="@+id/textSiparis"
             android:layout_above="@+id/buttonAzalt">
         </ListView>
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:textColor="@android:color/white"
-            android:background="@drawable/buttonstyle3"
-            android:text="Tam"
-            android:id="@+id/buttonPorsiyon"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
-            android:textSize="20sp"
-            android:layout_alignBottom="@+id/buttonAzalt"/>
 
     </RelativeLayout>
     <RelativeLayout
