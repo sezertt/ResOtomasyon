@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -106,12 +108,10 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
         final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+        String networkSSID = "AirTies_Air5650_74XD";
+        String networkPass = "m63uTpM7F6";
 
-
-
-        if (!wifi.isAvailable()) {
-            String networkSSID = "Airties_Air5650_74XD";
-            String networkPass = "m63uTpM7F6";
+        if (wifi.isAvailable() && !wifi.isConnectedOrConnecting()) {
 
             WifiConfiguration wifiConfig = new WifiConfiguration();
             wifiConfig.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
@@ -120,14 +120,28 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             wifiConfig.preSharedKey = "\""+ networkPass +"\"";
 
             WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-            wifiManager.addNetwork(wifiConfig);
 
             int netId = wifiManager.addNetwork(wifiConfig);
             wifiManager.disconnect();
             wifiManager.enableNetwork(netId, true);
             wifiManager.reconnect();
         }
+        else
+        {
+            String ssid = "";
+            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            if (WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState()) == NetworkInfo.DetailedState.CONNECTED) {
+                ssid = wifiInfo.getSSID();
+            }
+            if(!ssid.contentEquals(networkSSID)) // bizim ağımızdan farklı bir ağa bağlı ise bağlantıyı kopar.
+            {
+                wifiManager.disconnect();
+                checkNetwork();
+            }
+        }
     }
+
 
     @Override
     protected void onDestroy() {
