@@ -8,6 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -50,6 +53,10 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
     @Override
     protected void onResume() {
+        LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
+
+        checkNetwork();
+
         FileIO fileIO = new FileIO();
         List<File> files = null;
         try {
@@ -93,8 +100,47 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         super.onResume();
     }
 
+    private void checkNetwork()
+    {
+        final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (!wifi.isAvailable()) {
+            String networkSSID = "Airties_Air5650_74XD";
+            String networkPass = "m63uTpM7F6";
+
+            WifiConfiguration conf = new WifiConfiguration();
+            conf.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
+
+            //WPA
+            conf.preSharedKey = "\""+ networkPass +"\"";
+
+            WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+            wifiManager.addNetwork(conf);
+
+            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+            for( WifiConfiguration i : list ) {
+                if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
+                    break;
+                }
+            }
+
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        super.onDestroy();
+    }
+
     @Override
     protected void onPause() {
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
         activityVisible = false;
         if (t.timerRunning)
             t.stopTimer();
@@ -114,7 +160,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
         g = (GlobalApplication) getApplicationContext();
-        LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         btnGiris = (Button) findViewById(R.id.btnGiris);
         btnGiris.setOnClickListener(this);
@@ -168,11 +213,10 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         }
    };
 
-
     @Override
     public void onBackPressed() {
+        // geri basınca birşey yapmasın diye
    }
-
 
     public Handler myHandler = new Handler() {
         @Override
