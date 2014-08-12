@@ -106,29 +106,26 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
         final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+
+
+
         if (!wifi.isAvailable()) {
             String networkSSID = "Airties_Air5650_74XD";
             String networkPass = "m63uTpM7F6";
 
-            WifiConfiguration conf = new WifiConfiguration();
-            conf.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
+            WifiConfiguration wifiConfig = new WifiConfiguration();
+            wifiConfig.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
 
             //WPA
-            conf.preSharedKey = "\""+ networkPass +"\"";
+            wifiConfig.preSharedKey = "\""+ networkPass +"\"";
 
             WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-            wifiManager.addNetwork(conf);
+            wifiManager.addNetwork(wifiConfig);
 
-            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-            for( WifiConfiguration i : list ) {
-                if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                    wifiManager.disconnect();
-                    wifiManager.enableNetwork(i.networkId, true);
-                    wifiManager.reconnect();
-                    break;
-                }
-            }
-
+            int netId = wifiManager.addNetwork(wifiConfig);
+            wifiManager.disconnect();
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.reconnect();
         }
     }
 
