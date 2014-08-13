@@ -18,7 +18,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        /*final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
@@ -35,10 +35,16 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
             WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
 
-            int netId = wifiManager.addNetwork(wifiConfig);
-            wifiManager.disconnect();
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.reconnect();
+            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+            for( WifiConfiguration i : list ) {
+                if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
+
+                    break;
+                }
+            }
         }
         else
         {
@@ -53,6 +59,6 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
                 wifiManager.disconnect();
                 onReceive(context,intent);
             }
-        }
+        }*/
     }
 }

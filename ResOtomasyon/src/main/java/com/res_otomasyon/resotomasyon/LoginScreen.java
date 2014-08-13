@@ -57,7 +57,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     protected void onResume() {
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
 
-        checkNetwork();
+        //checkNetwork();
 
         FileIO fileIO = new FileIO();
         List<File> files = null;
@@ -121,10 +121,15 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
             WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
 
-            int netId = wifiManager.addNetwork(wifiConfig);
-            wifiManager.disconnect();
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.reconnect();
+            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+            for( WifiConfiguration i : list ) {
+                if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
+                    break;
+                }
+            }
         }
         else
         {

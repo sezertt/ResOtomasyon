@@ -34,6 +34,7 @@ public class Settings extends Activity implements View.OnClickListener {
 
     int kacinci = 1;
     int kacDosya;
+    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,9 @@ public class Settings extends Activity implements View.OnClickListener {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_settings);
+
+        preferences = this.getSharedPreferences("MyPreferences",
+                Context.MODE_PRIVATE);
 
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
 
@@ -106,8 +110,7 @@ public class Settings extends Activity implements View.OnClickListener {
         switch (v.getId()) {
 
             case R.id.button:
-                SharedPreferences preferences = this.getSharedPreferences("MyPreferences",
-                        Context.MODE_PRIVATE);
+
                 SharedPreferences.Editor editor = preferences.edit();
                 try {
                     editor.putString("IPAddress", ((EditText) findViewById(R.id.editTextIP)).getText().toString
@@ -182,6 +185,22 @@ public class Settings extends Activity implements View.OnClickListener {
                     case aktarimTamamlandi:
                         alertDialog.show();
                         break;
+                    case modemBilgileri:
+                        SharedPreferences.Editor editor = preferences.edit();
+                        try {
+                            editor.putString("SSID", collection.get("SSID"));
+                            editor.putString("ModemSifresi", collection.get("Sifre"));
+                            editor.commit();
+                            showAlertDialog = new ShowAlertDialog();
+                            AlertDialog alertDialog = showAlertDialog.showAlert(Settings.this, context, "Kayıt başarılı",
+                                    "Modem bilgileri kayıt edildi.");
+                            alertDialog.show();
+                        } catch (Exception e) {
+                            showAlertDialog = new ShowAlertDialog();
+                            AlertDialog alertDialog = showAlertDialog.showAlert(Settings.this, context, "Kayıt başarısız!",
+                                    "Modem bilgileri kayıt edilemedi.");
+                            alertDialog.show();
+                        }
                     default:
                         break;
                 }
