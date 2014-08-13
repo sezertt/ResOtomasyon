@@ -74,9 +74,24 @@ public class TCPClient {
         @Override
         public void run() {
             try {
-                //serverStatus = serverAddr.isReachable(100);
-                serverStatus = IsSocketConnected(socket);
-
+                serverStatus = serverAddr.isReachable(100);
+//                serverStatus = IsSocketConnected(socket);
+                if(!serverStatus)
+                {
+                    mRun=false;
+                    if (socket != null && socket.isConnected()) {
+                        try {
+                            stream.close();
+                            socket.close();
+                            Log.e("Soket&Stream", "kapandı");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.e("Soket&Stream", "Kapanırken Hata Verdi");
+                        }
+                    }
+                    callStopPing();
+                }
             } catch (IOException e) {
                 mRun = false;
                 Log.e("Soket", "Bağlantı Koptu");
@@ -99,7 +114,7 @@ public class TCPClient {
     }
 
     void callPingToServer() {
-        timer.schedule(new pingToServer(), 1500, 5000);
+        timer.schedule(new pingToServer(), 3000, 5000);
     }
 
     //Eğer bağlantı kopmuş ise ping atmayı durdur.

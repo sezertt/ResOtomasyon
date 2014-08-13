@@ -49,8 +49,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     ActionBar.Tab tab;
     ViewPager mViewPager;
     //
-    TCPClient mTcpClient;
-    //
     ArrayList<Departman> lstDepartmanlar;
     ArrayList<MasaDizayn> lstMasaDizayn;
     String[] masaPlanIsmi;
@@ -64,7 +62,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     public String[] acikMasalar;
     public String srvrMessage;
     public boolean mesajGeldi = false;
-    public boolean firstRun = false;
     boolean activityVisible = true;
     boolean masaKilitliMi = false;
     ArrayList<Employee> lstEmployees;
@@ -175,6 +172,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                                                 masaninSiparisleri.siparisler.add(siparis);
                                             }
                                         }
+                                        g.masaninSiparisleri.get(i).siparisler.add(siparis);
                                         g.masaninSiparisleri.add(masaninSiparisleri);
                                     }
                                 }
