@@ -18,12 +18,18 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        /*final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         String networkSSID = "AirTies_Air5650_74XD";
         String networkPass = "m63uTpM7F6";
+        String ssid = "";
+
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        ssid = wifiInfo.getSSID();
+
 
         if (wifi.isAvailable() && !wifi.isConnectedOrConnecting()) {
 
@@ -33,32 +39,26 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
             //WPA
             wifiConfig.preSharedKey = "\""+ networkPass +"\"";
 
-            WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
-
             List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
             for( WifiConfiguration i : list ) {
                 if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                    wifiManager.disconnect();
-                    wifiManager.enableNetwork(i.networkId, true);
-                    wifiManager.reconnect();
-
-                    break;
+                    if(!ssid.contentEquals("\"" + networkSSID + "\""))
+                    {
+                        wifiManager.disconnect();
+                        wifiManager.enableNetwork(i.networkId, true);
+                        wifiManager.reconnect();
+                        break;
+                    }
                 }
             }
         }
         else
         {
-            String ssid = "";
-            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            if (WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState()) == NetworkInfo.DetailedState.CONNECTED) {
-                ssid = wifiInfo.getSSID();
-            }
             if(!ssid.contentEquals(networkSSID)) // bizim ağımızdan farklı bir ağa bağlı ise bağlantıyı kopar.
             {
                 wifiManager.disconnect();
                 onReceive(context,intent);
             }
-        }*/
+        }
     }
 }

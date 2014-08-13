@@ -57,7 +57,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     protected void onResume() {
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
 
-        //checkNetwork();
+        checkNetwork();
 
         FileIO fileIO = new FileIO();
         List<File> files = null;
@@ -94,22 +94,27 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         activityVisible = true;
         if (g == null)
             g = (GlobalApplication) getApplicationContext();
-        if(t==null)
-            t = new TryConnection(g,myHandler);
+        if (t == null)
+            t = new TryConnection(g, myHandler);
         if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
         super.onResume();
     }
 
-    private void checkNetwork()
-    {
+    private void checkNetwork() {
         final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         String networkSSID = "AirTies_Air5650_74XD";
         String networkPass = "m63uTpM7F6";
+        String ssid = "";
+
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        ssid = wifiInfo.getSSID();
+
 
         if (wifi.isAvailable() && !wifi.isConnectedOrConnecting()) {
 
@@ -117,29 +122,21 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             wifiConfig.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
 
             //WPA
-            wifiConfig.preSharedKey = "\""+ networkPass +"\"";
-
-            WifiManager wifiManager = (WifiManager)context.getSystemService(Context.WIFI_SERVICE);
+            wifiConfig.preSharedKey = "\"" + networkPass + "\"";
 
             List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-            for( WifiConfiguration i : list ) {
-                if(i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                    wifiManager.disconnect();
-                    wifiManager.enableNetwork(i.networkId, true);
-                    wifiManager.reconnect();
-                    break;
+            for (WifiConfiguration i : list) {
+                if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
+                    if (!ssid.contentEquals("\"" + networkSSID + "\"")) {
+                        wifiManager.disconnect();
+                        wifiManager.enableNetwork(i.networkId, true);
+                        wifiManager.reconnect();
+                        break;
+                    }
                 }
             }
-        }
-        else
-        {
-            String ssid = "";
-            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-            if (WifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState()) == NetworkInfo.DetailedState.CONNECTED) {
-                ssid = wifiInfo.getSSID();
-            }
-            if(!ssid.contentEquals(networkSSID)) // bizim ağımızdan farklı bir ağa bağlı ise bağlantıyı kopar.
+        } else {
+            if (!ssid.contentEquals(networkSSID)) // bizim ağımızdan farklı bir ağa bağlı ise bağlantıyı kopar.
             {
                 wifiManager.disconnect();
                 checkNetwork();
@@ -227,12 +224,12 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                 }
             }
         }
-   };
+    };
 
     @Override
     public void onBackPressed() {
         // geri basınca birşey yapmasın diye
-   }
+    }
 
     public Handler myHandler = new Handler() {
         @Override
@@ -289,8 +286,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             startActivity(intent);
             return true;
         }
-        if(id == R.id.masaSec)
-        {
+        if (id == R.id.masaSec) {
             intent = new Intent(LoginScreen.this, MasaSecEkrani.class);
             startActivity(intent);
             return true;

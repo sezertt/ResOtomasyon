@@ -170,9 +170,9 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                                                 siparis.porsiyonSinifi = Double.parseDouble(("1"));
                                                 siparis.yemekAdi = collection.get("yemekAdi");
                                                 masaninSiparisleri.siparisler.add(siparis);
+                                                g.masaninSiparisleri.get(i).siparisler.add(siparis);
                                             }
                                         }
-                                        g.masaninSiparisleri.get(i).siparisler.add(siparis);
                                         g.masaninSiparisleri.add(masaninSiparisleri);
                                     }
                                 }
