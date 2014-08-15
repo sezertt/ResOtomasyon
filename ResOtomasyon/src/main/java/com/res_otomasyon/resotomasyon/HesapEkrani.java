@@ -45,7 +45,7 @@ public class HesapEkrani extends Activity {
 
     Double kacPorsiyon, yemeginFiyati, toplamHesap = 0d;
     Button buttonSepet, buttonNot;
-
+    Boolean ikramMi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -628,12 +628,19 @@ public class HesapEkrani extends Activity {
 
         String baslik;
 
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(0);
+        df.setGroupingUsed(false);
+
         switch(item.getItemId()) {
             case R.id.iptal:
-                baslik = "Kaç adet ürün iptal edilecek? Bulunan :" + urunListesiToplam.get(info.position).miktar + " adet";
+                ikramMi = false;
+                baslik = "Kaç adet ürün iptal edilecek? Bulunan : " + df.format(Double.parseDouble(urunListesiToplam.get(info.position).miktar)) + " adet";
                 break;
             case R.id.ikram:
-                baslik = "Kaç adet ürün ikram edilecek? Bulunan :" + urunListesiToplam.get(info.position).miktar + " adet";
+                ikramMi = true;
+                baslik = "Kaç adet ürün ikram edilecek? Bulunan : " + df.format(Double.parseDouble(urunListesiToplam.get(info.position).miktar)) + " adet";
                 break;
             default:
                 return super.onContextItemSelected(item);
@@ -677,19 +684,26 @@ public class HesapEkrani extends Activity {
                 String [] x = input.getText().toString().split("\\.");
                 if(x.length == 2)
                 {
-                    if(!x[1].contentEquals("25")&&!x[1].contentEquals("50")&&!x[1].contentEquals("75"))
+                    x[1] = x[1].substring(0,2);
+                    if(!x[1].contentEquals("25")&&!x[1].contentEquals("50")&&!x[1].contentEquals("75")&&!x[1].contentEquals("5"))
                     {
                         AlertDialog.Builder aBuilder = new AlertDialog.Builder(HesapEkrani.this);
                         aBuilder.setTitle("Porsiyon Hatası");
                         aBuilder.setMessage("Porsiyon hatalı girildiği için işlem gerçekleştirilemedi\nGirilen Porsiyon :" + input.getText()).setCancelable(false)
-                                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                });
+                                .setPositiveButton("Tamam",null);
                         AlertDialog alertDialog = aBuilder.create();
                         alertDialog.show();
+                    }
+                    else
+                    {
+                        if(ikramMi) // ürün ikram edilecek
+                        {
+
+                        }
+                        else // ürün iptal edilecek
+                        {
+
+                        }
                     }
                 }
             }

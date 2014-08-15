@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -137,6 +138,18 @@ public class Settings extends Activity implements View.OnClickListener {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+    }
+
     BroadcastReceiver rec = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -175,15 +188,20 @@ public class Settings extends Activity implements View.OnClickListener {
 
                         kacDosya = Integer.parseInt(collection.get("kacDosya"));
 
-                        Boolean dosyaAktarimiBasariliMi = Boolean.parseBoolean(collection.get("aktarim"));
-
-                        if(dosyaAktarimiBasariliMi) // dosya gönderimi başarılı    / başarısızsa aynı dosya yeniden istenir
+                        //if(g.commonAsyncTask.client.dosyaAlimiBasariliMi) // dosya gönderimi başarılı    / başarısızsa aynı dosya yeniden istenir
                             kacinci++;
 
-                        g.commonAsyncTask.client.sendMessage("<komut=veriGonder&kacinci=" + kacinci + ">");
+                        Log.i("asfasf", "Yeni Dosya istendi - " + kacinci);
+
+                        g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=" + kacinci);
                         break;
                     case aktarimTamamlandi:
-                        alertDialog.show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                alertDialog.show();
+                            }
+                        });
                         break;
                     case modemBilgileri:
                         SharedPreferences.Editor editor = preferences.edit();
@@ -212,7 +230,7 @@ public class Settings extends Activity implements View.OnClickListener {
 
     private void veriGuncellemeyiBaslat()
     {
-        g.commonAsyncTask.client.sendMessage("<komut=veriGonder&kacinci=1>");
+        g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=1");
     }
 
 }

@@ -5,6 +5,7 @@ package ekclasslar;
  */
 
 import java.lang.Exception;
+import java.nio.ByteBuffer;
 
 public class BitConverter {
     public static byte[] getBytes(boolean x) {

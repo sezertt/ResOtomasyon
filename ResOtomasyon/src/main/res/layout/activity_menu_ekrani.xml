@@ -9,6 +9,21 @@
     <ExpandableListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent" >
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/buttonSepet">
     </ExpandableListView>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/buttonstylekoseli"
+        android:textColor="@android:color/white"
+        android:text="Sepete Git"
+        android:id="@+id/buttonSepet"
+        android:textSize="20sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

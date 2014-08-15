@@ -1,7 +1,6 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,25 +9,20 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.io.File;
 
 import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.TCPClient;
 
 public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
 
-    TCPClient mTcpClient;
     SharedPreferences preferences;
     Context context = this;
-    String srvrMessage;
-    public boolean mesajGeldi = false;
     GlobalApplication g;
 
     @Override
@@ -50,10 +44,12 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         } else {
             if (g.commonAsyncTask == null) {
                 g.activity = this;
-                LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
                 g.connectServer(myHandler);
             }
         }
+        File folder= new File("/mnt/sdcard/shared/Lenovo/");
+        if(!folder.exists())
+            folder.mkdirs();
     }
 
     int counterGiris = 0;
@@ -64,51 +60,16 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
             switch (msg.what) {
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
                     counterGiris++;
                     Log.e("counterGiris", String.valueOf(counterGiris));
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null)
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
-                        else {
-                        }
                     }
                     break;
                 default:
                     break;
-            }
-        }
-    };
-
-    BroadcastReceiver rec = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //all events will be received here
-            //get message
-            srvrMessage = intent.getStringExtra("message");
-            if (srvrMessage != null) {
-                String[] parametreler = srvrMessage.split("&");
-                String[] esitlik;
-                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
-                for (String parametre : parametreler) {
-                    esitlik = parametre.split("=");
-                    if (esitlik.length == 2)
-                        collection.put(esitlik[0], esitlik[1]);
-                }
-                String gelenkomut = collection.get("komut");
-                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
-                final String baglanti = collection.get("sonuc");
-
-                if (komut.toString().contentEquals("giris") && baglanti.contentEquals("basarili")) {
-//                    mesajGeldi = true;
-//                    myHandler.sendEmptyMessage(0);
-//                    LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
-
-                } else if (komut.toString().contentEquals("giris") && !baglanti.contentEquals("basarili")) {
-
-                } else {
-
-                }
             }
         }
     };

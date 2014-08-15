@@ -57,7 +57,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
     protected void onResume() {
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
 
-        checkNetwork();
+        //checkNetwork();
 
         FileIO fileIO = new FileIO();
         List<File> files = null;
@@ -115,7 +115,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
         ssid = wifiInfo.getSSID();
 
-
         if (wifi.isAvailable() && !wifi.isConnectedOrConnecting()) {
 
             WifiConfiguration wifiConfig = new WifiConfiguration();
@@ -143,7 +142,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
             }
         }
     }
-
 
     @Override
     protected void onDestroy() {
@@ -239,7 +237,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     preferences = LoginScreen.this.getSharedPreferences("MyPreferences",
                             Context.MODE_PRIVATE);
-                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
                     EditText e = (EditText) findViewById(R.id.editTextPin);
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {

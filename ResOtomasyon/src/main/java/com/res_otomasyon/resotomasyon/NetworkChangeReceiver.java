@@ -54,11 +54,12 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
         }
         else
         {
+            /*
             if(!ssid.contentEquals(networkSSID)) // bizim ağımızdan farklı bir ağa bağlı ise bağlantıyı kopar.
             {
                 wifiManager.disconnect();
                 onReceive(context,intent);
-            }
+            }*/
         }
     }
 }

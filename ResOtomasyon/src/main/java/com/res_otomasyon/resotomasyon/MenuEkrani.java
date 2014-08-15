@@ -16,7 +16,9 @@ import android.text.InputType;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 
@@ -163,7 +165,7 @@ public class MenuEkrani extends Activity {
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     preferences = MenuEkrani.this.getSharedPreferences("MyPreferences",
                             Context.MODE_PRIVATE);
-                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
@@ -258,6 +260,13 @@ public class MenuEkrani extends Activity {
             }
         }
         t = new TryConnection(g, myHandler);
+
+        findViewById(R.id.buttonSepet).setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                g.commonAsyncTask.client.sendMessage("komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
+            }
+        });
+
     }
 
     @Override
@@ -513,11 +522,6 @@ public class MenuEkrani extends Activity {
                     });
                     builder.show();
                 }
-                break;
-
-            case R.id.action_hesap:
-                g.commonAsyncTask.client.sendMessage("<komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" +
-                        departmanAdi + ">");
                 break;
 
             case R.id.action_masaTemizleyin:

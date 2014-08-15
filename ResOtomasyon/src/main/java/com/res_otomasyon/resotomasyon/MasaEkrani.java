@@ -75,7 +75,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
         mViewPager.setCurrentItem(tab.getPosition());
         tabName = (String) tab.getText();
-        String komut = "<komut=departman&departmanAdi=" + tabName + ">";
+        String komut = "komut=departman&departmanAdi=" + tabName;
         if (g.commonAsyncTask.client != null && mesajGeldi == false) {
             g.commonAsyncTask.client.sendMessage(komut);
         }
@@ -98,7 +98,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
@@ -206,7 +206,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-                    String girisKomutu = "<komut=giris&nick=" + preferences.getString("TabletName", "Tablet") + ">";
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
 
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
@@ -223,11 +223,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
             }
         }
     };
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

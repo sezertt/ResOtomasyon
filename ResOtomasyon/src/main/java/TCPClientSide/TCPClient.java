@@ -1,18 +1,11 @@
 package TCPClientSide;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
-import com.res_otomasyon.resotomasyon.GlobalApplication;
-
-import ekclasslar.BitConverter;
-
 import org.apache.http.util.EncodingUtils;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ekclasslar.BitConverter;
+
 /**
  * Created by Mustafa on 20.5.2014.
  */
@@ -38,12 +33,12 @@ public class TCPClient {
     public static String SERVERIP; //your computer IP address
     public static int SERVERPORT;
     private OnMessageReceived mMessageListener = null;
-    public boolean mRun = false;
+    public boolean mRun = false, dosyaAlimiBasariliMi;
+    ;
     public InputStream stream;
     public Socket socket;
     public PrintWriter out;
     public InetAddress serverAddr;
-    Boolean aktarimVar = false;
     boolean serverStatus = false;
     Handler myHandler;
 
@@ -124,59 +119,101 @@ public class TCPClient {
     }
 
     public void sendMessage(String message) {
+        String komutMessage = "<" + message + ">";
         if (out != null && !out.checkError()) {
-            out.println(message);
+            out.println(komutMessage);
             out.flush();
         }
     }
 
-    public boolean getFolder() {
-        byte[] buffer = new byte[1024 * 5000];
+    class AsyncTaskClass extends AsyncTask<String, String, String> {
+
+        @Override
+        protected void onPreExecute() {
+            //uzun islem oncesi yapilacaklar
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            //uzun islem sirasinda yapilacaklar
+            try {
+
+            } catch (Exception ex) {
+
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            //uzun islem bitince yapilacaklar
+        }
+    }
+
+
+    public void getFolder() throws Exception {
         try {
-            int receivedBytesLength = socket.getInputStream().read(buffer);
-            int fileNameLen = BitConverter.toInt32(buffer, 0);
-            String fileName = EncodingUtils.getString(buffer, 4, fileNameLen, Charset.defaultCharset().name());
+            byte[] length = new byte[4];
+
+            stream.read(length, 0, 4);
+
+            int[] arrayimiz = new int[4];
+
+            arrayimiz[0] = (length[0] & 0xff);
+            arrayimiz[1] = (length[1] & 0xff);
+            arrayimiz[2] = (length[2] & 0xff);
+            arrayimiz[3] = (length[3] & 0xff);
+
+            int fileDataLen = arrayimiz[0] * 1 + arrayimiz[1] * 256 + arrayimiz[2] * 65536 + arrayimiz[3] * 16777216;
+
+            stream.read(length, 0, 4);
+            int fileNameLen = BitConverter.toInt32(length, 0);
+
+            byte[] fileNameBuffer = new byte[fileNameLen];
+            stream.read(fileNameBuffer, 0, fileNameLen);
+            String fileName = EncodingUtils.getString(fileNameBuffer, Charset.defaultCharset().name());
 
             String[] uzanti = fileName.split("\\.");
 
-            if (uzanti[1].contentEquals("png")) {
-                File folder = new File("/mnt/sdcard/shared/Lenovo/resimler/");
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
-                File file = new File("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "");
-                if (!file.exists())
-                    file.createNewFile();
-                else {
-                    file.delete();
-                    file.createNewFile();
-                }
-                FileOutputStream out = new FileOutputStream("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "");
-                out.write(buffer, 4 + fileNameLen, receivedBytesLength - 4 - fileNameLen);
-            } else {
-                File folder = new File("/mnt/sdcard/shared/Lenovo/");
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
-                File file = new File("/mnt/sdcard/shared/Lenovo/" + fileName + "");
-                if (!file.exists())
-                    file.createNewFile();
-                else {
-                    file.delete();
-                    file.createNewFile();
-                }
-                FileOutputStream out = new FileOutputStream("/mnt/sdcard/shared/Lenovo/" + fileName + "");
-                out.write(buffer, 4 + fileNameLen, receivedBytesLength - 4 - fileNameLen);
+            byte[] buffer = new byte[fileDataLen];
+
+            try {
+                int bytesNeeded = fileDataLen;
+                int bytesReceived = 0;
+                do {
+                    //read byte from client
+                    int bytesRead = stream.read(buffer, bytesReceived, bytesNeeded - bytesReceived);
+                    bytesReceived += bytesRead;
+                    // merge byte array to another byte array
+                } while (bytesReceived < bytesNeeded);   //  <- you should do this async.
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
 
-            return true;
+            try {
+                FileOutputStream fOutStream;
+                if (uzanti[1].contentEquals("png")) {
+                    File folder = new File("/mnt/sdcard/shared/Lenovo/resimler/");
+                    if (!folder.exists()) {
+                        folder.mkdirs();
+                    }
+                    fOutStream = new FileOutputStream("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "", false);
+                } else {
+                    File folder = new File("/mnt/sdcard/shared/Lenovo/");
+                    if (!folder.exists()) {
+                        folder.mkdirs();
+                    }
+                    fOutStream = new FileOutputStream("/mnt/sdcard/shared/Lenovo/" + fileName + "", false);
+                }
+                fOutStream.write(buffer, 0, fileDataLen);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -209,7 +246,6 @@ public class TCPClient {
                 if (socket.isConnected())
                     myHandler.sendEmptyMessage(2);
                 Log.e("client.out", "Oluştu");
-                String copyOfServerMessage = "";
                 Log.e("TCP Client", "C: Sent.");
 
                 Log.e("TCP Client", "C: Done.");
@@ -218,10 +254,8 @@ public class TCPClient {
                 byte LAST_BYTE = (byte) 62;
 
                 stream = socket.getInputStream();
-                Boolean dosyaAlimiBasariliMi = false;
 
                 while (mRun) {
-                    if (!aktarimVar) {
                         int firstByte = stream.read();
 
                         if ((byte) firstByte != FIRST_BYTE) {
@@ -239,24 +273,14 @@ public class TCPClient {
                         byte[] result = new byte[bList.size()];
 
                         for (int i = 0; i < bList.size(); i++) {
-                            result[i] = bList.get(i).byteValue();
+                            result[i] = bList.get(i);
                         }
                         serverMessage = new String(result, "UTF-8");
-                        copyOfServerMessage = serverMessage;
-                    } else {
-                        dosyaAlimiBasariliMi = getFolder();
-                        serverMessage += "&aktarim=" + dosyaAlimiBasariliMi;
-                        copyOfServerMessage = "";
-                        aktarimVar = false;
-                    }
-                    if (copyOfServerMessage.length() > 13) {
-                        if (copyOfServerMessage.substring(0, 14).contentEquals("komut=dosyalar")) {
-                            aktarimVar = true;
-                            continue;
+
+                    if (serverMessage.length() > 13)
+                        if (serverMessage.substring(0, 14).contentEquals("komut=dosyalar")) {
+                            getFolder();
                         }
-                    } else if (serverMessage.contentEquals("komut=aktarimTamamlandi")) {
-                        aktarimVar = false;
-                    }
 
                     if (serverMessage != null && mMessageListener != null) {
                         mMessageListener.messageReceived(serverMessage);
@@ -286,7 +310,6 @@ public class TCPClient {
             callStopPing();
             mRun = false;
         }
-
     }
 
     //Declare the interface. The method messageReceived(String message) will must be implemented in the MyActivity
