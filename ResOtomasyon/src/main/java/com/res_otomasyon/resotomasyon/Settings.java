@@ -14,10 +14,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-
+import android.widget.RelativeLayout;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import ekclasslar.ShowAlertDialog;
@@ -32,9 +33,8 @@ public class Settings extends Activity implements View.OnClickListener {
     GlobalApplication g;
     public String srvrMessage;
     AlertDialog alertDialog;
-
-    int kacinci = 1;
-    int kacDosya;
+    Boolean dosyaAktarimiVarMi = false;
+    int kacinci = 1, kacDosya;
     SharedPreferences preferences;
 
     @Override
@@ -97,11 +97,12 @@ public class Settings extends Activity implements View.OnClickListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        /*
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
             veriGuncellemeyiBaslat();
-        }
+        }*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -120,14 +121,14 @@ public class Settings extends Activity implements View.OnClickListener {
                             .toString());
                     editor.putString("TabletName", ((EditText) findViewById(R.id.editTextTableName)).getText()
                             .toString());
-                    editor.commit();
+                    editor.apply();
                     showAlertDialog = new ShowAlertDialog();
-                    AlertDialog alertDialog = showAlertDialog.showAlert(this, context, "Kayıt başarılı",
+                    AlertDialog alertDialog = showAlertDialog.showAlert(context, "Kayıt başarılı",
                             "Ayarlar kayıt edildi.");
                     alertDialog.show();
                 } catch (Exception e) {
                     showAlertDialog = new ShowAlertDialog();
-                    AlertDialog alertDialog = showAlertDialog.showAlert(this, context, "Kayıt başarısız!",
+                    AlertDialog alertDialog = showAlertDialog.showAlert(context, "Kayıt başarısız!",
                             "Ayarlar kayıt edilemedi.");
                     alertDialog.show();
                 }
@@ -188,8 +189,7 @@ public class Settings extends Activity implements View.OnClickListener {
 
                         kacDosya = Integer.parseInt(collection.get("kacDosya"));
 
-                        //if(g.commonAsyncTask.client.dosyaAlimiBasariliMi) // dosya gönderimi başarılı    / başarısızsa aynı dosya yeniden istenir
-                            kacinci++;
+                        kacinci++;
 
                         Log.i("asfasf", "Yeni Dosya istendi - " + kacinci);
 
@@ -202,20 +202,22 @@ public class Settings extends Activity implements View.OnClickListener {
                                 alertDialog.show();
                             }
                         });
+                        setViewGroupEnabled((RelativeLayout)findViewById(R.id.settings), true);
+                        dosyaAktarimiVarMi = false;
                         break;
                     case modemBilgileri:
                         SharedPreferences.Editor editor = preferences.edit();
                         try {
                             editor.putString("SSID", collection.get("SSID"));
                             editor.putString("ModemSifresi", collection.get("Sifre"));
-                            editor.commit();
+                            editor.apply();
                             showAlertDialog = new ShowAlertDialog();
-                            AlertDialog alertDialog = showAlertDialog.showAlert(Settings.this, context, "Kayıt başarılı",
+                            AlertDialog alertDialog = showAlertDialog.showAlert(context, "Kayıt başarılı",
                                     "Modem bilgileri kayıt edildi.");
                             alertDialog.show();
                         } catch (Exception e) {
                             showAlertDialog = new ShowAlertDialog();
-                            AlertDialog alertDialog = showAlertDialog.showAlert(Settings.this, context, "Kayıt başarısız!",
+                            AlertDialog alertDialog = showAlertDialog.showAlert(context, "Kayıt başarısız!",
                                     "Modem bilgileri kayıt edilemedi.");
                             alertDialog.show();
                         }
@@ -228,9 +230,33 @@ public class Settings extends Activity implements View.OnClickListener {
         }
     };
 
+    @Override
+    public void onBackPressed() {
+        if(!dosyaAktarimiVarMi)
+            super.onBackPressed();
+    }
+
     private void veriGuncellemeyiBaslat()
     {
         g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=1");
+        setViewGroupEnabled((RelativeLayout)findViewById(R.id.settings), false);
+        dosyaAktarimiVarMi = true;
+    }
+
+    public static void setViewGroupEnabled(ViewGroup view, boolean enabled)
+    {
+        int children = view.getChildCount();
+
+        for (int i = 0; i< children ; i++)
+        {
+            View child = view.getChildAt(i);
+            if (child instanceof ViewGroup)
+            {
+                setViewGroupEnabled((ViewGroup) child, enabled);
+            }
+            child.setEnabled(enabled);
+        }
+        view.setEnabled(enabled);
     }
 
 }

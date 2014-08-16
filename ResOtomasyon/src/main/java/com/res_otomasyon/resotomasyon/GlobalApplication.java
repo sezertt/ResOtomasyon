@@ -6,8 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.support.v4.content.LocalBroadcastManager;
-
 import java.util.ArrayList;
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
@@ -15,17 +13,13 @@ import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.TCPClient;
 import ekclasslar.DepartmanMasalari;
 
-/**
- * Created by Mustafa on 22.7.2014.
- */
 public class GlobalApplication extends Application {
 
     public CommonAsyncTask commonAsyncTask;
     SharedPreferences preferences;
-    TCPClient mTcpClient;
     Activity activity;
-    public LocalBroadcastManager localBroadcastManager;
     public BroadcastReceiver broadcastReceiver;
+    public boolean isMenuEkraniRunning = false;
 
     public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
     public ArrayList<MasaninSiparisleri> masaninSiparisleri = new ArrayList<MasaninSiparisleri>();
@@ -40,16 +34,14 @@ public class GlobalApplication extends Application {
     public enum Komutlar {
         Default,siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri;
+        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri
     }
 
-    public void connectServer(Handler myHandler) {
-        try {
-            preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-            mTcpClient.SERVERIP = preferences.getString("IPAddress", "0");
-            mTcpClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
-            commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity,
-                    myHandler).execute((Handler[]) null);
-        } catch (Exception e) { }
+    public void connectServer(Handler myHandler) throws Exception {
+        preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+        TCPClient.SERVERIP = preferences.getString("IPAddress", "0");
+        TCPClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
+        commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity,
+                myHandler).execute((Handler[]) null);
     }
 }

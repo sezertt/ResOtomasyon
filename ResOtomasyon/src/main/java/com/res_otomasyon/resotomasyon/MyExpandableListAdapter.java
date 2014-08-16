@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,13 +18,8 @@ import android.widget.TextView;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-
 import Entity.Siparis;
 import ekclasslar.UrunBilgileri;
-
-/**
- * Created by sezer on 08.07.2014.
- */
 
 public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
@@ -84,7 +80,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         final ImageView image;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.urun_gorunumu, null);
+            convertView = inflater.inflate(R.layout.urun_gorunumu, parent, false);
         }
 
         final TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewChildPrice);
@@ -94,7 +90,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         text.setText(productInfo);
 
         image = (ImageView) convertView.findViewById(R.id.imageView);
-        File file = new File("/mnt/sdcard/shared/Lenovo/Resimler/" + productName + ".png");
+        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/Resimler/" + productName + ".png");
         Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
         image.setImageBitmap(bmp);
         final TextView textName = (TextView) convertView.findViewById(R.id.textViewChildHeader);
@@ -545,7 +541,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.kategori_gorunumu, null);
+            convertView = inflater.inflate(R.layout.kategori_gorunumu, parent, false);
         }
         UrunBilgileri group = (UrunBilgileri) getGroup(groupPosition);
 

@@ -1,18 +1,12 @@
 package HashPassword;
-import android.util.Base64;
 
+import android.util.Base64;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
-
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-/*
- * PBKDF2 salted password hashing.
- * Author: havoc AT defuse.ca
- * www: http://crackstation.net/hashing-security.htm
- */
 public class passwordHash {
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 

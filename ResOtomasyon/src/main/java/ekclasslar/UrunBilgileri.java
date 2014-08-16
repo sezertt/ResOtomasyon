@@ -2,9 +2,7 @@ package ekclasslar;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
- * Created by sezer on 08.07.2014.
- */
+
 public class UrunBilgileri {
 
     public String productGroupName;

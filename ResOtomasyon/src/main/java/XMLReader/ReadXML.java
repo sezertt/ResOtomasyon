@@ -1,41 +1,24 @@
 package XMLReader;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Base64;
-import android.util.Xml;
-
-import org.apache.http.util.EncodingUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.nio.charset.CharsetEncoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
 import Entity.Urunler;
 
-/**
- * Created by Mustafa on 10.6.2014.
- */
 public class ReadXML {
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = null;
@@ -111,11 +94,11 @@ public class ReadXML {
                             for (int k = 0; k < nListUrunAdi.getLength(); k++) {
                                 Urunler u = new Urunler();
 
-                                u.urunAdi = nListUrunAdi.item(k).getTextContent().toString();
-                                u.porsiyonFiyati = nListPorsiyonFiyati.item(k).getTextContent().toString();
-                                u.urunAciklamasi = nListUrunAciklamasi.item(k).getTextContent().toString();
-                                u.urunKDV = Integer.parseInt(nListUrunKDV.item(k).getTextContent().toString());
-                                u.urunPorsiyonu = Double.parseDouble(nListUrunPorsiyonu.item(k).getTextContent().toString());
+                                u.urunAdi = nListUrunAdi.item(k).getTextContent();
+                                u.porsiyonFiyati = nListPorsiyonFiyati.item(k).getTextContent();
+                                u.urunAciklamasi = nListUrunAciklamasi.item(k).getTextContent();
+                                u.urunKDV = Integer.parseInt(nListUrunKDV.item(k).getTextContent());
+                                u.urunPorsiyonu = Double.parseDouble(nListUrunPorsiyonu.item(k).getTextContent());
                                 u.urunKategorisi = elementNodeUrunler.getElementsByTagName("kategorininAdi").item(0).getTextContent();
                                 lstUrunler.add(u);
                             }
@@ -131,6 +114,7 @@ public class ReadXML {
         return lstUrunler;
     }
 
+    /*
     public ArrayList<String> readKategoriler(List<File> files) {
         try {
             dBuilder = dbFactory.newDocumentBuilder();
@@ -150,7 +134,7 @@ public class ReadXML {
                     NodeList nListString = elementArrayOfString.getElementsByTagName("string");
 
                     for (int i = 0; i < nListString.getLength(); i++) {
-                        String x = nListString.item(i).getTextContent().toString();
+                        String x = nListString.item(i).getTextContent();
                         lstKategoriler.add(x);
                     }
                 }
@@ -162,6 +146,7 @@ public class ReadXML {
         }
         return lstKategoriler;
     }
+    */
 
     public ArrayList<MasaDizayn> readMasaDizayn(List<File> files) {
         try {
@@ -215,8 +200,7 @@ public class ReadXML {
 
     public String BaseConverter(String text) throws UnsupportedEncodingException {
         byte[] bytes = Base64.decode(text, Base64.DEFAULT);
-        String outPut = new String(bytes, "UTF-16LE");
-        return outPut;
+        return new String(bytes, "UTF-16LE");
     }
 
     public ArrayList<Employee> readEmployees(List<File> files) {

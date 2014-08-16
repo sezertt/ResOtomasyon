@@ -25,7 +25,6 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Locale;
-
 import Entity.Employee;
 import Entity.Siparis;
 
@@ -47,6 +46,7 @@ public class HesapEkrani extends Activity {
     Button buttonSepet, buttonNot;
     Boolean ikramMi;
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -1,15 +1,11 @@
 package ekclasslar;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-/**
- * Created by Mustafa on 26.6.2014.
- */
 public class ShowAlertDialog {
-    public AlertDialog showAlert(final Activity activity, Context context, String title, String message) {
+    public AlertDialog showAlert(Context context, String title, String message) {
         AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
         aBuilder.setTitle(title);
         aBuilder.setMessage(message).setCancelable(false)

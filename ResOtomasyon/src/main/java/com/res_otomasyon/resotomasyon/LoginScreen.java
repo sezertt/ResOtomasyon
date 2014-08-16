@@ -1,6 +1,5 @@
 package com.res_otomasyon.resotomasyon;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,21 +7,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +31,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-
 import ekclasslar.FileIO;
 import Entity.Employee;
 import HashPassword.passwordHash;
@@ -40,7 +38,7 @@ import XMLReader.ReadXML;
 import ekclasslar.TryConnection;
 
 
-public class LoginScreen extends Activity implements View.OnClickListener {
+public class LoginScreen extends ActionBarActivity implements View.OnClickListener {
 
     Intent intent;
     Button btnGiris;
@@ -55,14 +53,17 @@ public class LoginScreen extends Activity implements View.OnClickListener {
 
     @Override
     protected void onResume() {
+        btnGiris.setEnabled(true);
+
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
 
-        //checkNetwork();
+        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
+        checkNetwork.onReceive(context,intent);
 
         FileIO fileIO = new FileIO();
         List<File> files = null;
         try {
-            files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+            files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
         } catch (Exception ex) {
             intent = new Intent(LoginScreen.this, Settings.class);
             startActivity(intent);
@@ -102,47 +103,6 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         super.onResume();
     }
 
-    private void checkNetwork() {
-        final ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        final android.net.NetworkInfo wifi = connMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-        String networkSSID = "AirTies_Air5650_74XD";
-        String networkPass = "m63uTpM7F6";
-        String ssid = "";
-
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        ssid = wifiInfo.getSSID();
-
-        if (wifi.isAvailable() && !wifi.isConnectedOrConnecting()) {
-
-            WifiConfiguration wifiConfig = new WifiConfiguration();
-            wifiConfig.SSID = "\"" + networkSSID + "\"";   // Please note the quotes. String should contain ssid in quotes
-
-            //WPA
-            wifiConfig.preSharedKey = "\"" + networkPass + "\"";
-
-            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-            for (WifiConfiguration i : list) {
-                if (i.SSID != null && i.SSID.equals("\"" + networkSSID + "\"")) {
-                    if (!ssid.contentEquals("\"" + networkSSID + "\"")) {
-                        wifiManager.disconnect();
-                        wifiManager.enableNetwork(i.networkId, true);
-                        wifiManager.reconnect();
-                        break;
-                    }
-                }
-            }
-        } else {
-            if (!ssid.contentEquals(networkSSID)) // bizim ağımızdan farklı bir ağa bağlı ise bağlantıyı kopar.
-            {
-                wifiManager.disconnect();
-                checkNetwork();
-            }
-        }
-    }
-
     @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
@@ -175,12 +135,24 @@ public class LoginScreen extends Activity implements View.OnClickListener {
         btnGiris = (Button) findViewById(R.id.btnGiris);
         btnGiris.setOnClickListener(this);
 
+        EditText pin = (EditText) findViewById(R.id.editTextPin);
+
+        pin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    if(btnGiris.isEnabled())
+                        btnGiris.callOnClick();
+                }
+                return false;
+            }
+        });
+
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
-                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                LoginScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
             } else {
-                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-
+                LoginScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
             }
         }
         t = new TryConnection(g, myHandler);
@@ -212,7 +184,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                             if (activityVisible) {
                                 if (!t.timerRunning)
                                     t.startTimer();
-                                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                LoginScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                 EditText e = (EditText) findViewById(R.id.editTextPin);
                                 btnGiris.setEnabled(false);
                                 e.setFocusable(false);
@@ -245,7 +217,8 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                             e.setFocusableInTouchMode(true);
                             e.setFocusable(true);
                             btnGiris.setEnabled(true);
-                            getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            LoginScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+
                             if (t != null && t.timer != null) {
                                 t.stopTimer();
                             }
@@ -339,6 +312,7 @@ public class LoginScreen extends Activity implements View.OnClickListener {
                     intent = new Intent(LoginScreen.this, MasaEkrani.class);
                     intent.putExtra("lstEmployees", lstEmployees);
                     startActivity(intent);
+                    btnGiris.setEnabled(false);
                 } else {
                     AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
                     aBuilder.setTitle("Hatalı Pin");

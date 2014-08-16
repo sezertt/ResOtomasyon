@@ -1,6 +1,5 @@
 package com.res_otomasyon.resotomasyon;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,9 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.util.SparseArray;
 import android.view.Menu;
@@ -21,7 +22,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -31,7 +31,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-
 import Entity.Siparis;
 import ekclasslar.FileIO;
 import ekclasslar.TryConnection;
@@ -42,7 +41,7 @@ import HashPassword.passwordHash;
 import XMLReader.ReadXML;
 
 
-public class MenuEkrani extends Activity {
+public class MenuEkrani extends ActionBarActivity {
 
     Menu menu;
 
@@ -50,7 +49,7 @@ public class MenuEkrani extends Activity {
     private String m_Text = "";
     ArrayList<Employee> lstEmployee;
 
-    boolean masaKilitliMi = false, passCorrect = false, activityVisible = true, ilkAcilisGectiMi = false;
+    boolean masaKilitliMi = false, passCorrect = false, activityVisible = true;
     Context context = this;
     MenuItem item;
     ArrayList<Urunler> lstProducts;
@@ -113,15 +112,45 @@ public class MenuEkrani extends Activity {
                         ex.printStackTrace();
                     }
                     break;
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    preferences = MenuEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
+
+                    if (g.commonAsyncTask.client != null) {
+                        if (g.commonAsyncTask.client.out != null) {
+                            g.commonAsyncTask.client.sendMessage(girisKomutu);
+                            ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+
+                            t.stopTimer();
+                        } else {
+                            hataVer();
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
         }
     };
 
+    private void hataVer() {
+        AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
+        aBuilder.setTitle("Bağlantı Hatası");
+        aBuilder.setMessage("Sunucuya bağlanırken bir hata ile karşılaşıldı. Lütfen tekrar deneyiniz")
+                .setCancelable(false)
+                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MenuEkrani.this.finish();
+                    }
+                });
+        AlertDialog alertDialog = aBuilder.create();
+        alertDialog.show();
+    }
+
     @Override
     protected void onResume() {
-
         LocalBroadcastManager.getInstance(this).registerReceiver(rec, new IntentFilter("myevent"));
 
         if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
@@ -146,6 +175,7 @@ public class MenuEkrani extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        g.isMenuEkraniRunning = false;
         activityVisible = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
     }
@@ -155,29 +185,6 @@ public class MenuEkrani extends Activity {
         if (!masaKilitliMi)
             this.finish();
     }
-
-    //Tekrar bağlan durumunda.
-    public Handler handlerTekrarBaglan = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 2:
-                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    preferences = MenuEkrani.this.getSharedPreferences("MyPreferences",
-                            Context.MODE_PRIVATE);
-                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
-                    if (g.commonAsyncTask.client != null) {
-                        if (g.commonAsyncTask.client.out != null) {
-                            g.commonAsyncTask.client.sendMessage(girisKomutu);
-                            t.stopTimer();
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 
     BroadcastReceiver rec = new BroadcastReceiver() {
 
@@ -208,7 +215,7 @@ public class MenuEkrani extends Activity {
                                 if (activityVisible) {
                                     if (!t.timerRunning)
                                         t.startTimer();
-                                    getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                    MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlantı yok)");
                                 }
                             }
                         });
@@ -229,11 +236,14 @@ public class MenuEkrani extends Activity {
         }
     };
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         g = (GlobalApplication) getApplicationContext();
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_menu_ekrani);
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
@@ -243,7 +253,7 @@ public class MenuEkrani extends Activity {
         List<File> files = null;
 
         try {
-            files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+            files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -253,10 +263,9 @@ public class MenuEkrani extends Activity {
 
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
-                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlı)");
             } else {
-                getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-
+                MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlantı yok)");
             }
         }
         t = new TryConnection(g, myHandler);
@@ -266,11 +275,11 @@ public class MenuEkrani extends Activity {
                 g.commonAsyncTask.client.sendMessage("komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
             }
         });
-
     }
 
     @Override
     protected void onStop() {
+        g.isMenuEkraniRunning = false;
         activityVisible = false;
         super.onStop();
     }
@@ -278,6 +287,7 @@ public class MenuEkrani extends Activity {
     @Override
     protected void onDestroy() {
         activityVisible = false;
+        g.isMenuEkraniRunning = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
         super.onDestroy();
     }
@@ -420,31 +430,26 @@ public class MenuEkrani extends Activity {
 
     private void setLstOrderedProducts (UrunBilgileri group,DecimalFormat df, int i,ArrayList<Siparis>arrayListPorsiyon,Double carpan)
     {
-        for(int k=0;k<arrayListPorsiyon.size();k++)
-        {
-            if(arrayListPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi))
-            {
-                group.productCount.set(group.productCount.size()-1,df.format(Double.parseDouble(arrayListPorsiyon.get(k).miktar)*carpan+(Double.parseDouble(group.productCount.get(i)))));
+        for (Siparis anArrayListPorsiyon : arrayListPorsiyon) {
+            if (anArrayListPorsiyon.yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
+                group.productCount.set(group.productCount.size() - 1, df.format(Double.parseDouble(anArrayListPorsiyon.miktar) * carpan + (Double.parseDouble(group.productCount.get(i)))));
 
-                int siparisVarmi= -1;
-                for(int l = 0 ; l< lstOrderedProducts.size();l++) {
+                int siparisVarmi = -1;
+                for (int l = 0; l < lstOrderedProducts.size(); l++) {
                     if (lstOrderedProducts.get(l).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
                         siparisVarmi = l;
                         break;
                     }
                 }
-                if(siparisVarmi == -1)
-                {
+                if (siparisVarmi == -1) {
                     Siparis siparis = new Siparis();
                     siparis.porsiyonSinifi = lstProducts.get(i).urunPorsiyonu;
                     siparis.miktar = carpan.toString();
                     siparis.porsiyonFiyati = lstProducts.get(i).porsiyonFiyati;
                     siparis.yemekAdi = lstProducts.get(i).urunAdi;
                     lstOrderedProducts.add(siparis);
-                }
-                else
-                {
-                    lstOrderedProducts.get(siparisVarmi).miktar =df.format(Double.parseDouble(arrayListPorsiyon.get(k).miktar)*carpan+(Double.parseDouble(lstOrderedProducts.get(siparisVarmi).miktar)));
+                } else {
+                    lstOrderedProducts.get(siparisVarmi).miktar = df.format(Double.parseDouble(anArrayListPorsiyon.miktar) * carpan + (Double.parseDouble(lstOrderedProducts.get(siparisVarmi).miktar)));
                 }
                 break;
             }

@@ -4,18 +4,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-
 import com.res_otomasyon.resotomasyon.FragmentMasaEkrani;
-
 import java.util.ArrayList;
-
 import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
 
-/**
- * Created by Mustafa on 10.6.2014.
- */
 public class CollectionPagerAdapter extends FragmentPagerAdapter {
     public ArrayList<Departman> lstDepartmanlar;
     public ArrayList<MasaDizayn> lstMasaDizayn;

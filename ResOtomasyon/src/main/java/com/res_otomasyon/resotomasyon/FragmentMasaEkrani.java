@@ -17,14 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-
 import java.util.ArrayList;
-
 import Entity.Employee;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class FragmentMasaEkrani extends Fragment implements View.OnClickListener {
 
     String[] acikMasalar;
@@ -35,16 +30,13 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     public String acilanMasa;
     public String kapananMasa;
     public String acilanMasaDepartman;
-    public String kilitliMasa;
-    public String kilitliDepartman;
-
+    GlobalApplication g;
     View fragmentView;
     TableLayout tableView;
     ScrollView scrollView;
     LinearLayout linearLayout;
 
-    Button btn;
-    Button button;
+    Button masaButton;
 
     public class getKapananMasa implements Runnable {
         public String _kapananMasa;
@@ -104,9 +96,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         @Override
         public void run() {
             while (_DepartmanAdi == null) {
-
             }
-
             acikMasalar = this.arrayAcikmasalar;
             departmanAdi = this._DepartmanAdi;
             myHandler.sendEmptyMessage(0);
@@ -120,32 +110,31 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
             switch (msg.what) {
                 case 0:
                     if (acikMasalar != null) {
-                        for (int i = 0; i < masalar.size(); i++) {
-                            button = (Button) fragmentView.findViewWithTag(masalar.get(i));
-                            button.setBackgroundResource(R.drawable.buttonstyle);
-                            for (int j = 0; j < acikMasalar.length; j++) {
-                                String masaAdi = acikMasalar[j];
-                                if (button.getTag().toString().contentEquals(masaAdi)) {
-                                    button.setBackgroundResource(R.drawable.buttonstyleacikmasa);
-                                    button.setOnClickListener(FragmentMasaEkrani.this);
+                        for (String aMasalar : masalar) {
+                            masaButton = (Button) fragmentView.findViewWithTag(aMasalar);
+                            masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                            for (String masaAdi : acikMasalar) {
+                                if (masaButton.getTag().toString().contentEquals(masaAdi)) {
+                                    masaButton.setBackgroundResource(R.drawable.buttonstyleacikmasa);
+                                    masaButton.setOnClickListener(FragmentMasaEkrani.this);
                                 }
                             }
                         }
                     } else {
-                        for (int i = 0; i < masalar.size(); i++) {
-                            button = (Button) fragmentView.findViewWithTag(masalar.get(i));
-                            button.setBackgroundResource(R.drawable.buttonstyle);
-                            button.setOnClickListener(FragmentMasaEkrani.this);
+                        for (String aMasalar : masalar) {
+                            masaButton = (Button) fragmentView.findViewWithTag(aMasalar);
+                            masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                            masaButton.setOnClickListener(FragmentMasaEkrani.this);
                         }
                     }
                     break;
                 case 1:
-                    button = (Button) fragmentView.findViewWithTag(kapananMasa);
-                    button.setBackgroundResource(R.drawable.buttonstyle);
+                    masaButton = (Button) fragmentView.findViewWithTag(kapananMasa);
+                    masaButton.setBackgroundResource(R.drawable.buttonstyle);
                     break;
                 case 2:
-                    button = (Button) fragmentView.findViewWithTag(acilanMasa);
-                    button.setBackgroundResource(R.drawable.buttonstyleacikmasa);
+                    masaButton = (Button) fragmentView.findViewWithTag(acilanMasa);
+                    masaButton.setBackgroundResource(R.drawable.buttonstyleacikmasa);
                     break;
                 default:
                     break;
@@ -155,6 +144,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
     SharedPreferences preferences;
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onAttach(Activity activity) {
         preferences = getActivity().getSharedPreferences("KilitliMasa",
@@ -164,11 +154,16 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
         if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
             if (preferences.getBoolean("MasaKilitli", false)) {
-                Intent intent = new Intent(getActivity(), MenuEkrani.class);
-                intent.putExtra("DepartmanAdi", this.departmanAdi);
-                intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
-                intent.putExtra("lstEmployees", this.lstEmployees);
-                startActivity(intent);
+                if(!g.isMenuEkraniRunning)
+                {
+                    Intent intent = new Intent(getActivity(), MenuEkrani.class);
+                    intent.putExtra("DepartmanAdi", this.departmanAdi);
+                    intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
+                    intent.putExtra("lstEmployees", this.lstEmployees);
+
+                    startActivity(intent);
+                    g.isMenuEkraniRunning = true;
+                }
             }
         }
         super.onAttach(activity);
@@ -189,22 +184,30 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(getActivity(), MenuEkrani.class);
-        intent.putExtra("DepartmanAdi", this.departmanAdi);
-        intent.putExtra("MasaAdi", v.getTag().toString());
-        intent.putExtra("lstEmployees", this.lstEmployees);
-        startActivity(intent);
+        if(!g.isMenuEkraniRunning)
+        {
+            Intent intent = new Intent(getActivity(), MenuEkrani.class);
+            intent.putExtra("DepartmanAdi", this.departmanAdi);
+            intent.putExtra("MasaAdi", v.getTag().toString());
+            intent.putExtra("lstEmployees", this.lstEmployees);
+
+            startActivity(intent);
+            g.isMenuEkraniRunning = true;
+        }
     }
 
     public FragmentMasaEkrani() {
         // Required empty public constructor
     }
 
-
+    @SuppressWarnings("unchecked")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
+        g = (GlobalApplication) getActivity().getApplicationContext();
+
         fragmentView = inflater.inflate(R.layout.fragment_fragment_masa_design, container, false);
         this.masalar = getArguments().getStringArrayList("masalar");
         this.departmanAdi = getArguments().getString("departmanAdi");
@@ -228,22 +231,22 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         TableRow.LayoutParams paramsBtn = new TableRow.LayoutParams(TableRow.LayoutParams
                 .MATCH_PARENT, TableRow.LayoutParams.MATCH_PARENT);
         paramsBtn.setMargins(20, 0, 20, 0);
-        int numberOfRows = (int) Math.round(masalar.size() / 3);
+        int numberOfRows = Math.round(masalar.size() / 3);
         int masaCounter = 0;
         int numberOfButtonsForLastRow = masalar.size() - numberOfRows * 3;
         for (int i = 0; i < numberOfRows; i++) {
             tr = new TableRow(getActivity());
             tr.setLayoutParams(layoutParams);
             for (int j = 0; j < 3; j++) {
-                btn = new Button(tr.getContext());
-                btn.setBackgroundResource(R.drawable.buttonstyle);
-                btn.setText(masalar.get(masaCounter));
-                btn.setTag(masalar.get(masaCounter));
-                btn.setWidth(160);
-                btn.setHeight(160);
-                btn.setLayoutParams(paramsBtn);
-                btn.setOnClickListener(this);
-                tr.addView(btn);
+                masaButton = new Button(tr.getContext());
+                masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                masaButton.setText(masalar.get(masaCounter));
+                masaButton.setTag(masalar.get(masaCounter));
+                masaButton.setWidth(160);
+                masaButton.setHeight(160);
+                masaButton.setLayoutParams(paramsBtn);
+                masaButton.setOnClickListener(this);
+                tr.addView(masaButton);
                 masaCounter++;
             }
             tableView.addView(tr);
@@ -252,19 +255,18 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
             tr = new TableRow(tableView.getContext());
             tr.setLayoutParams(layoutParams);
             for (int j = 0; j < numberOfButtonsForLastRow; j++) {
-                btn = new Button(fragmentView.getContext());
-                btn.setBackgroundResource(R.drawable.buttonstyle);
-                btn.setText(masalar.get(masaCounter));
-                btn.setTag(masalar.get(masaCounter));
-                btn.setHeight(160);
-                btn.setLayoutParams(paramsBtn);
-                btn.setOnClickListener(this);
-                tr.addView(btn);
+                masaButton = new Button(fragmentView.getContext());
+                masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                masaButton.setText(masalar.get(masaCounter));
+                masaButton.setTag(masalar.get(masaCounter));
+                masaButton.setHeight(160);
+                masaButton.setLayoutParams(paramsBtn);
+                masaButton.setOnClickListener(this);
+                tr.addView(masaButton);
                 masaCounter++;
             }
             tableView.addView(tr);
         }
-
         scrollView.addView(tableView);
         linearLayout.addView(scrollView);
         fragmentView = linearLayout;

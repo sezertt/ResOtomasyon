@@ -1,29 +1,18 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.TextView;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
-
 import Entity.Siparis;
-
-/**
- * Created by sezer on 01.08.2014.
- */
 
 public class MyListAdapter extends BaseAdapter {
 
@@ -32,7 +21,6 @@ public class MyListAdapter extends BaseAdapter {
     ArrayList<Siparis> siparisListesi = new ArrayList<Siparis>();
     Boolean hesapMi;
     private int selectedIndex;
-    private int selectedColor = Color.WHITE;
 
     public MyListAdapter(ArrayList<Siparis> siparisListesi,Activity act, Boolean hesapMi) {
         activity = act;
@@ -66,7 +54,7 @@ public class MyListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.hesap_urun_gorunumu, null);
+            convertView = inflater.inflate(R.layout.hesap_urun_gorunumu, parent, false);
         }
 
         TextView textYemekAdi = (TextView) convertView.findViewById(R.id.textViewYemekAdi);
@@ -84,7 +72,8 @@ public class MyListAdapter extends BaseAdapter {
         catch (Exception ex)
         {
             NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
-            Number number = null;
+            Number number;
+
             //burası virgüllü stringi double a convert etme çevirme kısmı
             try {
                 number = format.parse(siparisListesi.get(position).porsiyonFiyati);
@@ -113,6 +102,7 @@ public class MyListAdapter extends BaseAdapter {
         }
         else
         {
+            int selectedColor = Color.WHITE;
             convertView.setBackgroundColor(selectedColor);
         }
 

@@ -2,7 +2,6 @@ package com.res_otomasyon.resotomasyon;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,24 +9,21 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-
-import android.support.v4.app.FragmentActivity;
 import android.view.WindowManager;
-
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.CollectionPagerAdapter;
@@ -36,17 +32,16 @@ import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
 import TCPClientSide.CommonAsyncTask;
-import TCPClientSide.TCPClient;
 import XMLReader.ReadXML;
 import ekclasslar.TryConnection;
 
 
-public class MasaEkrani extends FragmentActivity implements ActionBar.TabListener, CommonAsyncTask.OnAsyncRequestComplete {
+public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnAsyncRequestComplete, android.support.v7.app.ActionBar.TabListener {
 
     final FragmentMasaEkrani[] fragment = {new FragmentMasaEkrani()};
     //
-    ActionBar actionBar;
-    ActionBar.Tab tab;
+    android.support.v7.app.ActionBar actionBar;
+    android.support.v7.app.ActionBar.Tab tab;
     ViewPager mViewPager;
     //
     ArrayList<Departman> lstDepartmanlar;
@@ -70,47 +65,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
     Context context = this;
     GlobalApplication g;
     TryConnection t;
-
-    @Override
-    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-        mViewPager.setCurrentItem(tab.getPosition());
-        tabName = (String) tab.getText();
-        String komut = "komut=departman&departmanAdi=" + tabName;
-        if (g.commonAsyncTask.client != null && mesajGeldi == false) {
-            g.commonAsyncTask.client.sendMessage(komut);
-        }
-    }
-
-    @Override
-    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-    }
-
-    @Override
-    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-    }
-
-    //Tekrar bağlan durumunda.
-    public Handler handlerTekrarBaglan = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 2:
-                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
-                    if (g.commonAsyncTask.client != null) {
-                        if (g.commonAsyncTask.client.out != null) {
-                            g.commonAsyncTask.client.sendMessage(girisKomutu);
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
 
     public Handler myHandler = new Handler() {
 
@@ -136,7 +90,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                                     if (activityVisible) {
                                         if (!t.timerRunning)
                                             t.startTimer();
-                                        getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                        ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                     }
                                 }
                             });
@@ -211,7 +165,8 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
-                            getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+
                             t.stopTimer();
                         } else {
                             hataVer();
@@ -224,6 +179,7 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         }
     };
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -242,14 +198,15 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 }
             };
             LocalBroadcastManager.getInstance(context).registerReceiver(g.broadcastReceiver,new IntentFilter("myevent"));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
+
         }
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         FileIO fileIO = new FileIO();
         List<File> files;
-        files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+        files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
         ReadXML readXML = new ReadXML();
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
@@ -261,51 +218,49 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         //Giriş ekranından gelen çalışan bilgilerini alır.
         Bundle extras = getIntent().getExtras();
         lstEmployees = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
-        Object lockObject = new Object();
-        synchronized (lockObject) {
-            setContentView(R.layout.activity_masa_ekrani);
-            collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
-            collectionPagerAdapter.lstDepartmanlar = lstDepartmanlar;
-            collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
-            collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
-            collectionPagerAdapter.lstEmployees = lstEmployees;
-            collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
-            collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
-            mViewPager = (ViewPager) findViewById(R.id.pager);
-            mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
-            mViewPager.setAdapter(collectionPagerAdapter);
-            mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-                }
+        setContentView(R.layout.activity_masa_ekrani);
+        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+        collectionPagerAdapter.lstDepartmanlar = lstDepartmanlar;
+        collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
+        collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
+        collectionPagerAdapter.lstEmployees = lstEmployees;
+        collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
+        collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
+        mViewPager.setAdapter(collectionPagerAdapter);
+        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-                @Override
-                public void onPageSelected(int position) {
-                    actionBar.setSelectedNavigationItem(position);
-                }
+            }
 
-                @Override
-                public void onPageScrollStateChanged(int state) {
+            @Override
+            public void onPageSelected(int position) {
+                actionBar.setSelectedNavigationItem(position);
+            }
 
-                }
-            });
-            t = new TryConnection(g, myHandler);
-            if (g.commonAsyncTask.client != null) {
-                if (g.commonAsyncTask.client.out != null) {
-                    getActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-                } else {
-                    getActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+            @Override
+            public void onPageScrollStateChanged(int state) {
 
-                }
+            }
+        });
+        t = new TryConnection(g, myHandler);
+        if (g.commonAsyncTask.client != null) {
+            if (g.commonAsyncTask.client.out != null) {
+                ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+            } else {
+                ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
             }
         }
+
     }
 
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        actionBar = getActionBar();
+        actionBar = ((ActionBarActivity) context).getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         for (Departman departman : lstDepartmanlar) {
             tab = actionBar.newTab().setText(departman.DepartmanAdi);
@@ -345,15 +300,19 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         super.onStop();
     }
 
-    BroadcastReceiver rec = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //all events will be received here
-            //get message
-            srvrMessage = intent.getStringExtra("message");
-            myHandler.sendEmptyMessage(1);
-        }
-    };
+    BroadcastReceiver rec;
+
+    {
+        rec = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //all events will be received here
+                //get message
+                srvrMessage = intent.getStringExtra("message");
+                myHandler.sendEmptyMessage(1);
+            }
+        };
+    }
 
     @Override
     protected void onResume() {
@@ -366,20 +325,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         }
         activityVisible = true;
         super.onResume();
-    }
-
-    private void hataVerIsim() {
-        AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
-        aBuilder.setTitle("Bağlantı Hatası");
-        aBuilder.setMessage("Bilgisayar adı kullanımda.Lütfen ayarları kullanarak kullanıcı adınızı değiştirip tekrar deneniyiniz.").setCancelable(false)
-                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        MasaEkrani.this.finish();
-                    }
-                });
-        AlertDialog alertDialog = aBuilder.create();
-        alertDialog.show();
     }
 
     private void hataVer() {
@@ -395,18 +340,6 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
                 });
         AlertDialog alertDialog = aBuilder.create();
         alertDialog.show();
-    }
-
-    public Fragment getVisibleFragment() {
-        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
-        Fragment visibleFragment = new Fragment();
-        for (Fragment fragment : allFragments) {
-            if (fragment.getUserVisibleHint()) {
-                visibleFragment = fragment;
-                break;
-            }
-        }
-        return visibleFragment;
     }
 
     @Override
@@ -428,9 +361,34 @@ public class MasaEkrani extends FragmentActivity implements ActionBar.TabListene
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+
+        /*
+        if (id == R.id.action_settings)
             return true;
-        }
         return super.onOptionsItemSelected(item);
+        */
+
+    }
+
+    @Override
+    public void onTabSelected(android.support.v7.app.ActionBar.Tab tab, android.support.v4.app.FragmentTransaction fragmentTransaction) {
+        mViewPager.setCurrentItem(tab.getPosition());
+        tabName = (String) tab.getText();
+        String komut = "komut=departman&departmanAdi=" + tabName;
+        if (g.commonAsyncTask.client != null && !mesajGeldi) {
+            g.commonAsyncTask.client.sendMessage(komut);
+        }
+    }
+
+    @Override
+    public void onTabUnselected(android.support.v7.app.ActionBar.Tab tab, android.support.v4.app.FragmentTransaction fragmentTransaction) {
+
+    }
+
+    @Override
+    public void onTabReselected(android.support.v7.app.ActionBar.Tab tab, android.support.v4.app.FragmentTransaction fragmentTransaction) {
+
     }
 }

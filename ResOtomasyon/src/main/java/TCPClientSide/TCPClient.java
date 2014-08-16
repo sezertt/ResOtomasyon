@@ -1,11 +1,9 @@
 package TCPClientSide;
 
-import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-
 import org.apache.http.util.EncodingUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,19 +20,13 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import ekclasslar.BitConverter;
-
-/**
- * Created by Mustafa on 20.5.2014.
- */
 public class TCPClient {
 
     public String serverMessage;
     public static String SERVERIP; //your computer IP address
     public static int SERVERPORT;
     private OnMessageReceived mMessageListener = null;
-    public boolean mRun = false, dosyaAlimiBasariliMi;
-    ;
+    public boolean mRun = false;
     public InputStream stream;
     public Socket socket;
     public PrintWriter out;
@@ -53,24 +45,11 @@ public class TCPClient {
     //Bağlantının kopup kopmadığını anlamak için server a ping at.
     Timer timer = new Timer();
 
-    static Boolean IsSocketConnected(Socket s) throws IOException {
-        //The long, but simpler-to-understand version:
-
-        Boolean part1 = s.isOutputShutdown();
-        Boolean part2 = (s.getInputStream().available() == 0);
-        if ((part1 && part2 ) || !s.isConnected())
-            return false;
-        else
-            return true;
-    }
-
-
     class pingToServer extends TimerTask {
         @Override
         public void run() {
             try {
-                serverStatus = serverAddr.isReachable(100);
-//                serverStatus = IsSocketConnected(socket);
+                serverStatus = serverAddr.isReachable(1000);
                 if(!serverStatus)
                 {
                     mRun=false;
@@ -109,7 +88,7 @@ public class TCPClient {
     }
 
     void callPingToServer() {
-        timer.schedule(new pingToServer(), 3000, 5000);
+        timer.schedule(new pingToServer(), 3000, 20000);
     }
 
     //Eğer bağlantı kopmuş ise ping atmayı durdur.
@@ -126,33 +105,6 @@ public class TCPClient {
         }
     }
 
-    class AsyncTaskClass extends AsyncTask<String, String, String> {
-
-        @Override
-        protected void onPreExecute() {
-            //uzun islem oncesi yapilacaklar
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-
-            //uzun islem sirasinda yapilacaklar
-            try {
-
-            } catch (Exception ex) {
-
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            //uzun islem bitince yapilacaklar
-        }
-    }
-
-
     public void getFolder() throws Exception {
         try {
             byte[] length = new byte[4];
@@ -166,10 +118,16 @@ public class TCPClient {
             arrayimiz[2] = (length[2] & 0xff);
             arrayimiz[3] = (length[3] & 0xff);
 
-            int fileDataLen = arrayimiz[0] * 1 + arrayimiz[1] * 256 + arrayimiz[2] * 65536 + arrayimiz[3] * 16777216;
+            int fileDataLen = arrayimiz[0]+ arrayimiz[1] * 256 + arrayimiz[2] * 65536 + arrayimiz[3] * 16777216;
 
             stream.read(length, 0, 4);
-            int fileNameLen = BitConverter.toInt32(length, 0);
+
+            arrayimiz[0] = (length[0] & 0xff);
+            arrayimiz[1] = (length[1] & 0xff);
+            arrayimiz[2] = (length[2] & 0xff);
+            arrayimiz[3] = (length[3] & 0xff);
+
+            int fileNameLen = arrayimiz[0]+ arrayimiz[1] * 256 + arrayimiz[2] * 65536 + arrayimiz[3] * 16777216;
 
             byte[] fileNameBuffer = new byte[fileNameLen];
             stream.read(fileNameBuffer, 0, fileNameLen);
@@ -180,14 +138,13 @@ public class TCPClient {
             byte[] buffer = new byte[fileDataLen];
 
             try {
-                int bytesNeeded = fileDataLen;
                 int bytesReceived = 0;
                 do {
                     //read byte from client
-                    int bytesRead = stream.read(buffer, bytesReceived, bytesNeeded - bytesReceived);
+                    int bytesRead = stream.read(buffer, bytesReceived, fileDataLen - bytesReceived);
                     bytesReceived += bytesRead;
                     // merge byte array to another byte array
-                } while (bytesReceived < bytesNeeded);   //  <- you should do this async.
+                } while (bytesReceived < fileDataLen);   //  <- you should do this async.
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -195,17 +152,17 @@ public class TCPClient {
             try {
                 FileOutputStream fOutStream;
                 if (uzanti[1].contentEquals("png")) {
-                    File folder = new File("/mnt/sdcard/shared/Lenovo/resimler/");
+                    File folder = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/resimler/");
                     if (!folder.exists()) {
                         folder.mkdirs();
                     }
-                    fOutStream = new FileOutputStream("/mnt/sdcard/shared/Lenovo/resimler/" + fileName + "", false);
+                    fOutStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/resimler/" + fileName + "", false);
                 } else {
-                    File folder = new File("/mnt/sdcard/shared/Lenovo/");
+                    File folder = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo");
                     if (!folder.exists()) {
                         folder.mkdirs();
                     }
-                    fOutStream = new FileOutputStream("/mnt/sdcard/shared/Lenovo/" + fileName + "", false);
+                    fOutStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo" + fileName + "", false);
                 }
                 fOutStream.write(buffer, 0, fileDataLen);
 
@@ -217,12 +174,14 @@ public class TCPClient {
         }
     }
 
+    /*
     public void stopClient() throws IOException {
         if (stream != null) {
             stream.close();
         }
         mRun = false;
     }
+    */
 
     public void run() {
 

@@ -1,7 +1,6 @@
 package TCPClientSide;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -9,21 +8,10 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.res_otomasyon.resotomasyon.StartScreen;
-
-import org.apache.http.NameValuePair;
-
-import java.util.List;
-
-/**
- * Created by Mustafa on 4.7.2014.
- */
 public class CommonAsyncTask extends AsyncTask<Handler, String, String> {
 
     OnAsyncRequestComplete caller;
     public Context context;
-    String method = "GET";
-    List<NameValuePair> parameters = null;
     public TCPClient client;
     LocalBroadcastManager localBroadcastManager;
     android.os.Handler myHandler;

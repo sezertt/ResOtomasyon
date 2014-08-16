@@ -3,7 +3,6 @@ package com.res_otomasyon.resotomasyon;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,16 +12,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-
 import java.io.File;
-
 import TCPClientSide.CommonAsyncTask;
-import TCPClientSide.TCPClient;
 
 public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
 
     SharedPreferences preferences;
-    Context context = this;
     GlobalApplication g;
 
     @Override
@@ -44,12 +39,15 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         } else {
             if (g.commonAsyncTask == null) {
                 g.activity = this;
-                g.connectServer(myHandler);
+                try {
+                    g.connectServer(myHandler);
+                } catch (Exception ignored) {
+                }
             }
         }
-        File folder= new File("/mnt/sdcard/shared/Lenovo/");
-        if(!folder.exists())
-            folder.mkdirs();
+        File folder= new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo");
+
+        folder.mkdirs();
     }
 
     int counterGiris = 0;
@@ -108,10 +106,13 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+        /*
         if (id == R.id.action_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
+         */
     }
 
     @Override

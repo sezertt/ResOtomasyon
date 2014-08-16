@@ -2,16 +2,15 @@ package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import Entity.Departman;
 import Entity.MasaDizayn;
 import XMLReader.ReadXML;
@@ -21,7 +20,6 @@ import ekclasslar.FileIO;
 public class MasaSecEkrani extends Activity implements View.OnClickListener {
 
     ArrayList<Departman> lstDepartmanlar;
-    ArrayList<ArrayList<Departman>> asd;
     ArrayList<MasaDizayn> lstMasaDizayn;
     String[] masaPlanIsmi;
     ArrayList<DepartmanMasalari> dptMasalar;
@@ -32,7 +30,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_masa_sec_ekrani);
         FileIO fileIO = new FileIO();
         List<File> files;
-        files = fileIO.getListFiles(new File("/mnt/sdcard/shared/Lenovo"));
+        files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
         ReadXML readXML = new ReadXML();
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
@@ -91,10 +89,14 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+        /*
         if (id == R.id.action_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
+        */
     }
 
     @Override
@@ -103,8 +105,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
             case R.id.masaKaydet:
                 GlobalApplication g = (GlobalApplication) getApplicationContext();
                 ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
-                int masaSayac = 0;
-                int dptSayac=0;
+                int masaSayac;
                 for (DepartmanMasalari dpt : dptMasalar) {
                     DepartmanMasalari departmanMasalari = new DepartmanMasalari();
                     masaSayac = 0;
@@ -116,7 +117,6 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                         masaSayac++;
                     }
                     departmanMasalari.DepartmanAdi = dpt.DepartmanAdi;
-                    dptSayac++;
                     secilenMasalar.add(departmanMasalari);
                 }
                 g.secilenMasalar = secilenMasalar;

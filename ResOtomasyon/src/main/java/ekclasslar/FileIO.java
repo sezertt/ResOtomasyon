@@ -4,9 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Mustafa on 10.6.2014.
- */
 public class FileIO {
     public List<File> getListFiles(File parentDir) {
         ArrayList<File> inFiles = new ArrayList<File>();

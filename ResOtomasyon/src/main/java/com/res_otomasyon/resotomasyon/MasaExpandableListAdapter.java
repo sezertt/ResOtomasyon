@@ -2,22 +2,16 @@ package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.TextView;
-
 import java.util.ArrayList;
-
 import Entity.Departman;
 import ekclasslar.DepartmanMasalari;
 
-/**
- * Created by Mustafa on 5.8.2014.
- */
 public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
     public Activity activity;
     public LayoutInflater inflater;
@@ -71,7 +65,7 @@ public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.kategori_gorunumu, null);
+            convertView = inflater.inflate(R.layout.kategori_gorunumu, parent, false);
         }
         Departman group = (Departman) getGroup(groupPosition);
         CheckedTextView textGroupDepartmanAdi;
@@ -86,7 +80,7 @@ public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
         String MasaAdi = (String) getChild(groupPosition, childPosition);
         TextView textMasaAdi;
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.masa_gorunumu, null);
+            convertView = inflater.inflate(R.layout.masa_gorunumu, parent, false);
         }
         textMasaAdi = (TextView) convertView.findViewById(R.id.textViewChildMasaAdi);
         textMasaAdi.setText(MasaAdi);
