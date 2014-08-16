@@ -120,7 +120,7 @@ public class MenuEkrani extends ActionBarActivity {
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
-                            ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            MenuEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
 
                             t.stopTimer();
                         } else {

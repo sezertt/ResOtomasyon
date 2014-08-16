@@ -90,7 +90,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                     if (activityVisible) {
                                         if (!t.timerRunning)
                                             t.startTimer();
-                                        ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                        MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                     }
                                 }
                             });
@@ -165,7 +165,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
-                            ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
 
                             t.stopTimer();
                         } else {
@@ -249,9 +249,9 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         t = new TryConnection(g, myHandler);
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
-                ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
             } else {
-                ((ActionBarActivity) context).getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
             }
         }
 
@@ -260,7 +260,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        actionBar = ((ActionBarActivity) context).getSupportActionBar();
+        actionBar = MasaEkrani.this.getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         for (Departman departman : lstDepartmanlar) {
             tab = actionBar.newTab().setText(departman.DepartmanAdi);
