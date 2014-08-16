@@ -62,7 +62,8 @@
         </activity>
         <activity
             android:name=".MasaSecEkrani"
-            android:label="@string/title_activity_masa_sec_ekrani" >
+            android:label="@string/title_activity_masa_sec_ekrani"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
