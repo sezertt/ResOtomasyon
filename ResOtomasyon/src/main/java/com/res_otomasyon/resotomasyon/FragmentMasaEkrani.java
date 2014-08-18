@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -151,16 +152,16 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                 Context.MODE_PRIVATE);
         this.departmanAdi = getArguments().getString("departmanAdi");
         this.lstEmployees = (ArrayList<Employee>) getArguments().getSerializable("lstEmployees");
-
         if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
             if (preferences.getBoolean("MasaKilitli", false)) {
+                if (g == null)
+                    g = (GlobalApplication) getActivity().getApplicationContext();
                 if(!g.isMenuEkraniRunning)
                 {
                     Intent intent = new Intent(getActivity(), MenuEkrani.class);
                     intent.putExtra("DepartmanAdi", this.departmanAdi);
                     intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
                     intent.putExtra("lstEmployees", this.lstEmployees);
-
                     startActivity(intent);
                     g.isMenuEkraniRunning = true;
                 }

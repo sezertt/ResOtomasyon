@@ -161,7 +161,7 @@ public class TCPClient {
                     if (!folder.exists()) {
                         folder.mkdirs();
                     }
-                    fOutStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo" + fileName + "", false);
+                    fOutStream = new FileOutputStream(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/" + fileName + "", false);
                 }
                 fOutStream.write(buffer, 0, fileDataLen);
 

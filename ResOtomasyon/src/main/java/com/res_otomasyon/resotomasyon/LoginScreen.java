@@ -31,6 +31,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+
 import ekclasslar.FileIO;
 import Entity.Employee;
 import HashPassword.passwordHash;
@@ -55,10 +56,8 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
     protected void onResume() {
         btnGiris.setEnabled(true);
 
-        LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-
-        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
-        checkNetwork.onReceive(context,intent);
+//        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
+//        checkNetwork.onReceive(context,intent);
 
         FileIO fileIO = new FileIO();
         List<File> files = null;
@@ -89,29 +88,32 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             intent.putExtra("lstEmployees", lstEmployees);
             startActivity(intent);
         } else {
+            LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
             this.setVisible(true);
             ((EditText) findViewById(R.id.editTextPin)).setText("");
-        }
-        activityVisible = true;
-        if (g == null)
-            g = (GlobalApplication) getApplicationContext();
-        if (t == null)
-            t = new TryConnection(g, myHandler);
-        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
-            t.startTimer();
+            activityVisible = true;
+            if (g == null)
+                g = (GlobalApplication) getApplicationContext();
+            if (t == null)
+                t = new TryConnection(g, myHandler);
+            if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
+                t.startTimer();
+            }
         }
         super.onResume();
     }
 
     @Override
     protected void onDestroy() {
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        if (!MasaKilitliMi)
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        if (!MasaKilitliMi)
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
         activityVisible = false;
         if (t.timerRunning)
             t.stopTimer();
@@ -141,7 +143,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    if(btnGiris.isEnabled())
+                    if (btnGiris.isEnabled())
                         btnGiris.callOnClick();
                 }
                 return false;

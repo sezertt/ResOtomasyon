@@ -33,6 +33,7 @@ import Entity.Employee;
 import Entity.MasaDizayn;
 import TCPClientSide.CommonAsyncTask;
 import XMLReader.ReadXML;
+import ekclasslar.SetViewGroupEnabled;
 import ekclasslar.TryConnection;
 
 
@@ -91,6 +92,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                         if (!t.timerRunning)
                                             t.startTimer();
                                         MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                        SetViewGroupEnabled.setViewGroupEnabled((ViewPager)findViewById(R.id.masaEkrani),false);
                                     }
                                 }
                             });
@@ -166,7 +168,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
                             MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-
+                            SetViewGroupEnabled.setViewGroupEnabled((ViewPager)findViewById(R.id.masaEkrani),true);
                             t.stopTimer();
                         } else {
                             hataVer();
@@ -227,7 +229,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         collectionPagerAdapter.lstEmployees = lstEmployees;
         collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
         collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (ViewPager) findViewById(R.id.masaEkrani);
         mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
         mViewPager.setAdapter(collectionPagerAdapter);
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {

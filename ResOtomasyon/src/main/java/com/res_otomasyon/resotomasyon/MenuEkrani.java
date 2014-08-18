@@ -14,6 +14,7 @@ import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+
 import Entity.Siparis;
 import ekclasslar.FileIO;
 import ekclasslar.TryConnection;
@@ -153,8 +156,7 @@ public class MenuEkrani extends ActionBarActivity {
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(rec, new IntentFilter("myevent"));
 
-        if(!g.commonAsyncTask.client.mRun && !t.timerRunning)
-        {
+        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
 
@@ -163,7 +165,7 @@ public class MenuEkrani extends ActionBarActivity {
         createData();
 
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-        adapter = new MyExpandableListAdapter(this, groups, this,g);
+        adapter = new MyExpandableListAdapter(this, groups, this, g);
         listView.setAdapter(adapter);
 
         adapter.notifyDataSetChanged();
@@ -177,6 +179,13 @@ public class MenuEkrani extends ActionBarActivity {
         super.onPause();
         g.isMenuEkraniRunning = false;
         activityVisible = false;
+        if (!masaKilitliMi) {
+            g.tamPorsiyon.clear();
+            g.yarimPorsiyon.clear();
+            g.ceyrekPorsiyon.clear();
+            g.ucCeyrekPorsiyon.clear();
+            g.birBucukPorsiyon.clear();
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
     }
 
@@ -260,7 +269,6 @@ public class MenuEkrani extends ActionBarActivity {
 
         ReadXML readUrun = new ReadXML();
         lstProducts = readUrun.readUrunler(files);
-
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
                 MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlı)");
@@ -310,53 +318,45 @@ public class MenuEkrani extends ActionBarActivity {
                     group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
 
                     int siparisYeri = -1;
-                    for(int k=0;k<g.tamPorsiyon.size();k++)
-                    {
-                        if(g.tamPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi))
-                        {
+                    for (int k = 0; k < g.tamPorsiyon.size(); k++) {
+                        if (g.tamPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
                             siparisYeri = k;
                             break;
                         }
                     }
-                    if(siparisYeri != -1)
-                    {
+                    if (siparisYeri != -1) {
                         group.productCount.add(g.tamPorsiyon.get(siparisYeri).miktar);
 
-                        int siparisVarmi= -1;
-                        for(int l = 0 ; l< lstOrderedProducts.size();l++) {
+                        int siparisVarmi = -1;
+                        for (int l = 0; l < lstOrderedProducts.size(); l++) {
                             if (lstOrderedProducts.get(l).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
                                 siparisVarmi = l;
                                 break;
                             }
                         }
-                        if(siparisVarmi == -1)
-                        {
+                        if (siparisVarmi == -1) {
                             Siparis siparis = new Siparis();
                             siparis.porsiyonSinifi = lstProducts.get(i).urunPorsiyonu;
                             siparis.miktar = g.tamPorsiyon.get(siparisYeri).miktar;
                             siparis.porsiyonFiyati = lstProducts.get(i).porsiyonFiyati;
                             siparis.yemekAdi = lstProducts.get(i).urunAdi;
                             lstOrderedProducts.add(siparis);
-                        }
-                        else
-                        {
+                        } else {
                             lstOrderedProducts.get(siparisVarmi).miktar = g.tamPorsiyon.get(siparisYeri).miktar;
                         }
-                    }
-                    else
-                    {
+                    } else {
                         group.productCount.add("0");
                     }
 
-                    if(lstProducts.get(i).urunPorsiyonu != 0) //yarım & çeyrek porsiyon
+                    if (lstProducts.get(i).urunPorsiyonu != 0) //yarım & çeyrek porsiyon
                     {
-                        setLstOrderedProducts(group,df,i,g.yarimPorsiyon,0.5);
-                        setLstOrderedProducts(group,df,i,g.birBucukPorsiyon,1.5);
+                        setLstOrderedProducts(group, df, i, g.yarimPorsiyon, 0.5);
+                        setLstOrderedProducts(group, df, i, g.birBucukPorsiyon, 1.5);
 
-                        if(lstProducts.get(i).urunPorsiyonu == 2) // çeyrek porsiyon
+                        if (lstProducts.get(i).urunPorsiyonu == 2) // çeyrek porsiyon
                         {
-                            setLstOrderedProducts(group,df,i,g.ucCeyrekPorsiyon,0.75);
-                            setLstOrderedProducts(group,df,i,g.ceyrekPorsiyon,0.25);
+                            setLstOrderedProducts(group, df, i, g.ucCeyrekPorsiyon, 0.75);
+                            setLstOrderedProducts(group, df, i, g.ceyrekPorsiyon, 0.25);
                         }
                     }
 
@@ -365,61 +365,52 @@ public class MenuEkrani extends ActionBarActivity {
                         break;
                 }
             }
-            if(i+1<lstProducts.size())
-            {
+            if (i + 1 < lstProducts.size()) {
                 group.productName.add(lstProducts.get(i).urunAdi);
                 group.productPrice.add(lstProducts.get(i).porsiyonFiyati);
                 group.productInfo.add(lstProducts.get(i).urunAciklamasi);
                 group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
 
                 int siparisYeri = -1;
-                for(int k=0;k<g.tamPorsiyon.size();k++)
-                {
-                    if(g.tamPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi))
-                    {
+                for (int k = 0; k < g.tamPorsiyon.size(); k++) {
+                    if (g.tamPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
                         siparisYeri = k;
                         break;
                     }
                 }
-                if(siparisYeri != -1)
-                {
+                if (siparisYeri != -1) {
                     group.productCount.add(g.tamPorsiyon.get(siparisYeri).miktar);
 
-                    int siparisVarmi= -1;
-                    for(int l = 0 ; l< lstOrderedProducts.size();l++) {
+                    int siparisVarmi = -1;
+                    for (int l = 0; l < lstOrderedProducts.size(); l++) {
                         if (lstOrderedProducts.get(l).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
                             siparisVarmi = l;
                             break;
                         }
                     }
-                    if(siparisVarmi == -1)
-                    {
+                    if (siparisVarmi == -1) {
                         Siparis siparis = new Siparis();
                         siparis.porsiyonSinifi = lstProducts.get(i).urunPorsiyonu;
                         siparis.miktar = g.tamPorsiyon.get(siparisYeri).miktar;
                         siparis.porsiyonFiyati = lstProducts.get(i).porsiyonFiyati;
                         siparis.yemekAdi = lstProducts.get(i).urunAdi;
                         lstOrderedProducts.add(siparis);
-                    }
-                    else
-                    {
+                    } else {
                         lstOrderedProducts.get(siparisVarmi).miktar = g.tamPorsiyon.get(siparisYeri).miktar;
                     }
-                }
-                else
-                {
+                } else {
                     group.productCount.add("0");
                 }
 
-                if(lstProducts.get(i).urunPorsiyonu != 0) //yarım & çeyrek porsiyon
+                if (lstProducts.get(i).urunPorsiyonu != 0) //yarım & çeyrek porsiyon
                 {
-                    setLstOrderedProducts(group,df,i,g.yarimPorsiyon,0.5);
-                    setLstOrderedProducts(group,df,i,g.birBucukPorsiyon,1.5);
+                    setLstOrderedProducts(group, df, i, g.yarimPorsiyon, 0.5);
+                    setLstOrderedProducts(group, df, i, g.birBucukPorsiyon, 1.5);
 
-                    if(lstProducts.get(i).urunPorsiyonu == 2) // çeyrek porsiyon
+                    if (lstProducts.get(i).urunPorsiyonu == 2) // çeyrek porsiyon
                     {
-                        setLstOrderedProducts(group,df,i,g.ucCeyrekPorsiyon,0.75);
-                        setLstOrderedProducts(group,df,i,g.ceyrekPorsiyon,0.25);
+                        setLstOrderedProducts(group, df, i, g.ucCeyrekPorsiyon, 0.75);
+                        setLstOrderedProducts(group, df, i, g.ceyrekPorsiyon, 0.25);
                     }
                 }
             }
@@ -428,8 +419,7 @@ public class MenuEkrani extends ActionBarActivity {
         }
     }
 
-    private void setLstOrderedProducts (UrunBilgileri group,DecimalFormat df, int i,ArrayList<Siparis>arrayListPorsiyon,Double carpan)
-    {
+    private void setLstOrderedProducts(UrunBilgileri group, DecimalFormat df, int i, ArrayList<Siparis> arrayListPorsiyon, Double carpan) {
         for (Siparis anArrayListPorsiyon : arrayListPorsiyon) {
             if (anArrayListPorsiyon.yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
                 group.productCount.set(group.productCount.size() - 1, df.format(Double.parseDouble(anArrayListPorsiyon.miktar) * carpan + (Double.parseDouble(group.productCount.get(i)))));
@@ -509,7 +499,7 @@ public class MenuEkrani extends ActionBarActivity {
 
                     final EditText input = new EditText(context);
                     // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     builder.setView(input);
 
                     builder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {

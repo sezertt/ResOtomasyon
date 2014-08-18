@@ -328,7 +328,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                                     int adet = 1;
 
                                     if (urunBilgileri.length > 1)
-                                        adet = Integer.parseInt(urunBilgileri[1]);
+                                        adet = (int)(Double.parseDouble(urunBilgileri[1]));
 
                                     adet--;
 

@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+import ekclasslar.SetViewGroupEnabled;
 import ekclasslar.ShowAlertDialog;
 
 
@@ -194,7 +196,7 @@ public class Settings extends Activity implements View.OnClickListener {
                             @Override
                             public void run() {
                                 alertDialog.show();
-                                setViewGroupEnabled((RelativeLayout) findViewById(R.id.settings), true);
+                                SetViewGroupEnabled.setViewGroupEnabled((RelativeLayout) findViewById(R.id.settings), true);
                             }
                         });
                         dosyaAktarimiVarMi = false;
@@ -236,26 +238,11 @@ public class Settings extends Activity implements View.OnClickListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                setViewGroupEnabled((RelativeLayout)findViewById(R.id.settings), false);
+                SetViewGroupEnabled.setViewGroupEnabled((RelativeLayout) findViewById(R.id.settings), false);
             }
         });
         dosyaAktarimiVarMi = true;
     }
 
-    public static void setViewGroupEnabled(ViewGroup view, boolean enabled)
-    {
-        int children = view.getChildCount();
-
-        for (int i = 0; i< children ; i++)
-        {
-            View child = view.getChildAt(i);
-            if (child instanceof ViewGroup)
-            {
-                setViewGroupEnabled((ViewGroup) child, enabled);
-            }
-            child.setEnabled(enabled);
-        }
-        view.setEnabled(enabled);
-    }
 
 }
