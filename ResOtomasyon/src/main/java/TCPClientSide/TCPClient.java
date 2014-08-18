@@ -143,8 +143,7 @@ public class TCPClient {
                     //read byte from client
                     int bytesRead = stream.read(buffer, bytesReceived, fileDataLen - bytesReceived);
                     bytesReceived += bytesRead;
-                    // merge byte array to another byte array
-                } while (bytesReceived < fileDataLen);   //  <- you should do this async.
+                } while (bytesReceived < fileDataLen);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

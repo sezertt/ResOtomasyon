@@ -34,7 +34,7 @@ public class Settings extends Activity implements View.OnClickListener {
     public String srvrMessage;
     AlertDialog alertDialog;
     Boolean dosyaAktarimiVarMi = false;
-    int kacinci = 1, kacDosya;
+    int kacinci = 1;
     SharedPreferences preferences;
 
     @Override
@@ -186,23 +186,17 @@ public class Settings extends Activity implements View.OnClickListener {
                         break;
                     case dosyalar:
                         kacinci = Integer.parseInt(collection.get("kacinci"));
-
-                        kacDosya = Integer.parseInt(collection.get("kacDosya"));
-
                         kacinci++;
-
-                        Log.i("asfasf", "Yeni Dosya istendi - " + kacinci);
-
-                        g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=" + kacinci);
+                        g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=" + kacinci + "&sadeceXML=0");
                         break;
                     case aktarimTamamlandi:
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 alertDialog.show();
+                                setViewGroupEnabled((RelativeLayout) findViewById(R.id.settings), true);
                             }
                         });
-                        setViewGroupEnabled((RelativeLayout)findViewById(R.id.settings), true);
                         dosyaAktarimiVarMi = false;
                         break;
                     case modemBilgileri:
@@ -238,8 +232,13 @@ public class Settings extends Activity implements View.OnClickListener {
 
     private void veriGuncellemeyiBaslat()
     {
-        g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=1");
-        setViewGroupEnabled((RelativeLayout)findViewById(R.id.settings), false);
+        g.commonAsyncTask.client.sendMessage("komut=veriGonder&kacinci=1&sadeceXML=0");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setViewGroupEnabled((RelativeLayout)findViewById(R.id.settings), false);
+            }
+        });
         dosyaAktarimiVarMi = true;
     }
 
