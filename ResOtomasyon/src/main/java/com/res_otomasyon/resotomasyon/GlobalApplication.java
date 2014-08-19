@@ -5,8 +5,16 @@ import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.os.Handler;
+
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import TCPClientSide.CommonAsyncTask;
@@ -31,8 +39,10 @@ public class GlobalApplication extends Application {
     public ArrayList<Siparis> ucCeyrekPorsiyon = new ArrayList<Siparis>();
     public ArrayList<Siparis> birBucukPorsiyon = new ArrayList<Siparis>();
 
+    Dictionary<String,Bitmap> bitmapDictionary = new Hashtable<String, Bitmap>();
+
     public enum Komutlar {
-        Default,siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
+        Default, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
         masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri
     }
@@ -43,5 +53,25 @@ public class GlobalApplication extends Application {
         TCPClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
         commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity,
                 myHandler).execute((Handler[]) null);
+    }
+
+    public Dictionary<String, Bitmap> getImages() {
+        Dictionary<String, Bitmap> bmpCollection = new Hashtable<String, Bitmap>();
+        try {
+            File filesDirectory = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/Resimler/");
+            File[] files = filesDirectory.listFiles();
+            for (File file : files) {
+                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                bmOptions.inPurgeable = true;
+                bmOptions.inSampleSize = 2;
+                Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath(), bmOptions);
+                String key = file.getName();
+                key = key.substring(0, key.length() - 4);
+                bmpCollection.put(key, bmp);
+            }
+            return bmpCollection;
+        } catch (Exception ex) {
+            return null;
+        }
     }
 }

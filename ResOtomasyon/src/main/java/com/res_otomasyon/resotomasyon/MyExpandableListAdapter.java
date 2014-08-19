@@ -18,6 +18,10 @@ import android.widget.TextView;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+
 import Entity.Siparis;
 import ekclasslar.UrunBilgileri;
 
@@ -32,6 +36,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
     ArrayList<String> porsiyonlarPozitif = new ArrayList<String>();
     ArrayList<String> porsiyonlarNegatif = new ArrayList<String>();
+
+    Dictionary<String,Bitmap> bitmapDictionary = new Hashtable<String, Bitmap>();
 
     public MyExpandableListAdapter(Activity act, SparseArray<UrunBilgileri> groups, MenuEkrani menuEkrani, GlobalApplication g) {
         activity = act;
@@ -90,9 +96,9 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         text.setText(productInfo);
 
         image = (ImageView) convertView.findViewById(R.id.imageView);
-        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/Resimler/" + productName + ".png");
-        Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
-        image.setImageBitmap(bmp);
+//        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/Resimler/" + productName + ".png");
+//        Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
+        image.setImageBitmap(bitmapDictionary.get(productName));
         final TextView textName = (TextView) convertView.findViewById(R.id.textViewChildHeader);
         textName.setText(productName);
 

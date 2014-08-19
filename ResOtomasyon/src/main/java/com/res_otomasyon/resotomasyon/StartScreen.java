@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -12,7 +13,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+
 import java.io.File;
+import java.util.Hashtable;
+
 import TCPClientSide.CommonAsyncTask;
 
 public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
@@ -30,6 +34,7 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         while (!sdcardReady.contentEquals("mounted")) {
             sdcardReady = Environment.getExternalStorageState();
         }
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         g = (GlobalApplication) getApplicationContext();
         preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
@@ -45,9 +50,12 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
                 }
             }
         }
-        File folder= new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo");
-
+        File folder = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo");
         folder.mkdirs();
+        if(g.bitmapDictionary == null)
+            g.bitmapDictionary = new Hashtable<String, Bitmap>();
+        if (g.bitmapDictionary.size() == 0)
+            g.bitmapDictionary = g.getImages();
     }
 
     int counterGiris = 0;

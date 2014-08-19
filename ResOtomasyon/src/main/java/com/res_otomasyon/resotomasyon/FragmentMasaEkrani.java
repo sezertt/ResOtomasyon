@@ -18,7 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+
 import java.util.ArrayList;
+
 import Entity.Employee;
 
 public class FragmentMasaEkrani extends Fragment implements View.OnClickListener {
@@ -36,6 +38,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     TableLayout tableView;
     ScrollView scrollView;
     LinearLayout linearLayout;
+    boolean MasaKilitliMi = false;
 
     Button masaButton;
 
@@ -152,19 +155,17 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                 Context.MODE_PRIVATE);
         this.departmanAdi = getArguments().getString("departmanAdi");
         this.lstEmployees = (ArrayList<Employee>) getArguments().getSerializable("lstEmployees");
+        MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
         if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
-            if (preferences.getBoolean("MasaKilitli", false)) {
+            if (MasaKilitliMi) {
                 if (g == null)
                     g = (GlobalApplication) getActivity().getApplicationContext();
-                if(!g.isMenuEkraniRunning)
-                {
-                    Intent intent = new Intent(getActivity(), MenuEkrani.class);
-                    intent.putExtra("DepartmanAdi", this.departmanAdi);
-                    intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
-                    intent.putExtra("lstEmployees", this.lstEmployees);
-                    startActivity(intent);
-                    g.isMenuEkraniRunning = true;
-                }
+                Intent intent = new Intent(getActivity(), MenuEkrani.class);
+                intent.putExtra("DepartmanAdi", this.departmanAdi);
+                intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
+                intent.putExtra("lstEmployees", this.lstEmployees);
+                startActivity(intent);
+                g.isMenuEkraniRunning = true;
             }
         }
         super.onAttach(activity);
@@ -185,8 +186,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if(!g.isMenuEkraniRunning)
-        {
+        if (!g.isMenuEkraniRunning) {
             Intent intent = new Intent(getActivity(), MenuEkrani.class);
             intent.putExtra("DepartmanAdi", this.departmanAdi);
             intent.putExtra("MasaAdi", v.getTag().toString());

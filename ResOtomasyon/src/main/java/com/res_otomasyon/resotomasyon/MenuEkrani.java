@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -166,6 +168,7 @@ public class MenuEkrani extends ActionBarActivity {
 
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
         adapter = new MyExpandableListAdapter(this, groups, this, g);
+        adapter.bitmapDictionary = g.bitmapDictionary;
         listView.setAdapter(adapter);
 
         adapter.notifyDataSetChanged();

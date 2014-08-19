@@ -197,6 +197,8 @@ public class Settings extends Activity implements View.OnClickListener {
                             public void run() {
                                 alertDialog.show();
                                 SetViewGroupEnabled.setViewGroupEnabled((RelativeLayout) findViewById(R.id.settings), true);
+                                if(g.bitmapDictionary !=null && g.bitmapDictionary.size()>0)
+                                    g.bitmapDictionary = null;
                             }
                         });
                         dosyaAktarimiVarMi = false;

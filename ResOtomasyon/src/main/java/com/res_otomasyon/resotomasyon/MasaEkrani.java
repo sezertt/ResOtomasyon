@@ -18,12 +18,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+
+import android.view.ViewGroup;
 import android.view.WindowManager;
+
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.CollectionPagerAdapter;
@@ -92,7 +96,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                         if (!t.timerRunning)
                                             t.startTimer();
                                         MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-                                        SetViewGroupEnabled.setViewGroupEnabled((ViewPager)findViewById(R.id.masaEkrani),false);
+                                        SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), false);
                                     }
                                 }
                             });
@@ -110,32 +114,32 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             break;
                         case siparis:
                             mesajGeldi = false;
-                            if(activityVisible){
-                            if (g.secilenMasalar != null) {
-                                for (int i = 0; i < g.secilenMasalar.size(); i++) {
-                                    MasaninSiparisleri masaninSiparisleri = new MasaninSiparisleri();
-                                    masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
-                                    masaninSiparisleri.MasaAdi = collection.get("masa");
-                                    Siparis siparis = new Siparis();
-                                    if (g.secilenMasalar.get(i).DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
-                                        for (String masa : g.secilenMasalar.get(i).Masalar) {
-                                            if (masa.contentEquals(collection.get("masa"))) {
-                                                //process
-                                                siparis.miktar = collection.get("miktar");
-                                                siparis.porsiyonFiyati = collection.get("porsiyonFiyati");
-                                                siparis.porsiyonSinifi = Double.parseDouble(("1"));
-                                                siparis.yemekAdi = collection.get("yemekAdi");
-                                                masaninSiparisleri.siparisler.add(siparis);
-                                                g.masaninSiparisleri.get(i).siparisler.add(siparis);
+                            if (activityVisible) {
+                                if (g.secilenMasalar != null) {
+                                    for (int i = 0; i < g.secilenMasalar.size(); i++) {
+                                        MasaninSiparisleri masaninSiparisleri = new MasaninSiparisleri();
+                                        masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
+                                        masaninSiparisleri.MasaAdi = collection.get("masa");
+                                        Siparis siparis = new Siparis();
+                                        if (g.secilenMasalar.get(i).DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
+                                            for (String masa : g.secilenMasalar.get(i).Masalar) {
+                                                if (masa.contentEquals(collection.get("masa"))) {
+                                                    //process
+                                                    siparis.miktar = collection.get("miktar");
+                                                    siparis.porsiyonFiyati = collection.get("porsiyonFiyati");
+                                                    siparis.porsiyonSinifi = Double.parseDouble(("1"));
+                                                    siparis.yemekAdi = collection.get("yemekAdi");
+                                                    masaninSiparisleri.siparisler.add(siparis);
+                                                    g.masaninSiparisleri.get(i).siparisler.add(siparis);
+                                                }
                                             }
+                                            g.masaninSiparisleri.add(masaninSiparisleri);
                                         }
-                                        g.masaninSiparisleri.add(masaninSiparisleri);
                                     }
+                                } else {
+                                    //process
                                 }
                             }
-                            else {
-                                //process
-                            }}
 
                             break;
                         case masaAcildi:
@@ -168,7 +172,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
                             MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-                            SetViewGroupEnabled.setViewGroupEnabled((ViewPager)findViewById(R.id.masaEkrani),true);
+                            SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), true);
                             t.stopTimer();
                         } else {
                             hataVer();
@@ -188,7 +192,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         try {
             g = (GlobalApplication) getApplicationContext();
 
-            if(g.broadcastReceiver!=null) {
+            if (g.broadcastReceiver != null) {
                 LocalBroadcastManager.getInstance(context).unregisterReceiver(g.broadcastReceiver);
 
             }
@@ -199,7 +203,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                     myHandler.sendEmptyMessage(1);
                 }
             };
-            LocalBroadcastManager.getInstance(context).registerReceiver(g.broadcastReceiver,new IntentFilter("myevent"));
+            LocalBroadcastManager.getInstance(context).registerReceiver(g.broadcastReceiver, new IntentFilter("myevent"));
         } catch (Exception ignored) {
 
         }
@@ -220,43 +224,39 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         //Giriş ekranından gelen çalışan bilgilerini alır.
         Bundle extras = getIntent().getExtras();
         lstEmployees = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
+        Object obj = new Object();
+        //fragment[0] 'ın boş gelmemesi için gerekli.
+        synchronized (obj) {
+            setContentView(R.layout.activity_masa_ekrani);
+            collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
+            collectionPagerAdapter.lstDepartmanlar = lstDepartmanlar;
+            collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
+            collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
+            collectionPagerAdapter.lstEmployees = lstEmployees;
+            collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
+            collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
+            mViewPager = (ViewPager) findViewById(R.id.masaEkrani);
+            mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
+            mViewPager.setAdapter(collectionPagerAdapter);
+            mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-        setContentView(R.layout.activity_masa_ekrani);
-        collectionPagerAdapter = new CollectionPagerAdapter(getSupportFragmentManager());
-        collectionPagerAdapter.lstDepartmanlar = lstDepartmanlar;
-        collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
-        collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
-        collectionPagerAdapter.lstEmployees = lstEmployees;
-        collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
-        collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
-        mViewPager = (ViewPager) findViewById(R.id.masaEkrani);
-        mViewPager.setOffscreenPageLimit(lstDepartmanlar.size() - 1);
-        mViewPager.setAdapter(collectionPagerAdapter);
-        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                }
 
-            }
+                @Override
+                public void onPageSelected(int position) {
+                    actionBar.setSelectedNavigationItem(position);
+                }
 
-            @Override
-            public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
-            }
+                @Override
+                public void onPageScrollStateChanged(int state) {
 
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
-        t = new TryConnection(g, myHandler);
-        if (g.commonAsyncTask.client != null) {
-            if (g.commonAsyncTask.client.out != null) {
-                MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-            } else {
-                MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
-            }
+                }
+            });
         }
-
+        t = new TryConnection(g, myHandler);
+        SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.masaEkrani), false);
     }
 
     @Override
@@ -268,6 +268,15 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
             tab = actionBar.newTab().setText(departman.DepartmanAdi);
             tab.setTabListener(this);
             actionBar.addTab(tab);
+        }
+        if (g.commonAsyncTask.client != null) {
+            if (g.commonAsyncTask.client.out != null) {
+                MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.masaEkrani), true);
+            } else {
+                MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.masaEkrani), false);
+            }
         }
     }
 
@@ -320,8 +329,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     protected void onResume() {
         if (g == null)
             g = (GlobalApplication) getApplicationContext();
-        if(t == null)
-            t = new TryConnection(g,myHandler);
+        if (t == null)
+            t = new TryConnection(g, myHandler);
         if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
