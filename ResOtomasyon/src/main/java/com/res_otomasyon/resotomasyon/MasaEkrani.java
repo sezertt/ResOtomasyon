@@ -65,11 +65,13 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     boolean activityVisible = true;
     boolean masaKilitliMi = false;
     ArrayList<Employee> lstEmployees;
+
     //
     CollectionPagerAdapter collectionPagerAdapter;
     Context context = this;
     GlobalApplication g;
     TryConnection t;
+    Menu menu;
 
     public Handler myHandler = new Handler() {
 
@@ -114,33 +116,42 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             break;
                         case siparis:
                             mesajGeldi = false;
-                            if (activityVisible) {
-                                if (g.secilenMasalar != null) {
-                                    for (int i = 0; i < g.secilenMasalar.size(); i++) {
-                                        MasaninSiparisleri masaninSiparisleri = new MasaninSiparisleri();
-                                        masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
-                                        masaninSiparisleri.MasaAdi = collection.get("masa");
-                                        Siparis siparis = new Siparis();
-                                        if (g.secilenMasalar.get(i).DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
-                                            for (String masa : g.secilenMasalar.get(i).Masalar) {
-                                                if (masa.contentEquals(collection.get("masa"))) {
-                                                    //process
-                                                    siparis.miktar = collection.get("miktar");
-                                                    siparis.porsiyonFiyati = collection.get("porsiyonFiyati");
-                                                    siparis.porsiyonSinifi = Double.parseDouble(("1"));
-                                                    siparis.yemekAdi = collection.get("yemekAdi");
-                                                    masaninSiparisleri.siparisler.add(siparis);
-                                                    g.masaninSiparisleri.get(i).siparisler.add(siparis);
-                                                }
-                                            }
-                                            g.masaninSiparisleri.add(masaninSiparisleri);
-                                        }
+                            Siparis siparis = new Siparis();
+                            MasaninSiparisleri masaninSiparisleri = new MasaninSiparisleri();
+                            masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
+                            masaninSiparisleri.MasaAdi = collection.get("masa");
+                            siparis.miktar = collection.get("miktar");
+                            siparis.porsiyonFiyati = collection.get("porsiyonFiyati");
+                            siparis.porsiyonSinifi = Double.parseDouble(("1"));
+                            siparis.yemekAdi = collection.get("yemekAdi");
+                            siparis.goruldu = false;
+                            int mspCounter = 0;
+                            if (g.lstMasaninSiparisleri.size() > 0) {
+                                boolean ayniMasaVarMi = false;
+                                for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
+                                    if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
+                                        msp.siparisler.add(siparis);
+                                        mspCounter++;
+                                        ayniMasaVarMi = true;
                                     }
-                                } else {
-                                    //process
                                 }
+                                if(!ayniMasaVarMi)
+                                {
+                                    masaninSiparisleri.siparisler.add(siparis);
+                                    g.lstMasaninSiparisleri.add(masaninSiparisleri);
+                                }
+                            } else {
+                                masaninSiparisleri.siparisler.add(siparis);
+                                g.lstMasaninSiparisleri.add(masaninSiparisleri);
                             }
 
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!menu.findItem(R.id.action_notification).isVisible())
+                                        menu.findItem(R.id.action_notification).setVisible(true);
+                                }
+                            });
                             break;
                         case masaAcildi:
                             mesajGeldi = false;
@@ -160,6 +171,9 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             }
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
                             fragment[0].startSendAcikMasalar(acikMasalar, tabName);
+                            break;
+                        case bildirim:
+
                             break;
                     }
                     break;
@@ -335,7 +349,35 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
             t.startTimer();
         }
         activityVisible = true;
+        notificationMessage();
+        if (menu != null)
+            if (g.lstMasaninSiparisleri == null || g.lstMasaninSiparisleri.size() == 0)
+                menu.findItem(R.id.action_notification).setVisible(false);
         super.onResume();
+    }
+
+    public String notificationMessage() {
+        int counter = 0;
+        String komut;
+        komut = "<komut=bildirim&masalar=";
+        if (g.secilenMasalar.size() > 0) {
+            for (Departman dpt : lstDepartmanlar) {
+                if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
+                    if (g.secilenMasalar.get(counter).Masalar.size() > 0) {
+                        komut += dpt.DepartmanAdi + "-";
+                        for (String dptMasalar : g.secilenMasalar.get(counter).Masalar) {
+                            komut += dptMasalar + "-";
+                        }
+                    }
+                }
+                counter++;
+            }
+            komut = komut.substring(0, komut.length() - 1);
+        } else {
+            komut = "<komut=bildirim&masalar=hepsi";
+        }
+        komut += ">";
+        return komut;
     }
 
     private void hataVer() {
@@ -359,10 +401,16 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         this.finish();
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.masa_ekrani, menu);
+        this.menu = menu;
+        if (g.lstMasaninSiparisleri.size() == 0)
+            menu.findItem(R.id.action_notification).setVisible(false);
+        else
+            menu.findItem(R.id.action_notification).setVisible(true);
         return true;
     }
 
@@ -372,7 +420,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        if (id == R.id.action_notification) {
+            Intent intent = new Intent(MasaEkrani.this, NotificationScreen.class);
+            startActivity(intent);
+        }
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
 
         /*

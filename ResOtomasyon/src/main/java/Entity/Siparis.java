@@ -7,4 +7,5 @@ public class Siparis implements Serializable {
     public String porsiyonFiyati;
     public String yemekAdi;
     public double porsiyonSinifi;
+    public boolean goruldu;
 }

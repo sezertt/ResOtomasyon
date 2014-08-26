@@ -1,6 +1,9 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -8,9 +11,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
 import Entity.Departman;
 import Entity.MasaDizayn;
 import XMLReader.ReadXML;
@@ -23,9 +28,11 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
     ArrayList<MasaDizayn> lstMasaDizayn;
     String[] masaPlanIsmi;
     ArrayList<DepartmanMasalari> dptMasalar;
+    GlobalApplication g;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        g = (GlobalApplication) getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_masa_sec_ekrani);
         FileIO fileIO = new FileIO();
@@ -43,6 +50,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                 if (departman.DepartmanEkrani.contentEquals(masaPlanIsmi[j])) {
                     departmanMasalari.Masalar = new ArrayList<String>();
                     departmanMasalari.mDurumu = new ArrayList<Boolean>();
+                    int counterMasa = 0;
                     for (MasaDizayn masaDizayn : lstMasaDizayn) {
                         if (masaDizayn.MasaPlanAdi.contentEquals(departman.DepartmanEkrani)) {
                             departmanMasalari.Masalar.add(masaDizayn.MasaAdi);
@@ -53,11 +61,30 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
             }
             dptMasalar.add(departmanMasalari);
         }
+        if (g.secilenMasalar.size() > 0) {
+            int dptCounter =0;
+            for (DepartmanMasalari dpt : g.secilenMasalar)
+            {
+                for (String masa :g.secilenMasalar.get(dptCounter).Masalar)
+                {
+                    int masaCounter = 0;
+                    for (String masa1 : dptMasalar.get(dptCounter).Masalar)
+                    {
+                        if(masa.contentEquals(masa1))
+                        {
+                            dptMasalar.get(dptCounter).mDurumu.set(masaCounter,true);
+                        }
+                        masaCounter++;
+                    }
+                }
+                dptCounter++;
+            }
+        }
 
         Button btnMasaKaydet = (Button) findViewById(R.id.masaKaydet);
         btnMasaKaydet.setOnClickListener(this);
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
-        final MasaExpandableListAdapter masaExpandableListAdapter = new MasaExpandableListAdapter(this, dptMasalar, lstDepartmanlar);
+        final MasaExpandableListAdapter masaExpandableListAdapter = new MasaExpandableListAdapter(this, dptMasalar, lstDepartmanlar, g);
         listView.setAdapter(masaExpandableListAdapter);
         listView.setChoiceMode(ExpandableListView.CHOICE_MODE_MULTIPLE);
         listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -103,7 +130,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.masaKaydet:
-                GlobalApplication g = (GlobalApplication) getApplicationContext();
+
                 ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
                 int masaSayac;
                 for (DepartmanMasalari dpt : dptMasalar) {
@@ -120,6 +147,18 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                     secilenMasalar.add(departmanMasalari);
                 }
                 g.secilenMasalar = secilenMasalar;
+                AlertDialog.Builder aBuilder = new AlertDialog.Builder(this);
+                aBuilder.setTitle("Kayıt Başarılı");
+                aBuilder.setMessage("Seçtiğiniz masalar kayıt edildi.")
+                        .setCancelable(false)
+                        .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MasaSecEkrani.this.finish();
+                            }
+                        });
+                AlertDialog alertDialog = aBuilder.create();
+                alertDialog.show();
                 break;
         }
     }

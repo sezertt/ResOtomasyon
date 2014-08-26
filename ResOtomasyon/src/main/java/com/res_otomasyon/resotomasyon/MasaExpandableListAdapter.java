@@ -18,13 +18,15 @@ public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
     private ArrayList<DepartmanMasalari> groups;
     public ArrayList<Departman> lstDepartmantlar;
     public int selectedIndex;
+    public GlobalApplication g;
 
-    public MasaExpandableListAdapter(Activity act, ArrayList<DepartmanMasalari> groups, ArrayList<Departman> lstDepartmantlar) {
+    public MasaExpandableListAdapter(Activity act, ArrayList<DepartmanMasalari> groups, ArrayList<Departman> lstDepartmantlar,GlobalApplication g) {
         this.activity = act;
         this.inflater = act.getLayoutInflater();
         this.groups = groups;
         this.lstDepartmantlar = lstDepartmantlar;
         selectedIndex = -1;
+        this.g = g;
     }
 
     @Override
@@ -84,6 +86,7 @@ public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
         }
         textMasaAdi = (TextView) convertView.findViewById(R.id.textViewChildMasaAdi);
         textMasaAdi.setText(MasaAdi);
+
         if (groups.get(groupPosition).mDurumu.get(childPosition))
             convertView.setBackgroundColor(Color.rgb(51, 181, 229));
         else {

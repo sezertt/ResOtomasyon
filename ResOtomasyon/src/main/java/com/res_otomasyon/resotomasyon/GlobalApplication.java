@@ -40,11 +40,12 @@ public class GlobalApplication extends Application {
     public ArrayList<Siparis> birBucukPorsiyon = new ArrayList<Siparis>();
 
     Dictionary<String,Bitmap> bitmapDictionary = new Hashtable<String, Bitmap>();
+    public ArrayList<MasaninSiparisleri> lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();
 
     public enum Komutlar {
         Default, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, toplumesaj, departman,
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri
+        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim
     }
 
     public void connectServer(Handler myHandler) throws Exception {
