@@ -12,10 +12,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -30,6 +32,7 @@ import android.view.WindowManager;
 
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
+import ekclasslar.SiparisIslemler;
 import ekclasslar.CollectionPagerAdapter;
 import ekclasslar.FileIO;
 import Entity.Departman;
@@ -72,16 +75,54 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     GlobalApplication g;
     TryConnection t;
     Menu menu;
+    Siparis siparis;
+    MasaninSiparisleri masaninSiparisleri;
+    Dictionary<String, String> collection;
+    int siparisCounter = 0;
 
     public Handler myHandler = new Handler() {
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 1:
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
+
+                    if (g.commonAsyncTask.client != null) {
+                        if (g.commonAsyncTask.client.out != null) {
+                            g.commonAsyncTask.client.sendMessage(girisKomutu);
+                            MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), true);
+                            t.stopTimer();
+                        } else {
+                            hataVer();
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        try {
+            g = (GlobalApplication) getApplicationContext();
+
+            if (g.broadcastReceiver != null) {
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(g.broadcastReceiver);
+            }
+            g.broadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    srvrMessage = intent.getStringExtra("message");
                     String[] parametreler = srvrMessage.split("&");
                     String[] esitlik;
-                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                    collection = new Hashtable<String, String>(parametreler.length);
                     for (String parametre : parametreler) {
                         esitlik = parametre.split("=");
                         if (esitlik.length == 2)
@@ -115,41 +156,26 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             fragment[0].startKapananMasa(kapananMasa, kapananMasaDepartman);
                             break;
                         case siparis:
-                            mesajGeldi = false;
-                            Siparis siparis = new Siparis();
-                            MasaninSiparisleri masaninSiparisleri = new MasaninSiparisleri();
-                            masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
-                            masaninSiparisleri.MasaAdi = collection.get("masa");
-                            siparis.miktar = collection.get("miktar");
-                            siparis.porsiyonFiyati = collection.get("porsiyonFiyati");
-                            siparis.porsiyonSinifi = Double.parseDouble(("1"));
-                            siparis.yemekAdi = collection.get("yemekAdi");
-                            siparis.goruldu = false;
-                            int mspCounter = 0;
-                            if (g.lstMasaninSiparisleri.size() > 0) {
-                                boolean ayniMasaVarMi = false;
-                                for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
-                                    if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
-                                        msp.siparisler.add(siparis);
-                                        mspCounter++;
-                                        ayniMasaVarMi = true;
-                                    }
-                                }
-                                if(!ayniMasaVarMi)
-                                {
-                                    masaninSiparisleri.siparisler.add(siparis);
-                                    g.lstMasaninSiparisleri.add(masaninSiparisleri);
-                                }
-                            } else {
-                                masaninSiparisleri.siparisler.add(siparis);
-                                g.lstMasaninSiparisleri.add(masaninSiparisleri);
-                            }
-
+                            //Sipariş geldiğinde yapılacak işlemler.
+                            SiparisIslemler siparisIslemler = new SiparisIslemler(collection, g);
+                            siparisIslemler.Islem();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (!menu.findItem(R.id.action_notification).isVisible())
+                                    // Get instance of Vibrator from current Context
+                                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                                    if (!menu.findItem(R.id.action_notification).isVisible()) {
                                         menu.findItem(R.id.action_notification).setVisible(true);
+                                        // Vibrate for 300 milliseconds
+                                        v.vibrate(2000);
+                                    }
+                                    siparisCounter++;
+                                    if(siparisCounter == 10)
+                                    {
+                                        siparisCounter=0;
+                                        v.vibrate(2000);
+                                    }
+
                                 }
                             });
                             break;
@@ -173,48 +199,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             fragment[0].startSendAcikMasalar(acikMasalar, tabName);
                             break;
                         case bildirim:
-
                             break;
                     }
-                    break;
-                case 2:
-                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
-                    preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
-
-                    if (g.commonAsyncTask.client != null) {
-                        if (g.commonAsyncTask.client.out != null) {
-                            g.commonAsyncTask.client.sendMessage(girisKomutu);
-                            MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-                            SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), true);
-                            t.stopTimer();
-                        } else {
-                            hataVer();
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        try {
-            g = (GlobalApplication) getApplicationContext();
-
-            if (g.broadcastReceiver != null) {
-                LocalBroadcastManager.getInstance(context).unregisterReceiver(g.broadcastReceiver);
-
-            }
-            g.broadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    srvrMessage = intent.getStringExtra("message");
-                    myHandler.sendEmptyMessage(1);
+                    Log.e("MasaEkrani mesaj:", srvrMessage);
+//                    myHandler.sendEmptyMessage(1);
                 }
             };
             LocalBroadcastManager.getInstance(context).registerReceiver(g.broadcastReceiver, new IntentFilter("myevent"));
@@ -325,19 +313,19 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         super.onStop();
     }
 
-    BroadcastReceiver rec;
-
-    {
-        rec = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //all events will be received here
-                //get message
-                srvrMessage = intent.getStringExtra("message");
-                myHandler.sendEmptyMessage(1);
-            }
-        };
-    }
+//    BroadcastReceiver rec;
+//
+//    {
+//        rec = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                //all events will be received here
+//                //get message
+//                srvrMessage = intent.getStringExtra("message");
+//                myHandler.sendEmptyMessage(1);
+//            }
+//        };
+//    }
 
     @Override
     protected void onResume() {

@@ -58,8 +58,6 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
             g.bitmapDictionary = g.getImages();
     }
 
-    int counterGiris = 0;
-
     public Handler myHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -67,8 +65,6 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
                 case 2:
                     //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
                     String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
-                    counterGiris++;
-                    Log.e("counterGiris", String.valueOf(counterGiris));
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null)
                             g.commonAsyncTask.client.sendMessage(girisKomutu);

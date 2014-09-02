@@ -38,7 +38,6 @@ public class NotificationScreen extends ActionBarActivity {
         setContentView(R.layout.activity_notifications);
         g = (GlobalApplication) getApplicationContext();
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-
         final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(this, g.lstMasaninSiparisleri, g);
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
         adapter = expandableAdapter;
@@ -78,7 +77,6 @@ public class NotificationScreen extends ActionBarActivity {
     }
 
     BroadcastReceiver rec;
-
     {
         rec = new BroadcastReceiver() {
             @Override
@@ -86,41 +84,45 @@ public class NotificationScreen extends ActionBarActivity {
                 //all events will be received here
                 //get message
                 srvrMessage = intent.getStringExtra("message");
-                myHandler.sendEmptyMessage(1);
-            }
-        };
-    }
-
-    public Handler myHandler = new Handler() {
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 1:
-                    String[] parametreler = srvrMessage.split("&");
-                    String[] esitlik;
-                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
-                    for (String parametre : parametreler) {
-                        esitlik = parametre.split("=");
-                        if (esitlik.length == 2)
-                            collection.put(esitlik[0], esitlik[1]);
-                    }
-                    String gelenkomut = collection.get("komut");
-                    GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
-                    switch (komut) {
-                        case siparis:
+                String[] parametreler = srvrMessage.split("&");
+                String[] esitlik;
+                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                for (String parametre : parametreler) {
+                    esitlik = parametre.split("=");
+                    if (esitlik.length == 2)
+                        collection.put(esitlik[0], esitlik[1]);
+                }
+                String gelenkomut = collection.get("komut");
+                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+                switch (komut) {
+                    case siparis:
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     adapter.notifyDataSetChanged();
                                 }
                             });
-
-                            break;
-                    }
-                    break;
+                        break;
+                }
+//                myHandler.sendEmptyMessage(1);
             }
-        }
-    };
+        };
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+//    public Handler myHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            switch (msg.what) {
+//                case 1:
+//
+//                    break;
+//            }
+//        }
+//    };
 
 }

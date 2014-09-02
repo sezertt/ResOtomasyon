@@ -1,6 +1,8 @@
 package ekclasslar;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,14 +73,42 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+    public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null)
-            convertView = inflater.inflate(R.layout.kategori_gorunumu, parent, false);
+            convertView = inflater.inflate(R.layout.notification_kategori_gorunum, parent, false);
         MasaninSiparisleri group = (MasaninSiparisleri) getGroup(groupPosition);
         CheckedTextView textGroupDepartmanAdi;
+        Button btnClearAll;
         textGroupDepartmanAdi = (CheckedTextView) convertView.findViewById(R.id.textViewProductGroupHeader);
         textGroupDepartmanAdi.setText(group.DepartmanAdi + "-" + group.MasaAdi);
         textGroupDepartmanAdi.setChecked(isExpanded);
+
+        btnClearAll = (Button) convertView.findViewById(R.id.btnClearAll);
+        btnClearAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder aBuilder = new AlertDialog.Builder(activity);
+                aBuilder.setTitle("Siparişler Görüldü!");
+                aBuilder.setMessage("TÜM SİPARİŞLERİ GÖRÜLDÜ OLARAK İŞARETLEMEK İSTEDİĞİNİZE EMİN MİSİNİZ?")
+                        .setCancelable(true)
+                        .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                g.commonAsyncTask.client.sendMessage("<komut=bildirim&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi");
+                                groups.remove(groupPosition);
+                                notifyDataSetChanged();
+                            }
+                        }).setNegativeButton("İptal", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                AlertDialog alertDialog = aBuilder.create();
+                alertDialog.show();
+
+            }
+        });
         return convertView;
     }
 
@@ -96,9 +126,9 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                g.commonAsyncTask.client.sendMessage("siparis görüldü mesajını yolla");
+                g.commonAsyncTask.client.sendMessage("komut=bildirim&masa="+groups.get(groupPosition).MasaAdi+"&departmanAdi="+groups.get(groupPosition).DepartmanAdi+"&yemekAdi="+groups.get(groupPosition).siparisler.get(childPosition).yemekAdi+"");
                 groups.get(groupPosition).siparisler.remove(childPosition);
-                if(groups.get(groupPosition).siparisler.size()==0)
+                if (groups.get(groupPosition).siparisler.size() == 0)
                     groups.remove(groupPosition);
                 notifyDataSetChanged();
             }
