@@ -94,7 +94,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
                         .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                g.commonAsyncTask.client.sendMessage("<komut=bildirim&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi");
+                                g.commonAsyncTask.client.sendMessage("<komut=bildirimGoruldu&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi&adedi=hepsi&porsiyonu=hepsi");
                                 groups.remove(groupPosition);
                                 notifyDataSetChanged();
                             }
@@ -126,7 +126,9 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                g.commonAsyncTask.client.sendMessage("komut=bildirim&masa="+groups.get(groupPosition).MasaAdi+"&departmanAdi="+groups.get(groupPosition).DepartmanAdi+"&yemekAdi="+groups.get(groupPosition).siparisler.get(childPosition).yemekAdi+"");
+                MasaninSiparisleri masaninSiparisleri = groups.get(groupPosition);
+                Siparis siparis1 = groups.get(groupPosition).siparisler.get(childPosition);
+                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa="+masaninSiparisleri.MasaAdi+"&departmanAdi="+masaninSiparisleri.DepartmanAdi+"&yemekAdi="+siparis1.siparisYemekAdi+"&adedi="+siparis1.siparisAdedi+"&porsiyonu="+siparis1.siparisPorsiyonu+"");
                 groups.get(groupPosition).siparisler.remove(childPosition);
                 if (groups.get(groupPosition).siparisler.size() == 0)
                     groups.remove(groupPosition);

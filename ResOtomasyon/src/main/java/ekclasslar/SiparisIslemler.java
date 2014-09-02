@@ -33,37 +33,63 @@ public class SiparisIslemler {
         masaninSiparisleri = new MasaninSiparisleri();
     }
 
-    public void Islem() {
+    public boolean Islem() {
         String gelenkomut = collection.get("komut");
         GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+        boolean secilenMasaMi = false;
         switch (komut) {
             case siparis:
                 siparis = new Siparis();
-                masaninSiparisleri = new MasaninSiparisleri();
                 masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
                 masaninSiparisleri.MasaAdi = collection.get("masa");
                 siparis.siparisAdedi = collection.get("miktar");
                 siparis.siparisYemekAdi = collection.get("yemekAdi");
-                if (g.lstMasaninSiparisleri.size() > 0) {
-                    boolean ayniMasaVarMi = false;
-                    for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
-                        if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
-                            msp.siparisler.add(siparis);
-                            ayniMasaVarMi = true;
-                            break;
+                if (g.secilenMasalar.size() > 0) {
+                    for (DepartmanMasalari dptMasa : g.secilenMasalar) {
+                        for (String masa : dptMasa.Masalar) {
+                            if (masa.contentEquals(collection.get("masa")) && dptMasa.DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
+                                if (g.lstMasaninSiparisleri.size() > 0) {
+                                    boolean ayniMasaVarMi = false;
+                                    for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
+                                        if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
+                                            msp.siparisler.add(siparis);
+                                            ayniMasaVarMi = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!ayniMasaVarMi) {
+                                        masaninSiparisleri.siparisler.add(siparis);
+                                        g.lstMasaninSiparisleri.add(masaninSiparisleri);
+                                    }
+                                } else {
+                                    masaninSiparisleri.siparisler.add(siparis);
+                                    g.lstMasaninSiparisleri.add(masaninSiparisleri);
+                                }
+                                secilenMasaMi = true;
+                            }
                         }
                     }
-                    if (!ayniMasaVarMi) {
+                } else {
+                    if (g.lstMasaninSiparisleri.size() > 0) {
+                        boolean ayniMasaVarMi = false;
+                        for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
+                            if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
+                                msp.siparisler.add(siparis);
+                                ayniMasaVarMi = true;
+                                break;
+                            }
+                        }
+                        if (!ayniMasaVarMi) {
+                            masaninSiparisleri.siparisler.add(siparis);
+                            g.lstMasaninSiparisleri.add(masaninSiparisleri);
+                        }
+                    } else {
                         masaninSiparisleri.siparisler.add(siparis);
                         g.lstMasaninSiparisleri.add(masaninSiparisleri);
                     }
-                } else {
-                    masaninSiparisleri.siparisler.add(siparis);
-                    g.lstMasaninSiparisleri.add(masaninSiparisleri);
+                    secilenMasaMi = true;
                 }
-
-            case bildirim:
-                break;
         }
+        return secilenMasaMi;
     }
 }
