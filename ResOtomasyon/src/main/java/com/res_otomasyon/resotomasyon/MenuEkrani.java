@@ -32,8 +32,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-
-import Entity.Siparis;
 import Entity.UrunlerinListesi;
 import ekclasslar.FileIO;
 import ekclasslar.TryConnection;

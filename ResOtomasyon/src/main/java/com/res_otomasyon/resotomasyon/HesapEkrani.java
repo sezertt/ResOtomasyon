@@ -81,7 +81,7 @@ public class HesapEkrani extends Activity {
         final Button hesapButton = (Button) findViewById(R.id.buttonHesap);
         Button buttonAzalt = (Button) findViewById(R.id.buttonAzalt);
         Button buttonArttir = (Button) findViewById(R.id.buttonArttir);
-        buttonSepet = (Button) findViewById(R.id.buttonSepetOnayla);
+        buttonSepet = (Button) findViewById(R.id.buttonSepetiOnayla);
         buttonNot = (Button) findViewById(R.id.buttonNot);
 
         final String siparisler = extras.getString("siparisler");

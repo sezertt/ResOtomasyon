@@ -75,8 +75,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     GlobalApplication g;
     TryConnection t;
     Menu menu;
-    Siparis siparis;
-    MasaninSiparisleri masaninSiparisleri;
     Dictionary<String, String> collection;
     int siparisCounter = 0;
 
@@ -158,26 +156,26 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                         case siparis:
                             //Sipariş geldiğinde yapılacak işlemler.
                             SiparisIslemler siparisIslemler = new SiparisIslemler(collection, g);
-                            siparisIslemler.Islem();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Get instance of Vibrator from current Context
-                                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                                    if (!menu.findItem(R.id.action_notification).isVisible()) {
-                                        menu.findItem(R.id.action_notification).setVisible(true);
-                                        // Vibrate for 300 milliseconds
-                                        v.vibrate(2000);
+                            //Gelen sipariş seçilen masalara ait ise titreşim yarat.
+                            if (siparisIslemler.Islem()) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        // Get instance of Vibrator from current Context
+                                        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                                        if (!menu.findItem(R.id.action_notification).isVisible()) {
+                                            menu.findItem(R.id.action_notification).setVisible(true);
+                                            // Vibrate for 300 milliseconds
+                                            v.vibrate(2000);
+                                        }
+                                        siparisCounter++;
+                                        if (siparisCounter == 10) {
+                                            siparisCounter = 0;
+                                            v.vibrate(2000);
+                                        }
                                     }
-                                    siparisCounter++;
-                                    if(siparisCounter == 10)
-                                    {
-                                        siparisCounter=0;
-                                        v.vibrate(2000);
-                                    }
-
-                                }
-                            });
+                                });
+                            }
                             break;
                         case masaAcildi:
                             mesajGeldi = false;
@@ -259,6 +257,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         }
         t = new TryConnection(g, myHandler);
         SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.masaEkrani), false);
+        g.commonAsyncTask.client.sendMessage(notificationMessage());
     }
 
     @Override
@@ -337,7 +336,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
             t.startTimer();
         }
         activityVisible = true;
-        notificationMessage();
         if (menu != null)
             if (g.lstMasaninSiparisleri == null || g.lstMasaninSiparisleri.size() == 0)
                 menu.findItem(R.id.action_notification).setVisible(false);
@@ -346,21 +344,21 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
 
     public String notificationMessage() {
         int counter = 0;
-        String komut;
+        String komut,masalar ="";
         komut = "<komut=bildirim&masalar=";
         if (g.secilenMasalar.size() > 0) {
             for (Departman dpt : lstDepartmanlar) {
                 if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
                     if (g.secilenMasalar.get(counter).Masalar.size() > 0) {
-                        komut += dpt.DepartmanAdi + "-";
+                        masalar += "*" + dpt.DepartmanAdi;
                         for (String dptMasalar : g.secilenMasalar.get(counter).Masalar) {
-                            komut += dptMasalar + "-";
+                            masalar += "-" + dptMasalar;
                         }
                     }
                 }
                 counter++;
             }
-            komut = komut.substring(0, komut.length() - 1);
+            komut += masalar.substring(1, masalar.length()-1);
         } else {
             komut = "<komut=bildirim&masalar=hepsi";
         }

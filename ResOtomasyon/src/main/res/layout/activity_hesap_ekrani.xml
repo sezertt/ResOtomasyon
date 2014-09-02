@@ -59,7 +59,7 @@
             android:textColor="@android:color/white"
             android:background="@drawable/buttonstyle3"
             android:text="Sepeti Onayla"
-            android:id="@+id/buttonSepetOnayla"
+            android:id="@+id/buttonSepetiOnayla"
             android:textSize="20sp"
             android:layout_toRightOf="@+id/buttonNot"
             android:layout_toEndOf="@+id/buttonNot"
@@ -95,6 +95,7 @@
         </ListView>
 
     </RelativeLayout>
+
     <RelativeLayout
         android:background="#AAAAAA"
         android:layout_height="0dp"

@@ -3,7 +3,6 @@ package com.res_otomasyon.resotomasyon;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -50,7 +49,6 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                 if (departman.DepartmanEkrani.contentEquals(masaPlanIsmi[j])) {
                     departmanMasalari.Masalar = new ArrayList<String>();
                     departmanMasalari.mDurumu = new ArrayList<Boolean>();
-                    int counterMasa = 0;
                     for (MasaDizayn masaDizayn : lstMasaDizayn) {
                         if (masaDizayn.MasaPlanAdi.contentEquals(departman.DepartmanEkrani)) {
                             departmanMasalari.Masalar.add(masaDizayn.MasaAdi);
@@ -62,22 +60,21 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
             dptMasalar.add(departmanMasalari);
         }
         if (g.secilenMasalar.size() > 0) {
-            int dptCounter =0;
-            for (DepartmanMasalari dpt : g.secilenMasalar)
+
+            for (int i=0; i < g.secilenMasalar.size(); i++)
             {
-                for (String masa :g.secilenMasalar.get(dptCounter).Masalar)
+                for (String masa :g.secilenMasalar.get(i).Masalar)
                 {
                     int masaCounter = 0;
-                    for (String masa1 : dptMasalar.get(dptCounter).Masalar)
+                    for (String masa1 : dptMasalar.get(i).Masalar)
                     {
                         if(masa.contentEquals(masa1))
                         {
-                            dptMasalar.get(dptCounter).mDurumu.set(masaCounter,true);
+                            dptMasalar.get(i).mDurumu.set(masaCounter,true);
                         }
                         masaCounter++;
                     }
                 }
-                dptCounter++;
             }
         }
 

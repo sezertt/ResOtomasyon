@@ -1,34 +1,22 @@
 package com.res_otomasyon.resotomasyon;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ExpandableListView;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
-
-import Entity.MasaninSiparisleri;
-import Entity.Siparis;
 import ekclasslar.NotificationExpandableAdapter;
-import ekclasslar.SetViewGroupEnabled;
-
 
 public class NotificationScreen extends ActionBarActivity {
-    public boolean mesajGeldi = false;
     GlobalApplication g;
     public String srvrMessage;
-    boolean activityVisible = true;
     NotificationExpandableAdapter adapter;
     Context context = this;
 
@@ -70,10 +58,13 @@ public class NotificationScreen extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+        /*
         if (id == R.id.action_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
+        */
     }
 
     BroadcastReceiver rec;
