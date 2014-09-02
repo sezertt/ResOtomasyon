@@ -103,8 +103,8 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
                 notifyDataSetChanged();
             }
         });
-        textYemekAdi.setText(siparis.yemekAdi);
-        textAdet.setText(siparis.miktar);
+        textYemekAdi.setText(siparis.siparisYemekAdi);
+        textAdet.setText(siparis.siparisAdedi);
         return convertView;
     }
 

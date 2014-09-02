@@ -7,8 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -16,7 +14,6 @@ import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,11 +34,11 @@ import java.util.List;
 import java.util.Set;
 
 import Entity.Siparis;
+import Entity.UrunlerinListesi;
 import ekclasslar.FileIO;
 import ekclasslar.TryConnection;
 import ekclasslar.UrunBilgileri;
 import Entity.Employee;
-import Entity.Urunler;
 import HashPassword.passwordHash;
 import XMLReader.ReadXML;
 
@@ -54,18 +51,16 @@ public class MenuEkrani extends ActionBarActivity {
     private String m_Text = "";
     ArrayList<Employee> lstEmployee;
 
-    boolean masaKilitliMi = false, passCorrect = false, activityVisible = true;
+    boolean masaKilitliMi = false, passCorrect = false, activityVisible = true, hesapEkraniAcilicak = false;
     Context context = this;
     MenuItem item;
-    ArrayList<Urunler> lstProducts;
-    ArrayList<Siparis> lstOrderedProducts = new ArrayList<Siparis>();
+    ArrayList<UrunlerinListesi> urunListesi;
     SharedPreferences preferences = null;
     GlobalApplication g;
     TryConnection t;
     // more efficient than HashMap for mapping integers to objects
     SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
     MyExpandableListAdapter adapter;
-
 
     public Handler myHandler = new Handler() {
         @Override
@@ -158,12 +153,13 @@ public class MenuEkrani extends ActionBarActivity {
     protected void onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(rec, new IntentFilter("myevent"));
 
+        hesapEkraniAcilicak = false;
+
         if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
             t.startTimer();
         }
 
         groups.clear();
-        lstOrderedProducts.clear();
         createData();
 
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
@@ -182,12 +178,8 @@ public class MenuEkrani extends ActionBarActivity {
         super.onPause();
         g.isMenuEkraniRunning = false;
         activityVisible = false;
-        if (!masaKilitliMi) {
-            g.tamPorsiyon.clear();
-            g.yarimPorsiyon.clear();
-            g.ceyrekPorsiyon.clear();
-            g.ucCeyrekPorsiyon.clear();
-            g.birBucukPorsiyon.clear();
+        if (!masaKilitliMi && !hesapEkraniAcilicak) {
+            g.siparisListesi.clear();
         }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
     }
@@ -236,11 +228,12 @@ public class MenuEkrani extends ActionBarActivity {
                         String siparisler = collection.get("siparisBilgileri");
                         Intent hesapEkrani = new Intent(MenuEkrani.this, HesapEkrani.class);
 
-                        hesapEkrani.putExtra("lstOrderedProducts", lstOrderedProducts); // yeni verilecek olan siparişler
+                        //hesapEkrani.putExtra("verilecekSiparislerinListesi", g.siparisListesi); // yeni verilecek olan siparişler
                         hesapEkrani.putExtra("siparisler", siparisler); // eski siparişler
                         hesapEkrani.putExtra("DepartmanAdi", departmanAdi);
                         hesapEkrani.putExtra("MasaAdi", masaAdi);
                         hesapEkrani.putExtra("lstEmployees", lstEmployee);
+                        hesapEkraniAcilicak = true;
                         startActivity(hesapEkrani);
                         break;
                 }
@@ -271,7 +264,7 @@ public class MenuEkrani extends ActionBarActivity {
         }
 
         ReadXML readUrun = new ReadXML();
-        lstProducts = readUrun.readUrunler(files);
+        urunListesi = readUrun.readUrunler(files);
         if (g.commonAsyncTask.client != null) {
             if (g.commonAsyncTask.client.out != null) {
                 MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlı)");
@@ -292,6 +285,9 @@ public class MenuEkrani extends ActionBarActivity {
     protected void onStop() {
         g.isMenuEkraniRunning = false;
         activityVisible = false;
+        if (!masaKilitliMi && !hesapEkraniAcilicak) {
+            g.siparisListesi.clear();
+        }
         super.onStop();
     }
 
@@ -299,6 +295,9 @@ public class MenuEkrani extends ActionBarActivity {
     protected void onDestroy() {
         activityVisible = false;
         g.isMenuEkraniRunning = false;
+        if (!masaKilitliMi && !hesapEkraniAcilicak) {
+            g.siparisListesi.clear();
+        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
         super.onDestroy();
     }
@@ -311,141 +310,53 @@ public class MenuEkrani extends ActionBarActivity {
         df.setMinimumFractionDigits(0);
         df.setGroupingUsed(false);
 
-        for (int i = 0; i < lstProducts.size(); i++) {
-            UrunBilgileri group = new UrunBilgileri(lstProducts.get(i).urunKategorisi);
-            if (i + 1 < lstProducts.size()) {
-                while (lstProducts.get(i).urunKategorisi.contentEquals(lstProducts.get(i + 1).urunKategorisi)) {
-                    group.productName.add(lstProducts.get(i).urunAdi);
-                    group.productPrice.add(lstProducts.get(i).porsiyonFiyati);
-                    group.productInfo.add(lstProducts.get(i).urunAciklamasi);
-                    group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
+        for (int i = 0; i < urunListesi.size(); i++) {
+            UrunBilgileri group = new UrunBilgileri(urunListesi.get(i).urunKategorisi);
+            if (i + 1 < urunListesi.size())
+            {
+                while (urunListesi.get(i).urunKategorisi.contentEquals(urunListesi.get(i + 1).urunKategorisi)) // bir sonraki ürünün kategorisi, eklenen ürünün kategorisi ile aynı olduğu sürece devam et
+                {
+                    group.productName.add(urunListesi.get(i).urunAdi);
+                    group.productPrice.add(urunListesi.get(i).urunFiyati);
+                    group.productInfo.add(urunListesi.get(i).urunAciklamasi);
+                    group.productPortionClass.add(urunListesi.get(i).urunPorsiyonSinifi);
 
-                    int siparisYeri = -1;
-                    for (int k = 0; k < g.tamPorsiyon.size(); k++) {
-                        if (g.tamPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
-                            siparisYeri = k;
-                            break;
-                        }
-                    }
-                    if (siparisYeri != -1) {
-                        group.productCount.add(g.tamPorsiyon.get(siparisYeri).miktar);
-
-                        int siparisVarmi = -1;
-                        for (int l = 0; l < lstOrderedProducts.size(); l++) {
-                            if (lstOrderedProducts.get(l).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
-                                siparisVarmi = l;
-                                break;
-                            }
-                        }
-                        if (siparisVarmi == -1) {
-                            Siparis siparis = new Siparis();
-                            siparis.porsiyonSinifi = lstProducts.get(i).urunPorsiyonu;
-                            siparis.miktar = g.tamPorsiyon.get(siparisYeri).miktar;
-                            siparis.porsiyonFiyati = lstProducts.get(i).porsiyonFiyati;
-                            siparis.yemekAdi = lstProducts.get(i).urunAdi;
-                            lstOrderedProducts.add(siparis);
-                        } else {
-                            lstOrderedProducts.get(siparisVarmi).miktar = g.tamPorsiyon.get(siparisYeri).miktar;
-                        }
-                    } else {
-                        group.productCount.add("0");
-                    }
-
-                    if (lstProducts.get(i).urunPorsiyonu != 0) //yarım & çeyrek porsiyon
+                    String miktar = "0";
+                    for (int k = 0; k < g.siparisListesi.size(); k++)
                     {
-                        setLstOrderedProducts(group, df, i, g.yarimPorsiyon, 0.5);
-                        setLstOrderedProducts(group, df, i, g.birBucukPorsiyon, 1.5);
-
-                        if (lstProducts.get(i).urunPorsiyonu == 2) // çeyrek porsiyon
+                        if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi))
                         {
-                            setLstOrderedProducts(group, df, i, g.ucCeyrekPorsiyon, 0.75);
-                            setLstOrderedProducts(group, df, i, g.ceyrekPorsiyon, 0.25);
+                            miktar = df.format(Double.parseDouble(miktar) + Integer.parseInt(g.siparisListesi.get(k).siparisAdedi) * g.siparisListesi.get(k).siparisPorsiyonu);
                         }
                     }
+
+                    group.productCount.add(miktar);
 
                     i++;
-                    if (i + 1 >= lstProducts.size())
+                    if (i + 1 >= urunListesi.size())
                         break;
                 }
             }
-            if (i + 1 < lstProducts.size()) {
-                group.productName.add(lstProducts.get(i).urunAdi);
-                group.productPrice.add(lstProducts.get(i).porsiyonFiyati);
-                group.productInfo.add(lstProducts.get(i).urunAciklamasi);
-                group.productPortion.add(lstProducts.get(i).urunPorsiyonu);
+            // bir sonraki ürünün kategorisi, eklenen ürünün kategorisinden farklı ise kategori değişiyor demektir. o zaman bu ürün kategorisinin son ürünüdür. ekliyoruz.
+            if (i + 1 < urunListesi.size()) {
+                group.productName.add(urunListesi.get(i).urunAdi);
+                group.productPrice.add(urunListesi.get(i).urunFiyati);
+                group.productInfo.add(urunListesi.get(i).urunAciklamasi);
+                group.productPortionClass.add(urunListesi.get(i).urunPorsiyonSinifi);
 
-                int siparisYeri = -1;
-                for (int k = 0; k < g.tamPorsiyon.size(); k++) {
-                    if (g.tamPorsiyon.get(k).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
-                        siparisYeri = k;
-                        break;
-                    }
-                }
-                if (siparisYeri != -1) {
-                    group.productCount.add(g.tamPorsiyon.get(siparisYeri).miktar);
-
-                    int siparisVarmi = -1;
-                    for (int l = 0; l < lstOrderedProducts.size(); l++) {
-                        if (lstOrderedProducts.get(l).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
-                            siparisVarmi = l;
-                            break;
-                        }
-                    }
-                    if (siparisVarmi == -1) {
-                        Siparis siparis = new Siparis();
-                        siparis.porsiyonSinifi = lstProducts.get(i).urunPorsiyonu;
-                        siparis.miktar = g.tamPorsiyon.get(siparisYeri).miktar;
-                        siparis.porsiyonFiyati = lstProducts.get(i).porsiyonFiyati;
-                        siparis.yemekAdi = lstProducts.get(i).urunAdi;
-                        lstOrderedProducts.add(siparis);
-                    } else {
-                        lstOrderedProducts.get(siparisVarmi).miktar = g.tamPorsiyon.get(siparisYeri).miktar;
-                    }
-                } else {
-                    group.productCount.add("0");
-                }
-
-                if (lstProducts.get(i).urunPorsiyonu != 0) //yarım & çeyrek porsiyon
+                String miktar = "0";
+                for (int k = 0; k < g.siparisListesi.size(); k++)
                 {
-                    setLstOrderedProducts(group, df, i, g.yarimPorsiyon, 0.5);
-                    setLstOrderedProducts(group, df, i, g.birBucukPorsiyon, 1.5);
-
-                    if (lstProducts.get(i).urunPorsiyonu == 2) // çeyrek porsiyon
+                    if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi))
                     {
-                        setLstOrderedProducts(group, df, i, g.ucCeyrekPorsiyon, 0.75);
-                        setLstOrderedProducts(group, df, i, g.ceyrekPorsiyon, 0.25);
+                        miktar = df.format(Double.parseDouble(miktar) + Integer.parseInt(g.siparisListesi.get(k).siparisAdedi) * g.siparisListesi.get(k).siparisPorsiyonu);
                     }
                 }
+
+                group.productCount.add(miktar);
             }
             groups.append(j, group);
             j++;
-        }
-    }
-
-    private void setLstOrderedProducts(UrunBilgileri group, DecimalFormat df, int i, ArrayList<Siparis> arrayListPorsiyon, Double carpan) {
-        for (Siparis anArrayListPorsiyon : arrayListPorsiyon) {
-            if (anArrayListPorsiyon.yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
-                group.productCount.set(group.productCount.size() - 1, df.format(Double.parseDouble(anArrayListPorsiyon.miktar) * carpan + (Double.parseDouble(group.productCount.get(i)))));
-
-                int siparisVarmi = -1;
-                for (int l = 0; l < lstOrderedProducts.size(); l++) {
-                    if (lstOrderedProducts.get(l).yemekAdi.contentEquals(lstProducts.get(i).urunAdi)) {
-                        siparisVarmi = l;
-                        break;
-                    }
-                }
-                if (siparisVarmi == -1) {
-                    Siparis siparis = new Siparis();
-                    siparis.porsiyonSinifi = lstProducts.get(i).urunPorsiyonu;
-                    siparis.miktar = carpan.toString();
-                    siparis.porsiyonFiyati = lstProducts.get(i).porsiyonFiyati;
-                    siparis.yemekAdi = lstProducts.get(i).urunAdi;
-                    lstOrderedProducts.add(siparis);
-                } else {
-                    lstOrderedProducts.get(siparisVarmi).miktar = df.format(Double.parseDouble(anArrayListPorsiyon.miktar) * carpan + (Double.parseDouble(lstOrderedProducts.get(siparisVarmi).miktar)));
-                }
-                break;
-            }
         }
     }
 
@@ -502,7 +413,7 @@ public class MenuEkrani extends ActionBarActivity {
 
                     final EditText input = new EditText(context);
                     // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-                    input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
                     builder.setView(input);
 
                     builder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {

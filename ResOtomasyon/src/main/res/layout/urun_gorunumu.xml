@@ -7,6 +7,7 @@
     android:clickable="true"
     android:orientation="vertical"
     android:paddingLeft="10dp"
+    android:paddingStart="10dp"
     android:paddingBottom="2dp"
     tools:context=".MainActivity" >
 
@@ -71,6 +72,7 @@
         android:layout_height="50dp"
         android:textColor="@android:color/white"
         android:drawableStart="@drawable/plus"
+        android:drawableLeft="@drawable/plus"
         android:background="@drawable/buttonstyle2"
         android:id="@+id/buttonPlus"
         android:layout_marginRight="15dp"

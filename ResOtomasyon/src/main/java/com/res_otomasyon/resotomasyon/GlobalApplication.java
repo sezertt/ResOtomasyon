@@ -9,12 +9,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.Handler;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import TCPClientSide.CommonAsyncTask;
@@ -30,14 +28,8 @@ public class GlobalApplication extends Application {
     public boolean isMenuEkraniRunning = false;
 
     public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
-    public ArrayList<MasaninSiparisleri> masaninSiparisleri = new ArrayList<MasaninSiparisleri>();
 
-
-    public ArrayList<Siparis> tamPorsiyon = new ArrayList<Siparis>();
-    public ArrayList<Siparis> yarimPorsiyon = new ArrayList<Siparis>();
-    public ArrayList<Siparis> ceyrekPorsiyon = new ArrayList<Siparis>();
-    public ArrayList<Siparis> ucCeyrekPorsiyon = new ArrayList<Siparis>();
-    public ArrayList<Siparis> birBucukPorsiyon = new ArrayList<Siparis>();
+    public ArrayList<Siparis> siparisListesi = new ArrayList<Siparis>();
 
     Dictionary<String,Bitmap> bitmapDictionary = new Hashtable<String, Bitmap>();
     public ArrayList<MasaninSiparisleri> lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();

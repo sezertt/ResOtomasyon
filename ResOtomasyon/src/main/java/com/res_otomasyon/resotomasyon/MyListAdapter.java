@@ -60,13 +60,14 @@ public class MyListAdapter extends BaseAdapter {
         TextView textYemekAdi = (TextView) convertView.findViewById(R.id.textViewYemekAdi);
         TextView textAdet = (TextView) convertView.findViewById(R.id.textViewAdet);
         TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewFiyat);
+        TextView textPorsiyon = (TextView) convertView.findViewById(R.id.textViewPorsiyon);
 
-        Double doubleMiktar = Double.valueOf(siparisListesi.get(position).miktar);
+        Double doubleMiktar = Double.valueOf(siparisListesi.get(position).siparisAdedi);
 
         Double doubleFiyat;
         try
         {
-            doubleFiyat = Double.parseDouble(siparisListesi.get(position).porsiyonFiyati);
+            doubleFiyat = Double.parseDouble(siparisListesi.get(position).siparisFiyati);
             textFiyat.setText(String.format("%.2f", doubleFiyat)+" TL"); // 2 hane virgülden sonra virgül den
         }
         catch (Exception ex)
@@ -76,9 +77,9 @@ public class MyListAdapter extends BaseAdapter {
 
             //burası virgüllü stringi double a convert etme çevirme kısmı
             try {
-                number = format.parse(siparisListesi.get(position).porsiyonFiyati);
+                number = format.parse(siparisListesi.get(position).siparisFiyati);
                 doubleFiyat = number.doubleValue();
-                textFiyat.setText(String.format("%.2f", doubleFiyat)+" TL"); // 2 hane virgülden sonra virgül den
+                textFiyat.setText(String.format("%.2f", doubleFiyat) + " TL"); // 2 hane virgülden sonra virgül den
 
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -93,7 +94,8 @@ public class MyListAdapter extends BaseAdapter {
 
         String result = df.format(doubleMiktar);
 
-        textYemekAdi.setText(siparisListesi.get(position).yemekAdi);
+        textYemekAdi.setText(siparisListesi.get(position).siparisYemekAdi);
+        textPorsiyon.setText(String.valueOf(siparisListesi.get(position).siparisPorsiyonu));
         textAdet.setText("x"+result);
 
         if(selectedIndex!= -1 && position == selectedIndex)

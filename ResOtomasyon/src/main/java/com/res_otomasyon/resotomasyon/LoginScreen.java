@@ -67,6 +67,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             intent = new Intent(LoginScreen.this, Settings.class);
             startActivity(intent);
         }
+
         if (files != null) {
             ReadXML readXML = new ReadXML();
             lstEmployees = readXML.readEmployees(files);
@@ -279,7 +280,10 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                         for (int i = 0; i < lstEmployees.size(); i++) {
                             passCorrect = passwordHash.validatePassword(pass, lstEmployees.get(i).PinCode);
                             if (passCorrect)
+                            {
                                 getCurrentEmployee = i;
+                                break;
+                            }
                         }
                     } else {
                         AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
@@ -318,7 +322,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                 } else {
                     AlertDialog.Builder aBuilder = new AlertDialog.Builder(context);
                     aBuilder.setTitle("Hatalı Pin");
-                    aBuilder.setMessage("Hatalı pin kodu giridiniz.").setCancelable(false)
+                    aBuilder.setMessage("Hatalı pin kodu girdiniz.").setCancelable(false)
                             .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {

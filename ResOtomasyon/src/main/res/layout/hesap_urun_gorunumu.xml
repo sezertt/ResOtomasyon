@@ -67,8 +67,26 @@
         android:longClickable = "false"
         android:focusableInTouchMode="false"
         android:layout_alignWithParentIfMissing="false"
-        android:layout_toStartOf="@+id/textView"
-        android:layout_toLeftOf="@+id/textViewFiyat">
-
+        android:layout_toLeftOf="@+id/textViewPorsiyon">
     </TextView>
+
+    <TextView
+        android:id="@+id/textViewPorsiyon"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        android:text="0.75"
+        android:minWidth="40dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:textSize="18sp"
+        android:clickable="false"
+        android:focusable="false"
+        android:longClickable = "false"
+        android:focusableInTouchMode="false"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_toLeftOf="@+id/textViewFiyat">
+    </TextView>
+
 </RelativeLayout>

@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -19,12 +21,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Locale;
+
 import Entity.Employee;
 import Entity.Siparis;
 
@@ -32,7 +37,6 @@ public class HesapEkrani extends Activity {
 
     String departmanAdi, masaAdi;
     ArrayList<Employee> lstEmployee;
-    ArrayList<Siparis> lstOrderedProducts = new ArrayList<Siparis>();
     SharedPreferences preferences = null;
     boolean MasaKilitliMi = false;
     MyListAdapter adapterSecilenSiparisler;
@@ -40,9 +44,9 @@ public class HesapEkrani extends Activity {
     int selectedSiparisItemPosition = -1;
     GlobalApplication g;
     ArrayList<String> porsiyonlarPozitif = new ArrayList<String>();
-    ArrayList<String> porsiyonlarNegatif = new ArrayList<String>();
 
-    Double kacPorsiyon, yemeginFiyati, toplamHesap = 0d;
+    Integer kacAdet;
+    Double  yemeginFiyati, toplamHesap = 0d;
     Button buttonSepet, buttonNot;
     Boolean ikramMi;
 
@@ -58,7 +62,6 @@ public class HesapEkrani extends Activity {
         departmanAdi = extras.getString("DepartmanAdi");
         masaAdi = extras.getString("MasaAdi");
         lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
-        lstOrderedProducts = (ArrayList<Siparis>) extras.getSerializable("lstOrderedProducts");
 
         g = (GlobalApplication) getApplicationContext();
 
@@ -67,11 +70,12 @@ public class HesapEkrani extends Activity {
 
         String yemeginAdi, Garson;
         Boolean ikramMi;
+        Double porsiyon = 1d;
 
         ListView hesapListesi = (ListView) findViewById(R.id.listViewHesap);
         final ListView secilenSiparislerinListesi = (ListView) findViewById(R.id.listViewSecilenSiparisler);
 
-        ArrayList<Siparis> urunListesi = new ArrayList<Siparis>();
+        final ArrayList<Siparis> urunListesi = new ArrayList<Siparis>();
         ArrayList<Siparis> urunListesiIkram = new ArrayList<Siparis>();
 
         final Button hesapButton = (Button) findViewById(R.id.buttonHesap);
@@ -90,28 +94,23 @@ public class HesapEkrani extends Activity {
                 String[] detaylari = aSiparisler.split("-");
 
                 NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
-                Number number = null;
+                Number numberFiyat = null, numberPorsiyon = null;
 
                 //burası virgüllü stringi double a convert etme çevirme kısmı
                 try {
-                    number = format.parse(detaylari[0]);
+                    numberFiyat = format.parse(detaylari[0]);
+                    numberPorsiyon = format.parse(detaylari[5]);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
-                if (number != null) {
-                    yemeginFiyati = number.doubleValue();
-                }
+                if (numberFiyat != null)
+                    yemeginFiyati = numberFiyat.doubleValue();
 
-                try {
-                    number = format.parse(detaylari[1]);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                if (numberPorsiyon != null)
+                    porsiyon = numberPorsiyon.doubleValue();
 
-                if (number != null) {
-                    kacPorsiyon = number.doubleValue();
-                }
+                kacAdet = Integer.parseInt(detaylari[1]);
 
                 yemeginAdi = detaylari[2];
                 ikramMi = Boolean.parseBoolean(detaylari[3]);
@@ -122,7 +121,7 @@ public class HesapEkrani extends Activity {
                 if (!ikramMi) // ikram değilse
                 {
                     for (int j = 0; j < urunListesi.size(); j++) {
-                        if (yemeginAdi.contentEquals(urunListesi.get(j).yemekAdi)) // listede yemek var
+                        if (yemeginAdi.contentEquals(urunListesi.get(j).siparisYemekAdi) && porsiyon == urunListesi.get(j).siparisPorsiyonu) // listede yemek var
                         {
                             gruptaYeniGelenSiparisVarMi = j;
                             break;
@@ -131,20 +130,21 @@ public class HesapEkrani extends Activity {
 
                     if (gruptaYeniGelenSiparisVarMi != -1) // listede yemek var
                     {
-                        urunListesi.get(gruptaYeniGelenSiparisVarMi).miktar = (Double.parseDouble(urunListesi.get(gruptaYeniGelenSiparisVarMi).miktar) + kacPorsiyon) + "";
+                        urunListesi.get(gruptaYeniGelenSiparisVarMi).siparisAdedi = (Double.parseDouble(urunListesi.get(gruptaYeniGelenSiparisVarMi).siparisAdedi) + kacAdet) + "";
                     } else // listede yemek yok
                     {
                         Siparis yeniSiparis = new Siparis();
-                        yeniSiparis.miktar = kacPorsiyon.toString();
-                        yeniSiparis.yemekAdi = yemeginAdi;
-                        yeniSiparis.porsiyonFiyati = String.format("%.2f", yemeginFiyati);
+                        yeniSiparis.siparisAdedi = kacAdet.toString();
+                        yeniSiparis.siparisYemekAdi = yemeginAdi;
+                        yeniSiparis.siparisFiyati = String.format("%.2f", yemeginFiyati);
+                        yeniSiparis.siparisPorsiyonu = porsiyon;
                         urunListesi.add(yeniSiparis);
                     }
-                    toplamHesap += yemeginFiyati * kacPorsiyon;
+                    toplamHesap += yemeginFiyati * kacAdet;
                 } else // ikramsa
                 {
                     for (int j = 0; j < urunListesiIkram.size(); j++) {
-                        if (yemeginAdi.contentEquals(urunListesiIkram.get(j).yemekAdi)) // listede yemek var
+                        if (yemeginAdi.contentEquals(urunListesiIkram.get(j).siparisYemekAdi) && porsiyon == urunListesi.get(j).siparisPorsiyonu) // listede yemek var
                         {
                             gruptaYeniGelenSiparisVarMi = j;
                             break;
@@ -153,13 +153,14 @@ public class HesapEkrani extends Activity {
 
                     if (gruptaYeniGelenSiparisVarMi != -1) // listede yemek var
                     {
-                        urunListesiIkram.get(gruptaYeniGelenSiparisVarMi).miktar = (Double.parseDouble(urunListesiIkram.get(gruptaYeniGelenSiparisVarMi).miktar) + kacPorsiyon) + "";
+                        urunListesiIkram.get(gruptaYeniGelenSiparisVarMi).siparisAdedi = (Double.parseDouble(urunListesiIkram.get(gruptaYeniGelenSiparisVarMi).siparisAdedi) + kacAdet) + "";
                     } else // listede yemek yok
                     {
                         Siparis yeniSiparis = new Siparis();
-                        yeniSiparis.miktar = kacPorsiyon.toString();
-                        yeniSiparis.yemekAdi = yemeginAdi;
-                        yeniSiparis.porsiyonFiyati = "ikram";
+                        yeniSiparis.siparisAdedi = kacAdet.toString();
+                        yeniSiparis.siparisYemekAdi = yemeginAdi;
+                        yeniSiparis.siparisFiyati = "ikram";
+                        yeniSiparis.siparisPorsiyonu = porsiyon;
                         urunListesiIkram.add(yeniSiparis);
                     }
                 }
@@ -184,7 +185,7 @@ public class HesapEkrani extends Activity {
             hesapButton.setEnabled(false);
         }
 
-        adapterSecilenSiparisler = new MyListAdapter(lstOrderedProducts,this,false);
+        adapterSecilenSiparisler = new MyListAdapter(g.siparisListesi, this, false);
         secilenSiparislerinListesi.setAdapter(adapterSecilenSiparisler);
 
         registerForContextMenu(hesapListesi);
@@ -201,90 +202,82 @@ public class HesapEkrani extends Activity {
             public void onClick(View v) {
                 if(selectedSiparisItemPosition != -1)
                 {
-                    if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 0) // tam porsiyon
+                    if (g.siparisListesi.get(selectedSiparisItemPosition).siparisPorsiyonSinifi == 0) // tam porsiyon
                     {
                         porsiyonEkle(1d);
                     }
                     else // diğer porsiyonlar
                     {
-                        int varMi = -1;
-                        for(int i=0;i<g.birBucukPorsiyon.size();i++)
+                        int [] selectedSiparisItemPositionsOnSiparisListesi = {-1,-1,-1,-1,-1}; // 0-1.5 porsiyon --- 1-1 porsiyon --- 2-0.75 porsiyon --- 3-0.5 porsiyon --- 4-0.25 porsiyon
+                        for(int i=0;i<g.siparisListesi.size();i++)
                         {
-                            if(g.birBucukPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                            if(g.siparisListesi.get(i).siparisYemekAdi.contentEquals(urunListesi.get(selectedSiparisItemPosition).siparisYemekAdi))
                             {
-                                porsiyonlarPozitif.add("1.5 Porsiyon x" + g.birBucukPorsiyon.get(i).miktar);
-                                varMi = i;
-                                break;
-                            }
-                        }
-
-                        if(varMi == -1)
-                            porsiyonlarPozitif.add("1.5 Porsiyon ");
-
-                        varMi = -1;
-
-                        for(int i=0;i<g.tamPorsiyon.size();i++)
-                        {
-                            if(g.tamPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
-                            {
-                                porsiyonlarPozitif.add("1 Porsiyon x" + g.tamPorsiyon.get(i).miktar);
-                                varMi = i;
-                                break;
-                            }
-                        }
-
-                        if(varMi == -1)
-                            porsiyonlarPozitif.add("1 Porsiyon ");
-
-                        if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 2d)
-                        {
-                            varMi = -1;
-
-                            for(int i=0;i<g.ucCeyrekPorsiyon.size();i++)
-                            {
-                                if(g.ucCeyrekPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
-                                {
-                                    porsiyonlarPozitif.add("0.75 Porsiyon x" + g.ucCeyrekPorsiyon.get(i).miktar);
-                                    varMi = i;
-                                    break;
+                                if (g.siparisListesi.get(i).siparisPorsiyonu == 1.5d) {
+                                    selectedSiparisItemPositionsOnSiparisListesi[0] = i;
+                                }
+                                else if (g.siparisListesi.get(i).siparisPorsiyonu == 1) {
+                                    selectedSiparisItemPositionsOnSiparisListesi[1] = i;
+                                }
+                                else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.75d) {
+                                    selectedSiparisItemPositionsOnSiparisListesi[2] = i;
+                                }
+                                else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.5d) {
+                                    selectedSiparisItemPositionsOnSiparisListesi[3] = i;
+                                }
+                                else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.25d) {
+                                    selectedSiparisItemPositionsOnSiparisListesi[4] = i;
                                 }
                             }
-
-                            if(varMi == -1)
-                                porsiyonlarPozitif.add("0.75 Porsiyon ");
                         }
 
-                        varMi = -1;
-
-                        for(int i=0;i<g.yarimPorsiyon.size();i++)
+                        for(int i = 0; i < selectedSiparisItemPositionsOnSiparisListesi.length; i++)
                         {
-                            if(g.yarimPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                            if (g.siparisListesi.get(selectedSiparisItemPosition).siparisPorsiyonSinifi == 1d && (i == 2 || i == 4)) // ürün yarım porsiyonluk ise 0.25 ve 0.75 eklenmemeli
+                                continue; // eğer ürünün çeyrek porsiyon özelliği yoksa, sipariş porsiyonuna 0.75 ve 0.25 eklenmesin
+
+                            if(selectedSiparisItemPositionsOnSiparisListesi[i] != -1)
                             {
-                                porsiyonlarPozitif.add("0.5 Porsiyon x" + g.yarimPorsiyon.get(i).miktar);
-                                varMi = i;
-                                break;
-                            }
-                        }
-
-                        if(varMi == -1)
-                            porsiyonlarPozitif.add("0.5 Porsiyon ");
-
-                        if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 2d)
-                        {
-                            varMi = -1;
-
-                            for(int i=0;i<g.ceyrekPorsiyon.size();i++)
-                            {
-                                if(g.ceyrekPorsiyon.get(i).yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi))
+                                switch (i)
                                 {
-                                    porsiyonlarPozitif.add("0.25 Porsiyon x" + g.ceyrekPorsiyon.get(i).miktar);
-                                    varMi = i;
-                                    break;
+                                    case 0:
+                                        porsiyonlarPozitif.add("1.5 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPositionsOnSiparisListesi[i]).siparisAdedi);
+                                        break;
+                                    case 1:
+                                        porsiyonlarPozitif.add("1 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPositionsOnSiparisListesi[i]).siparisAdedi);
+                                        break;
+                                    case 2:
+                                        porsiyonlarPozitif.add("0.75 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPositionsOnSiparisListesi[i]).siparisAdedi);
+                                        break;
+                                    case 3:
+                                        porsiyonlarPozitif.add("0.5 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPositionsOnSiparisListesi[i]).siparisAdedi);
+                                        break;
+                                    case 4:
+                                        porsiyonlarPozitif.add("0.25 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPositionsOnSiparisListesi[i]).siparisAdedi);
+                                        break;
                                 }
                             }
-
-                            if(varMi == -1)
-                                porsiyonlarPozitif.add("0.25 Porsiyon ");
+                            else
+                            {
+                                switch (i)
+                                {
+                                    case 0:
+                                        porsiyonlarPozitif.add("1.5 Porsiyon ");
+                                        break;
+                                    case 1:
+                                        porsiyonlarPozitif.add("1 Porsiyon ");
+                                        break;
+                                    case 2:
+                                        porsiyonlarPozitif.add("0.75 Porsiyon ");
+                                        break;
+                                    case 3:
+                                        porsiyonlarPozitif.add("0.5 Porsiyon ");
+                                        break;
+                                    case 4:
+                                        porsiyonlarPozitif.add("0.25 Porsiyon ");
+                                        break;
+                                }
+                            }
                         }
 
                         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(HesapEkrani.this, android.R.layout.simple_list_item_1,porsiyonlarPozitif);
@@ -317,16 +310,16 @@ public class HesapEkrani extends Activity {
 
                                         porsiyonEkle(porsiyon);
 
-                                        String [] urunBilgileri = porsiyonlarPozitif.get(item).split("x");
+                                        String[] urunPorsiyonSecimi = porsiyonlarPozitif.get(item).split("x");
 
                                         int adet = 0;
 
-                                        if(urunBilgileri.length > 1)
-                                            adet = Integer.parseInt(urunBilgileri[1]);
+                                        if (urunPorsiyonSecimi.length > 1)
+                                            adet = Integer.parseInt(urunPorsiyonSecimi[1]);
 
                                         adet++;
 
-                                        porsiyonlarPozitif.set(item, urunBilgileri[0] +"x" + adet);
+                                        porsiyonlarPozitif.set(item, urunPorsiyonSecimi[0] + "x" + adet);
                                         adapter.notifyDataSetChanged();
                                     }
                                 })
@@ -342,264 +335,58 @@ public class HesapEkrani extends Activity {
             public void onClick(View v) {
                 if(selectedSiparisItemPosition != -1)
                 {
-                    if(lstOrderedProducts.get(selectedSiparisItemPosition).porsiyonSinifi == 0) // tam porsiyon
-                    {
-                        porsiyonCikar(1d);
-                    }
-                    else // diğer porsiyonlar
-                    {
-                        if(g.birBucukPorsiyon.size()>0) // eğer önceden eklenmiş 1.5 porsiyon varsa
-                        {
-                            for (Siparis aBirBucukPorsiyon : g.birBucukPorsiyon) {
-                                if (aBirBucukPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
-                                    porsiyonlarNegatif.add("-1.5 Porsiyon x" + aBirBucukPorsiyon.miktar);
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(g.tamPorsiyon.size()>0)  // eğer önceden eklenmiş 1 porsiyon varsa
-                        {
-                            for (Siparis aTamPorsiyon : g.tamPorsiyon) {
-                                if (aTamPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
-                                    porsiyonlarNegatif.add("-1 Porsiyon x" + aTamPorsiyon.miktar);
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(g.ucCeyrekPorsiyon.size()>0) // eğer önceden eklenmiş 0.75 porsiyon varsa
-                        {
-                            for (Siparis anUcCeyrekPorsiyon : g.ucCeyrekPorsiyon) {
-                                if (anUcCeyrekPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
-                                    porsiyonlarNegatif.add("-0.75 Porsiyon x" + anUcCeyrekPorsiyon.miktar);
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(g.yarimPorsiyon.size()>0) // eğer önceden eklenmiş 0.5 porsiyon varsa
-                        {
-                            for (Siparis aYarimPorsiyon : g.yarimPorsiyon) {
-                                if (aYarimPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
-                                    porsiyonlarNegatif.add("-0.5 Porsiyon x" + aYarimPorsiyon.miktar);
-                                    break;
-                                }
-                            }
-                        }
-
-                        if(g.ceyrekPorsiyon.size()>0)  // eğer önceden eklenmiş 0.25 porsiyon varsa
-                        {
-                            for (Siparis aCeyrekPorsiyon : g.ceyrekPorsiyon) {
-                                if (aCeyrekPorsiyon.yemekAdi.contentEquals(lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi)) {
-                                    porsiyonlarNegatif.add("-0.25 Porsiyon x" + aCeyrekPorsiyon.miktar);
-                                    break;
-                                }
-                            }
-                        }
-
-                        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(HesapEkrani.this, android.R.layout.simple_list_item_1,porsiyonlarNegatif);
-
-                        final AlertDialog alert = new AlertDialog.Builder(HesapEkrani.this)
-                                .setTitle("Porsiyon Seçiniz")
-                                .setCancelable(false)
-                                .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int item) {
-                                        // porsiyon seçimi tamamlanınca yapılacaklar
-                                        porsiyonlarNegatif.clear();
-                                        adapter.notifyDataSetChanged();
-                                    }
-                                })
-                                .setSingleChoiceItems(adapter, -1, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int item) {
-                                        Double porsiyon;
-                                        try {
-                                            porsiyon = Double.parseDouble(porsiyonlarNegatif.get(item).substring(0, 4));
-                                        } catch (Exception ex) {
-                                            porsiyon = -1d;
-                                        }
-
-                                        porsiyon *= -1;
-
-                                        if (porsiyon == 0.7)
-                                            porsiyon = 0.75;
-                                        else if (porsiyon == 0.2)
-                                            porsiyon = 0.25;
-                                        porsiyonCikar(porsiyon);
-
-                                        String[] urunBilgileri = porsiyonlarNegatif.get(item).split("x");
-
-                                        int adet = 1;
-
-                                        if (urunBilgileri.length > 1)
-                                            adet = Integer.parseInt(urunBilgileri[1]);
-
-                                        adet--;
-
-                                        if (adet != 0)
-                                        {
-                                            porsiyonlarNegatif.set(item, urunBilgileri[0] + "x" + adet);
-                                        }
-                                        else
-                                        {
-                                            porsiyonlarNegatif.remove(item);
-                                        }
-                                        adapter.notifyDataSetChanged();
-
-                                        if(porsiyonlarNegatif.size() < 1)
-                                        {
-                                            dialog.dismiss();
-                                        }
-                                    }
-                                })
-                                .create();
-
-                        alert.show();
-                    }
+                        porsiyonCikar();
                 }
             }
         });
 
-        if(lstOrderedProducts.size() < 1)
-        {
+        if (g.siparisListesi.size() < 1) {
             buttonSepet.setEnabled(false);
             buttonNot.setEnabled(false);
         }
     }
 
-    private void porsiyonCikar(Double azaltmaMiktari)
+    private void porsiyonCikar()
     {
-        if(azaltmaMiktari == 1)
-        {
-            // eğer varsa azalt
-            porsiyonAzaltmaliMi(g.tamPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else if(azaltmaMiktari == 0.5)
-        {
-            // eğer varsa azalt
-            porsiyonAzaltmaliMi(g.yarimPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else if(azaltmaMiktari == 0.25)
-        {
-            // eğer varsa azalt
-            porsiyonAzaltmaliMi(g.ceyrekPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else if(azaltmaMiktari == 1.5)
-        {
-            // eğer varsa azalt
-            porsiyonAzaltmaliMi(g.birBucukPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else
-        {
-            // eğer varsa azalt
-            porsiyonAzaltmaliMi(g.ucCeyrekPorsiyon, lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
+        g.siparisListesi.get(selectedSiparisItemPosition).siparisAdedi = String.valueOf(Integer.parseInt(g.siparisListesi.get(selectedSiparisItemPosition).siparisAdedi) - 1);
 
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
-        df.setMinimumFractionDigits(0);
-        df.setGroupingUsed(false);
-
-        lstOrderedProducts.get(selectedSiparisItemPosition).miktar =  df.format(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) - azaltmaMiktari);
-
-        if(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) == 0d)
+        if (Integer.parseInt(g.siparisListesi.get(selectedSiparisItemPosition).siparisAdedi) == 0)
         {
-            lstOrderedProducts.remove(selectedSiparisItemPosition);
-            if(selectedSiparisItemPosition == lstOrderedProducts.size())
+            g.siparisListesi.remove(selectedSiparisItemPosition);
+            if (selectedSiparisItemPosition == g.siparisListesi.size())
             {
-                selectedSiparisItemPosition = lstOrderedProducts.size() - 1;
-                adapterSecilenSiparisler.setSelectedIndex(lstOrderedProducts.size() - 1);
+                selectedSiparisItemPosition = g.siparisListesi.size() - 1;
+                adapterSecilenSiparisler.setSelectedIndex(g.siparisListesi.size() - 1);
             }
-            else
-            {
-                adapterSecilenSiparisler.notifyDataSetChanged();
-            }
-            if(lstOrderedProducts.size() < 1)
-            {
+            if (g.siparisListesi.size() < 1) {
                 buttonSepet.setEnabled(false);
                 buttonNot.setEnabled(false);
             }
         }
-        else
-        {
-            adapterSecilenSiparisler.notifyDataSetChanged();
-        }
-    }
-
-    private void porsiyonAzaltmaliMi(ArrayList<Siparis> porsiyonArrayi, String yemekAdi)
-    {
-        for(int i=0;i<porsiyonArrayi.size();i++)
-        {
-            if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
-            {
-                porsiyonArrayi.get(i).miktar = String.valueOf(Double.parseDouble(porsiyonArrayi.get(i).miktar)-1);
-                if(Double.parseDouble(porsiyonArrayi.get(i).miktar) == 0d)
-                    porsiyonArrayi.remove(i);
-                break;
-            }
-        }
+        adapterSecilenSiparisler.notifyDataSetChanged();
     }
 
     private void porsiyonEkle(Double arttirmaMiktari)
     {
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
-        df.setMinimumFractionDigits(0);
-        df.setGroupingUsed(false);
+        Siparis siparis = new Siparis();
 
-        lstOrderedProducts.get(selectedSiparisItemPosition).miktar = df.format(Double.parseDouble(lstOrderedProducts.get(selectedSiparisItemPosition).miktar) + arttirmaMiktari);
-        adapterSecilenSiparisler.notifyDataSetChanged();
-
-        if(arttirmaMiktari == 1d)
-        {
-            porsiyonArttir(g.tamPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else if(arttirmaMiktari == 0.5)
-        {
-            porsiyonArttir(g.yarimPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else if(arttirmaMiktari == 0.25)
-        {
-            porsiyonArttir(g.ceyrekPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else if(arttirmaMiktari == 1.5)
-        {
-            porsiyonArttir(g.birBucukPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-        else
-        {
-            porsiyonArttir(g.ucCeyrekPorsiyon,lstOrderedProducts.get(selectedSiparisItemPosition).yemekAdi);
-        }
-    }
-
-    private void porsiyonArttir(ArrayList<Siparis> porsiyonArrayi,String yemekAdi)
-    {
-        Integer siparisVarMi= -1;
-        for(int i=0;i<porsiyonArrayi.size();i++)
-        {
-            if(porsiyonArrayi.get(i).yemekAdi.contentEquals(yemekAdi))
-            {
-                siparisVarMi = i;
-                break;
+        for(int i = 0 ; i< g.siparisListesi.size();i++) {
+            if (g.siparisListesi.get(i).siparisYemekAdi.contentEquals(g.siparisListesi.get(selectedSiparisItemPosition).siparisYemekAdi)&& g.siparisListesi.get(i).siparisPorsiyonu == arttirmaMiktari) {
+                g.siparisListesi.get(i).siparisAdedi = String.valueOf(1+ Integer.parseInt(g.siparisListesi.get(i).siparisAdedi));
+                adapterSecilenSiparisler.notifyDataSetChanged();
+                return;
             }
         }
-        if(siparisVarMi != -1) // siparis listede var
-        {
-            DecimalFormat df = new DecimalFormat();
-            df.setMaximumFractionDigits(2);
-            df.setMinimumFractionDigits(0);
-            df.setGroupingUsed(false);
 
-            porsiyonArrayi.get(siparisVarMi).miktar = String.valueOf(df.format(Double.parseDouble(porsiyonArrayi.get(siparisVarMi).miktar) + 1));
-        }
-        else// listede yok
-        {
-            Siparis siparis = new Siparis();
-            siparis.yemekAdi = yemekAdi;
-            siparis.miktar = "1";
-            porsiyonArrayi.add(siparis);
-        }
+        siparis.siparisPorsiyonSinifi = g.siparisListesi.get(selectedSiparisItemPosition).siparisPorsiyonSinifi;
+        siparis.siparisAdedi = "1";
+        siparis.siparisFiyati = g.siparisListesi.get(selectedSiparisItemPosition).siparisFiyati;
+        siparis.siparisYemekAdi = g.siparisListesi.get(selectedSiparisItemPosition).siparisYemekAdi;
+        siparis.siparisPorsiyonu = arttirmaMiktari;
+
+        g.siparisListesi.add(siparis);
+
+        adapterSecilenSiparisler.notifyDataSetChanged();
     }
 
     @Override
@@ -612,9 +399,9 @@ public class HesapEkrani extends Activity {
                 inflater.inflate(R.menu.menu_urun, menu);
 
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-                menu.setHeaderTitle(urunListesiToplam.get(info.position).yemekAdi);
+                menu.setHeaderTitle(urunListesiToplam.get(info.position).siparisYemekAdi);
 
-                if(urunListesiToplam.get(info.position).porsiyonFiyati.contentEquals("ikram"))
+                if (urunListesiToplam.get(info.position).siparisFiyati.contentEquals("ikram"))
                     menu.getItem(1).setTitle("İkramı İptal Et");
                 else
                     menu.getItem(1).setTitle("Ürünü İkram Et");
@@ -626,7 +413,7 @@ public class HesapEkrani extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         final AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
-        String baslik;
+        String baslik,hint;
 
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
@@ -636,39 +423,135 @@ public class HesapEkrani extends Activity {
         switch(item.getItemId()) {
             case R.id.iptal:
                 ikramMi = false;
-                baslik = "Kaç adet ürün iptal edilecek? Bulunan : " + df.format(Double.parseDouble(urunListesiToplam.get(info.position).miktar)) + " adet";
+                baslik = "Ürün İptali";
+                hint = "Kaç adet ürün iptal edilecek? Bulunan : " + df.format(Double.parseDouble(urunListesiToplam.get(info.position).siparisAdedi)) + " adet";
                 break;
             case R.id.ikram:
                 ikramMi = true;
-                baslik = "Kaç adet ürün ikram edilecek? Bulunan : " + df.format(Double.parseDouble(urunListesiToplam.get(info.position).miktar)) + " adet";
+                baslik = "İkram";
+                hint = "Kaç adet ürün ikram edilecek? Bulunan : " + df.format(Double.parseDouble(urunListesiToplam.get(info.position).siparisAdedi)) + " adet";
                 break;
             default:
                 return super.onContextItemSelected(item);
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(HesapEkrani.this);
-        builder.setTitle(baslik);
 
-        final EditText input = new EditText(HesapEkrani.this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        final EditText kacAdetIptalveyaIkram = new EditText(HesapEkrani.this);
+        kacAdetIptalveyaIkram.setInputType(InputType.TYPE_CLASS_NUMBER);
 
-        input.addTextChangedListener(new TextWatcher() {
+        kacAdetIptalveyaIkram.setHint(hint);
+
+        final EditText iptalNedeni = new EditText(HesapEkrani.this);
+        iptalNedeni.setInputType(InputType.TYPE_CLASS_TEXT);
+        iptalNedeni.setHint("İptal nedeninizi yazınız");
+
+        View builderView;
+        if(!baslik.contentEquals("İkram"))
+        {
+            LinearLayout linearLayout=new LinearLayout(this);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+            linearLayout.addView(kacAdetIptalveyaIkram);
+            linearLayout.addView(iptalNedeni);
+            builderView = linearLayout;
+        }
+        else
+        {
+            builderView = kacAdetIptalveyaIkram;
+        }
+
+        final AlertDialog builder = new AlertDialog.Builder(HesapEkrani.this)
+                .setTitle(baslik)
+                .setView(builderView)
+                .setPositiveButton("Tamam", null)
+                .setNegativeButton("Vazgeç", null)
+                .create();
+
+        builder.setCanceledOnTouchOutside(false);
+
+        builder.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+
+                Button b = builder.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        if(ikramMi) // ürün ikram edilecek
+                        {
+                            if(Integer.parseInt(kacAdetIptalveyaIkram.getText().toString())<1)
+                            {
+                                // 0 ürün ikram edilecekse ikram etme
+                                builder.dismiss();
+                            }
+                            else
+                            {
+                                //ürün ikram et
+                                builder.dismiss();
+                            }
+                        }
+                        else // ürün iptali
+                        {
+                            if(iptalNedeni.getText().toString().trim().contentEquals(""))
+                            {
+                                AlertDialog.Builder aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                                        aBuilder.setTitle("İptal Hatası")
+                                        .setMessage("İptal nedeni boş bırakılamaz").setCancelable(false)
+                                        .setPositiveButton("Tamam", null)
+                                        .create();
+
+                                AlertDialog alertDialog = aBuilder.create();
+                                alertDialog.show();
+                            }
+                            else // ürün iptal edilecek
+                            {
+                                if(Integer.parseInt(kacAdetIptalveyaIkram.getText().toString())<1)
+                                {
+                                    // 0 ürün iptal edilecekse iptal etme
+                                    builder.dismiss();
+                                }
+                                else
+                                {
+                                    //ürün iptal et
+                                    builder.dismiss();
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (source.charAt(i) == '<' || source.charAt(i) == '>' || source.charAt(i) == '&' || source.charAt(i) == '=' || source.charAt(i) == '*' || source.charAt(i) == '-') {
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+
+        iptalNedeni.setFilters(new InputFilter[]{new InputFilter.LengthFilter(200),filter});
+
+        kacAdetIptalveyaIkram.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
 
-                double girilenSayi;
-                try
-                {
-                    String x= s.toString();
-                    girilenSayi = Double.parseDouble(x);
+                Integer girilenSayi;
+                try {
+                    String x = s.toString();
+                    girilenSayi = Integer.parseInt(x);
+                } catch (Exception ex) {
+                    return;
                 }
-                catch (Exception ex)
-                {  return; }
 
-                if(girilenSayi>Double.parseDouble(urunListesiToplam.get(info.position).miktar))
-                {
-                    input.setText(urunListesiToplam.get(info.position).miktar);
+                if (girilenSayi > Integer.parseInt(urunListesiToplam.get(info.position).siparisAdedi)) {
+                    kacAdetIptalveyaIkram.setText(urunListesiToplam.get(info.position).siparisAdedi);
                 }
             }
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -676,44 +559,6 @@ public class HesapEkrani extends Activity {
             }
         });
 
-        builder.setView(input);
-
-        builder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String [] x = input.getText().toString().split("\\.");
-                if(x.length == 2)
-                {
-                    x[1] = x[1].substring(0,2);
-                    if(!x[1].contentEquals("25")&&!x[1].contentEquals("50")&&!x[1].contentEquals("75")&&!x[1].contentEquals("5"))
-                    {
-                        AlertDialog.Builder aBuilder = new AlertDialog.Builder(HesapEkrani.this);
-                        aBuilder.setTitle("Porsiyon Hatası");
-                        aBuilder.setMessage("Porsiyon hatalı girildiği için işlem gerçekleştirilemedi\nGirilen Porsiyon :" + input.getText()).setCancelable(false)
-                                .setPositiveButton("Tamam",null);
-                        AlertDialog alertDialog = aBuilder.create();
-                        alertDialog.show();
-                    }
-                    else
-                    {
-                        if(ikramMi) // ürün ikram edilecek
-                        {
-
-                        }
-                        else // ürün iptal edilecek
-                        {
-
-                        }
-                    }
-                }
-            }
-        });
-        builder.setNegativeButton("Vazgeç", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
         builder.show();
         return true;
     }

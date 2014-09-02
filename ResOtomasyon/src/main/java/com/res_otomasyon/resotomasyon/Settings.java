@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,6 +85,20 @@ public class Settings extends Activity implements View.OnClickListener {
                 textPort.setHint("Port");
             }
             EditText textName = (EditText) findViewById(R.id.editTextTableName);
+
+            InputFilter filter = new InputFilter() {
+                public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                    for (int i = start; i < end; i++) {
+                        if (source.charAt(i) == '<' || source.charAt(i) == '>' || source.charAt(i) == '&' || source.charAt(i) == '=' || source.charAt(i) == '*' || source.charAt(i) == '-') {
+                            return "";
+                        }
+                    }
+                    return null;
+                }
+            };
+
+            textName.setFilters(new InputFilter[]{filter});
+
             textName.setText(preferences.getString("TabletName", ""));
             if (textName.getText().toString().contentEquals("")) {
                 textName.setHint("Tablet Adı");

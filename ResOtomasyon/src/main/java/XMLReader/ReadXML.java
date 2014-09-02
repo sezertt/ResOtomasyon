@@ -17,7 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
-import Entity.Urunler;
+import Entity.UrunlerinListesi;
 
 public class ReadXML {
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -62,13 +62,13 @@ public class ReadXML {
         return lstDepartmanlar;
     }
 
-    public ArrayList<Urunler> readUrunler(List<File> files) {
+    public ArrayList<UrunlerinListesi> readUrunler(List<File> files) {
         try {
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        ArrayList<Urunler> lstUrunler = new ArrayList<Urunler>();
+        ArrayList<UrunlerinListesi> lstUrunler = new ArrayList<UrunlerinListesi>();
         try {
             for (File file : files) {
                 String fileName = file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("/")
@@ -86,19 +86,19 @@ public class ReadXML {
                             Element elementNodeUrunler = (Element) nNode;
 
                             NodeList nListUrunAdi = ((Element) elementNodeUrunler.getElementsByTagName("urunAdi").item(0)).getElementsByTagName("string");
-                            NodeList nListPorsiyonFiyati = ((Element) elementNodeUrunler.getElementsByTagName("porsiyonFiyati").item(0)).getElementsByTagName("string");
+                            NodeList nListPorsiyonFiyati = ((Element) elementNodeUrunler.getElementsByTagName("urunFiyati").item(0)).getElementsByTagName("string");
                             NodeList nListUrunAciklamasi = ((Element) elementNodeUrunler.getElementsByTagName("urunAciklamasi").item(0)).getElementsByTagName("string");
                             NodeList nListUrunKDV = ((Element) elementNodeUrunler.getElementsByTagName("urunKDV").item(0)).getElementsByTagName("int");
-                            NodeList nListUrunPorsiyonu = ((Element) elementNodeUrunler.getElementsByTagName("urunPorsiyonu").item(0)).getElementsByTagName("int");
+                            NodeList nListUrunPorsiyonu = ((Element) elementNodeUrunler.getElementsByTagName("urunPorsiyonSinifi").item(0)).getElementsByTagName("int");
 
                             for (int k = 0; k < nListUrunAdi.getLength(); k++) {
-                                Urunler u = new Urunler();
+                                UrunlerinListesi u = new UrunlerinListesi();
 
                                 u.urunAdi = nListUrunAdi.item(k).getTextContent();
-                                u.porsiyonFiyati = nListPorsiyonFiyati.item(k).getTextContent();
+                                u.urunFiyati = nListPorsiyonFiyati.item(k).getTextContent();
                                 u.urunAciklamasi = nListUrunAciklamasi.item(k).getTextContent();
                                 u.urunKDV = Integer.parseInt(nListUrunKDV.item(k).getTextContent());
-                                u.urunPorsiyonu = Double.parseDouble(nListUrunPorsiyonu.item(k).getTextContent());
+                                u.urunPorsiyonSinifi = Double.parseDouble(nListUrunPorsiyonu.item(k).getTextContent());
                                 u.urunKategorisi = elementNodeUrunler.getElementsByTagName("kategorininAdi").item(0).getTextContent();
                                 lstUrunler.add(u);
                             }
