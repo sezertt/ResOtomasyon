@@ -128,7 +128,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 MasaninSiparisleri masaninSiparisleri = groups.get(groupPosition);
                 Siparis siparis1 = groups.get(groupPosition).siparisler.get(childPosition);
-                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa="+masaninSiparisleri.MasaAdi+"&departmanAdi="+masaninSiparisleri.DepartmanAdi+"&yemekAdi="+siparis1.siparisYemekAdi+"&adedi="+siparis1.siparisAdedi+"&porsiyonu="+siparis1.siparisPorsiyonu+"");
+                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa="+masaninSiparisleri.MasaAdi+"&departmanAdi="+masaninSiparisleri.DepartmanAdi+"&yemekAdi="+siparis1.siparisYemekAdi+"&adedi="+siparis1.siparisAdedi+"&porsiyonu="+siparis1.siparisPorsiyonu);
                 groups.get(groupPosition).siparisler.remove(childPosition);
                 if (groups.get(groupPosition).siparisler.size() == 0)
                     groups.remove(groupPosition);
@@ -136,7 +136,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             }
         });
         textYemekAdi.setText(siparis.siparisYemekAdi);
-        textAdet.setText(siparis.siparisAdedi);
+        textAdet.setText(siparis.siparisAdedi+"");
         return convertView;
     }
 

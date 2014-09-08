@@ -42,7 +42,7 @@ public class SiparisIslemler {
                 siparis = new Siparis();
                 masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
                 masaninSiparisleri.MasaAdi = collection.get("masa");
-                siparis.siparisAdedi = collection.get("miktar");
+                siparis.siparisAdedi = Integer.parseInt(collection.get("miktar"));
                 siparis.siparisYemekAdi = collection.get("yemekAdi");
                 if (g.secilenMasalar.size() > 0) {
                     for (DepartmanMasalari dptMasa : g.secilenMasalar) {

@@ -378,8 +378,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                     groups.get(groupPosition).productCount.set(childPosition,miktar);
                     notifyDataSetChanged();
 
-                    g.siparisListesi.get(i).siparisAdedi = String.valueOf(Integer.parseInt(g.siparisListesi.get(i).siparisAdedi)-1);
-                    if(g.siparisListesi.get(i).siparisAdedi.contentEquals("0"))
+                    g.siparisListesi.get(i).siparisAdedi --;
+                    if(g.siparisListesi.get(i).siparisAdedi <= 0)
                         g.siparisListesi.remove(i);
                     break;
                 }
@@ -404,12 +404,12 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
         for(int i = 0 ; i< g.siparisListesi.size();i++) {
             if (g.siparisListesi.get(i).siparisYemekAdi.contentEquals(textName.getText().toString())&& g.siparisListesi.get(i).siparisPorsiyonu == porsiyon) {
-                g.siparisListesi.get(i).siparisAdedi = String.valueOf(1 + Integer.parseInt(g.siparisListesi.get(i).siparisAdedi));
+                g.siparisListesi.get(i).siparisAdedi ++;
                 return;
             }
         }
         siparis.siparisPorsiyonSinifi = productPortionClass;
-        siparis.siparisAdedi = "1";
+        siparis.siparisAdedi = 1;
         siparis.siparisFiyati = String.valueOf(Double.parseDouble(textFiyat.getText().toString().substring(0, textFiyat.getText().length() - 3)) * porsiyon);
         siparis.siparisYemekAdi = textName.getText().toString();
         siparis.siparisPorsiyonu = porsiyon;

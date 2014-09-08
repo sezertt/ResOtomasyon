@@ -36,7 +36,7 @@ public class BildirimBilgileriIslemler {
             masaninSiparisleri.DepartmanAdi = siparisDetay[0];
             masaninSiparisleri.MasaAdi = siparisDetay[1];
             this.siparis.siparisFiyati = siparisDetay[2];
-            this.siparis.siparisAdedi = siparisDetay[3];
+            this.siparis.siparisAdedi = Integer.parseInt(siparisDetay[3]);
             this.siparis.siparisYemekAdi = siparisDetay[4];
             if(siparisDetay[5].contains(","))
                 siparisDetay[5] = siparisDetay[5].replace(",",".");

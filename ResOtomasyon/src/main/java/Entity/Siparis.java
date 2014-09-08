@@ -3,7 +3,7 @@ package Entity;
 import java.io.Serializable;
 
 public class Siparis implements Serializable {
-    public String siparisAdedi;
+    public int siparisAdedi;
     public String siparisFiyati;
     public String siparisYemekAdi;
     public double siparisPorsiyonu;
