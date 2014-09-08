@@ -94,6 +94,8 @@ public class NotificationScreen extends ActionBarActivity {
                                 }
                             });
                         break;
+                    default:
+                        break;
                 }
 //                myHandler.sendEmptyMessage(1);
             }

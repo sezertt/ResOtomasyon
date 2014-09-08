@@ -152,6 +152,8 @@ public class Settings extends Activity implements View.OnClickListener {
             case R.id.btnIptal:
                 this.finish();
                 break;
+            default:
+                break;
         }
     }
 

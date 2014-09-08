@@ -62,7 +62,10 @@ public class MyListAdapter extends BaseAdapter {
         TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewFiyat);
         TextView textPorsiyon = (TextView) convertView.findViewById(R.id.textViewPorsiyon);
 
-        Double doubleMiktar = Double.valueOf(siparisListesi.get(position).siparisAdedi);
+        String miktar = "-";
+
+        if(siparisListesi.get(position).siparisAdedi != null)
+            miktar = String.valueOf(Math.round(Float.parseFloat(siparisListesi.get(position).siparisAdedi)));
 
         Double doubleFiyat;
         try
@@ -92,11 +95,24 @@ public class MyListAdapter extends BaseAdapter {
         df.setMinimumFractionDigits(0);
         df.setGroupingUsed(false);
 
-        String result = df.format(doubleMiktar);
+        String result = miktar;
 
         textYemekAdi.setText(siparisListesi.get(position).siparisYemekAdi);
-        textPorsiyon.setText(String.valueOf(siparisListesi.get(position).siparisPorsiyonu));
-        textAdet.setText("x"+result);
+
+       if(siparisListesi.get(position).siparisPorsiyonu > 0)
+            textPorsiyon.setText(String.valueOf(siparisListesi.get(position).siparisPorsiyonu));
+        else
+        {
+            textPorsiyon.setText("");
+        }
+
+        if(!result.contentEquals("-")) {
+            textAdet.setText("x"+result);
+        }
+        else
+        {
+            textAdet.setText("");
+        }
 
         if(selectedIndex!= -1 && position == selectedIndex)
         {

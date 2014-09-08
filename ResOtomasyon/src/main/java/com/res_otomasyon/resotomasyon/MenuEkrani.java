@@ -45,9 +45,9 @@ public class MenuEkrani extends ActionBarActivity {
 
     Menu menu;
 
-    String departmanAdi, masaAdi;
+    String departmanAdi, masaAdi, siparisler;
     private String m_Text = "";
-    ArrayList<Employee> lstEmployee;
+    Employee employee;
 
     boolean masaKilitliMi = false, passCorrect = false, activityVisible = true, hesapEkraniAcilicak = false;
     Context context = this;
@@ -72,24 +72,23 @@ public class MenuEkrani extends ActionBarActivity {
                             if (!masaKilitliMi) {
                                 try {
                                     masaKilitliMi = true;
-                                    editor.putString("PinCode", lstEmployee.get(0).PinCode);
-                                    editor.putString("Name", lstEmployee.get(0).Name);
-                                    editor.putString("LastName", lstEmployee.get(0).LastName);
+                                    editor.putString("PinCode", employee.PinCode);
+                                    editor.putString("Name", employee.Name);
+                                    editor.putString("LastName", employee.LastName);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
-                                    editor.putString("Title", lstEmployee.get(0).Title);
+                                    editor.putString("Title", employee.Title);
                                     editor.putString("masaAdi", masaAdi);
                                     editor.putString("departmanAdi", departmanAdi);
-                                    Set<String> mySet = new HashSet<String>(Arrays.asList(lstEmployee.get
-                                            (0).Permissions));
+                                    Set<String> mySet = new HashSet<String>(Arrays.asList(employee.Permissions));
                                     editor.putStringSet("Permission", mySet);
-                                    editor.putString("UserName", lstEmployee.get(0).UserName);
+                                    editor.putString("UserName", employee.UserName);
                                     editor.apply();
                                     item.setTitle(R.string.masa_ac);
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
-                                passCorrect = passwordHash.validatePassword(m_Text, lstEmployee.get(0).PinCode);
+                                passCorrect = passwordHash.validatePassword(m_Text, employee.PinCode);
                                 if (passCorrect && masaKilitliMi) {
                                     masaKilitliMi = false;
                                     item.setTitle(R.string.masa_kilitle);
@@ -223,16 +222,21 @@ public class MenuEkrani extends ActionBarActivity {
                         });
                         break;
                     case LoadSiparis:
-                        String siparisler = collection.get("siparisBilgileri");
+                        siparisler = collection.get("siparisBilgileri");
+                        g.commonAsyncTask.client.sendMessage("komut=OdemeBilgileriTablet&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
+                        break;
+                    case OdemeBilgileriTablet:
                         Intent hesapEkrani = new Intent(MenuEkrani.this, HesapEkrani.class);
-
-                        //hesapEkrani.putExtra("verilecekSiparislerinListesi", g.siparisListesi); // yeni verilecek olan siparişler
                         hesapEkrani.putExtra("siparisler", siparisler); // eski siparişler
                         hesapEkrani.putExtra("DepartmanAdi", departmanAdi);
                         hesapEkrani.putExtra("MasaAdi", masaAdi);
-                        hesapEkrani.putExtra("lstEmployees", lstEmployee);
+                        hesapEkrani.putExtra("Employee", employee);
+                        hesapEkrani.putExtra("alinanOdemeler", collection.get("alinanOdemeler"));
+                        hesapEkrani.putExtra("indirimler", collection.get("indirimler"));
                         hesapEkraniAcilicak = true;
                         startActivity(hesapEkrani);
+                        break;
+                    default:
                         break;
                 }
             }
@@ -251,7 +255,7 @@ public class MenuEkrani extends ActionBarActivity {
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
         masaAdi = extras.getString("MasaAdi");
-        lstEmployee = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
+        employee = (Employee) extras.getSerializable("Employee");
         FileIO fileIO = new FileIO();
         List<File> files = null;
 
@@ -441,6 +445,8 @@ public class MenuEkrani extends ActionBarActivity {
 
             case R.id.action_garsonIstiyorum:
 
+                break;
+            default:
                 break;
         }
 

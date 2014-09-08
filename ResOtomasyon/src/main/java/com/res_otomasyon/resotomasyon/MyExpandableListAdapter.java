@@ -156,6 +156,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                                 case 4:
                                     porsiyonlarPozitif.add("0.25 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPosition[i]).siparisAdedi);
                                     break;
+                                default:
+                                    break;
                             }
                         }
                         else
@@ -176,6 +178,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                                     break;
                                 case 4:
                                     porsiyonlarPozitif.add("0.25 Porsiyon ");
+                                    break;
+                                default:
                                     break;
                             }
                         }
@@ -284,6 +288,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                                     break;
                                 case 4:
                                     porsiyonlarNegatif.add("-0.25 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPosition[i]).siparisAdedi);
+                                    break;
+                                default:
                                     break;
                             }
                         }

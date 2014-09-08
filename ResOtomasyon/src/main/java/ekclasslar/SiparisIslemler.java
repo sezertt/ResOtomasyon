@@ -89,6 +89,8 @@ public class SiparisIslemler {
                     }
                     secilenMasaMi = true;
                 }
+            default:
+                break;
         }
         return secilenMasaMi;
     }

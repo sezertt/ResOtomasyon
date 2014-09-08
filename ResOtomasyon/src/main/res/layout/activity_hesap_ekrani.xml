@@ -22,23 +22,6 @@
             android:id="@+id/textSiparis" />
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/buttonstyle3"
-            android:text="Not Ekle"
-            android:textColor="@android:color/white"
-            android:id="@+id/buttonNot"
-            android:layout_marginRight="5dp"
-            android:layout_alignParentBottom="true"
-            android:textSize="20sp"
-            android:minWidth="150dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
-            android:layout_toRightOf="@+id/buttonArttir"
-            android:layout_toEndOf="@+id/buttonArttir"
-            android:layout_alignTop="@+id/buttonAzalt" />
-
-        <Button
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:textColor="@android:color/white"
@@ -61,15 +44,15 @@
             android:text="Sepeti Onayla"
             android:id="@+id/buttonSepetiOnayla"
             android:textSize="20sp"
-            android:layout_toRightOf="@+id/buttonNot"
-            android:layout_toEndOf="@+id/buttonNot"
+            android:layout_toRightOf="@+id/buttonArttir"
+            android:layout_toEndOf="@+id/buttonArttir"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="1dp"
             android:layout_marginBottom="1dp"
             android:layout_marginRight="5dp"
             android:layout_alignBottom="@+id/buttonArttir"
-            android:layout_alignTop="@+id/buttonNot" />
+            android:layout_alignTop="@+id/buttonArttir" />
 
         <Button
             android:layout_width="50dp"
@@ -84,7 +67,7 @@
             android:layout_marginBottom="1dp"
             android:layout_toRightOf="@+id/buttonAzalt"
             android:layout_toEndOf="@+id/buttonAzalt"
-            android:layout_alignTop="@+id/buttonNot" />
+            android:layout_alignTop="@+id/buttonAzalt" />
 
         <ListView android:id="@+id/listViewSecilenSiparisler"
             android:layout_width="match_parent"

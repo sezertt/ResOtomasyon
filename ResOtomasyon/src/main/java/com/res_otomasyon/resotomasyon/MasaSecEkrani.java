@@ -127,7 +127,6 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.masaKaydet:
-
                 ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
                 int masaSayac;
                 for (DepartmanMasalari dpt : dptMasalar) {
@@ -156,6 +155,8 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                         });
                 AlertDialog alertDialog = aBuilder.create();
                 alertDialog.show();
+                break;
+            default:
                 break;
         }
     }

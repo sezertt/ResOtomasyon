@@ -35,9 +35,9 @@ public class GlobalApplication extends Application {
     public ArrayList<MasaninSiparisleri> lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();
 
     public enum Komutlar {
-        Default, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
+        Default, OdemeBilgileriTablet, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim,bildirimBilgileri
+        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj
     }
 
     public void connectServer(Handler myHandler) throws Exception {

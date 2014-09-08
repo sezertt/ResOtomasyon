@@ -51,6 +51,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
     GlobalApplication g;
     Menu menu;
     TryConnection t;
+    Employee employee;
 
     @Override
     protected void onResume() {
@@ -78,15 +79,15 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
 
         if (MasaKilitliMi) {
             this.setVisible(false);
-            lstEmployees.get(0).PinCode = preferences.getString("PinCode", "0000");
-            lstEmployees.get(0).Title = preferences.getString("Title", null);
+            employee.PinCode = preferences.getString("PinCode", "0000");
+            employee.Title = preferences.getString("Title", null);
             Set<String> setPermissions = preferences.getStringSet("Permission", null);
-            lstEmployees.get(0).Permissions = setPermissions.toArray(new String[setPermissions.size()]);
-            lstEmployees.get(0).UserName = preferences.getString("UserName", null);
-            lstEmployees.get(0).Name = preferences.getString("Name", null);
-            lstEmployees.get(0).LastName = preferences.getString("LastName", null);
+            employee.Permissions = setPermissions.toArray(new String[setPermissions.size()]);
+            employee.UserName = preferences.getString("UserName", null);
+            employee.Name = preferences.getString("Name", null);
+            employee.LastName = preferences.getString("LastName", null);
             intent = new Intent(LoginScreen.this, MasaEkrani.class);
-            intent.putExtra("lstEmployees", lstEmployees);
+            intent.putExtra("Employee", employee);
             startActivity(intent);
         } else {
             LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
@@ -305,18 +306,18 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                     e.printStackTrace();
                 }
                 if (passCorrect) {
-                    Employee e = new Employee();
-                    e.Name = lstEmployees.get(getCurrentEmployee).Name;
-                    e.PinCode = lstEmployees.get(getCurrentEmployee).PinCode;
-                    e.Permissions = lstEmployees.get(getCurrentEmployee).Permissions;
-                    e.UserName = lstEmployees.get(getCurrentEmployee).UserName;
-                    e.LastName = lstEmployees.get(getCurrentEmployee).LastName;
+                    employee = new Employee();
+                    employee.Name = lstEmployees.get(getCurrentEmployee).Name;
+                    employee.PinCode = lstEmployees.get(getCurrentEmployee).PinCode;
+                    employee.Permissions = lstEmployees.get(getCurrentEmployee).Permissions;
+                    employee.UserName = lstEmployees.get(getCurrentEmployee).UserName;
+                    employee.LastName = lstEmployees.get(getCurrentEmployee).LastName;
 //                    e.PassWord = lstEmployees.get(getCurrentEmployee).PassWord;
 //                    e.Title = lstEmployees.get(getCurrentEmployee).Title;
-                    lstEmployees.removeAll(lstEmployees);
-                    lstEmployees.add(e);
+//                    lstEmployees.removeAll(lstEmployees);
+//                    lstEmployees.add(e);
                     intent = new Intent(LoginScreen.this, MasaEkrani.class);
-                    intent.putExtra("lstEmployees", lstEmployees);
+                    intent.putExtra("Employee", employee);
                     startActivity(intent);
                     btnGiris.setEnabled(false);
                 } else {
@@ -332,6 +333,8 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                     AlertDialog alertDialog = aBuilder.create();
                     alertDialog.show();
                 }
+                break;
+            default:
                 break;
         }
     }
