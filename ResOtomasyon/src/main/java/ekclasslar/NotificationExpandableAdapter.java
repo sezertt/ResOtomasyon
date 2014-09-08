@@ -94,7 +94,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
                         .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                g.commonAsyncTask.client.sendMessage("<komut=bildirimGoruldu&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi&adedi=hepsi&porsiyonu=hepsi");
+                                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi&adedi=hepsi&porsiyonu=hepsi");
                                 groups.remove(groupPosition);
                                 notifyDataSetChanged();
                             }

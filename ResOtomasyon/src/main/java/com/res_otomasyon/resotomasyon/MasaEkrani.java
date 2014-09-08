@@ -32,6 +32,7 @@ import android.view.WindowManager;
 
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
+import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.SiparisIslemler;
 import ekclasslar.CollectionPagerAdapter;
 import ekclasslar.FileIO;
@@ -67,7 +68,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     public boolean mesajGeldi = false;
     boolean activityVisible = true;
     boolean masaKilitliMi = false;
-    ArrayList<Employee> lstEmployees;
+    Employee employee;
 
     //
     CollectionPagerAdapter collectionPagerAdapter;
@@ -193,10 +194,37 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             } catch (Exception e) {
                                 acikMasalar = null;
                             }
-                            fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
-                            fragment[0].startSendAcikMasalar(acikMasalar, tabName);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
+                                    fragment[0].startSendAcikMasalar(acikMasalar, tabName);
+                                }
+                            });
                             break;
-                        case bildirim:
+                        case bildirimBilgileri:
+                            //onResume tetiklendiğin notification uyarı butonunun görnüp görünmeyeceği sipariş listesinin dolu olup olmadığına
+                            //bağlı olduğu için onResume() metodunun bildirdimBilgilerinden sonra çalışması gerekmektedir.
+                            //Bu yüzden runOnUiThread e konmuştur. bildirimBilgileri için gerekli mesaj ise onAttachedToWindow metdodunda
+                            //gönderildi.
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (activityVisible) {
+                                        g.lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();
+                                        if (g.lstMasaninSiparisleri.size() == 0) {
+                                            BildirimBilgileriIslemler bildirimBilgileriIslemler = new BildirimBilgileriIslemler(collection, g);
+                                            if (bildirimBilgileriIslemler.bildirimBilgileri()) {
+                                                if (!menu.findItem(R.id.action_notification).isVisible())
+                                                    menu.findItem(R.id.action_notification).setVisible(true);
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+
+                            break;
+                        default:
                             break;
                     }
                     Log.e("MasaEkrani mesaj:", srvrMessage);
@@ -223,7 +251,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         }
         //Giriş ekranından gelen çalışan bilgilerini alır.
         Bundle extras = getIntent().getExtras();
-        lstEmployees = (ArrayList<Employee>) extras.getSerializable("lstEmployees");
+        employee = (Employee) extras.getSerializable("Employee");
         Object obj = new Object();
         //fragment[0] 'ın boş gelmemesi için gerekli.
         synchronized (obj) {
@@ -232,7 +260,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
             collectionPagerAdapter.lstDepartmanlar = lstDepartmanlar;
             collectionPagerAdapter.lstMasaDizayn = lstMasaDizayn;
             collectionPagerAdapter.masaPlanIsmi = masaPlanIsmi;
-            collectionPagerAdapter.lstEmployees = lstEmployees;
+            collectionPagerAdapter.employee = employee;
             collectionPagerAdapter.kilitliDepartmanAdi = preferences.getString("departmanAdi", tabName);
             collectionPagerAdapter.kilitliMasaAdi = preferences.getString("masaAdi", null);
             mViewPager = (ViewPager) findViewById(R.id.masaEkrani);
@@ -257,7 +285,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         }
         t = new TryConnection(g, myHandler);
         SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.masaEkrani), false);
-        g.commonAsyncTask.client.sendMessage(notificationMessage());
     }
 
     @Override
@@ -279,6 +306,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.masaEkrani), false);
             }
         }
+        g.commonAsyncTask.client.sendMessage(notificationMessage());
     }
 
     @Override
@@ -344,8 +372,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
 
     public String notificationMessage() {
         int counter = 0;
-        String komut,masalar ="";
-        komut = "<komut=bildirim&masalar=";
+        String komut, masalar = "";
+        komut = "komut=bildirim&masalar=";
         if (g.secilenMasalar.size() > 0) {
             for (Departman dpt : lstDepartmanlar) {
                 if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
@@ -358,11 +386,11 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 }
                 counter++;
             }
-            komut += masalar.substring(1, masalar.length()-1);
+            komut += masalar.substring(1, masalar.length() - 1);
         } else {
-            komut = "<komut=bildirim&masalar=hepsi";
+            komut = "komut=bildirim&masalar=hepsi";
         }
-        komut += ">";
+        komut += "";
         return komut;
     }
 

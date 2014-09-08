@@ -436,6 +436,7 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_gorusOneri:
+                //Garson iste
 
                 break;
 
