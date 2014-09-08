@@ -36,13 +36,8 @@ public class GlobalApplication extends Application {
 
     public enum Komutlar {
         Default, OdemeBilgileriTablet, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
-        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,
-<<<<<<< HEAD
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj
-=======
-        masaAcildi, masaKapandi, AdisyonNotu, IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti,
-        modemBilgileri, bildirim,bildirimBilgileri
->>>>>>> origin/master
+        BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,masaAcildi, masaKapandi, AdisyonNotu,
+        IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj
     }
 
     public void connectServer(Handler myHandler) throws Exception {
