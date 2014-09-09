@@ -61,6 +61,7 @@ public class Settings extends Activity implements View.OnClickListener {
         aBuilder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                g.bitmapDictionary = g.getImages();
             }
         });
         alertDialog = aBuilder.create();

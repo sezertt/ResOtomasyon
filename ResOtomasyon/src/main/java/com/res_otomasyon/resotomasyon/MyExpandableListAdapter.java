@@ -95,7 +95,9 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         image = (ImageView) convertView.findViewById(R.id.imageView);
 //        File file = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo/Resimler/" + productName + ".png");
 //        Bitmap bmp = BitmapFactory.decodeFile(file.getAbsolutePath());
-        image.setImageBitmap(bitmapDictionary.get(productName));
+        if(bitmapDictionary != null && (!productName.isEmpty() && productName != null))
+            image.setImageBitmap(bitmapDictionary.get(productName));
+
         final TextView textName = (TextView) convertView.findViewById(R.id.textViewChildHeader);
         textName.setText(productName);
 

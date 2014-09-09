@@ -328,7 +328,7 @@ public class MenuEkrani extends ActionBarActivity {
                     {
                         if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi))
                         {
-                            miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu); buraya bak
+                            miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);
                         }
                     }
 
@@ -351,7 +351,7 @@ public class MenuEkrani extends ActionBarActivity {
                 {
                     if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi))
                     {
-                        miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);buraya bak
+                        miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);
                     }
                 }
 

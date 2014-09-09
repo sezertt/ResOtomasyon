@@ -65,7 +65,7 @@ public class MyListAdapter extends BaseAdapter {
         String miktar = "-";
 
         if(siparisListesi.get(position).siparisAdedi != 0)
-            miktar = String.valueOf(siparisListesi.get(position).siparisAdedi); buraya bak
+            miktar = String.valueOf(siparisListesi.get(position).siparisAdedi);
 
         Double doubleFiyat;
         try

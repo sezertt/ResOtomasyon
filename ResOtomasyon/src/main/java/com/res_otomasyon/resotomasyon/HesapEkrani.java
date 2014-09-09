@@ -69,6 +69,7 @@ public class HesapEkrani extends Activity {
         setContentView(R.layout.activity_hesap_ekrani);
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
+        departmanAdi = extras.getString("DepartmanAdi");
         masaAdi = extras.getString("MasaAdi");
         employee = (Employee) extras.getSerializable("Employee");
 
@@ -449,9 +450,7 @@ public class HesapEkrani extends Activity {
         buttonAzalt.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 if(selectedSiparisItemPosition != -1)
-                {
-                        porsiyonCikar();
-                }
+                    porsiyonCikar();
             }
         });
 
@@ -619,7 +618,8 @@ public class HesapEkrani extends Activity {
 
                                 AlertDialog alertDialog = aBuilder.create();
                                 alertDialog.show();
-                            } else // ürün iptal edilecek
+                            }
+                            else // ürün iptal edilecek
                             {
                                 if (kacAdet > 0) {
                                     //ürün iptal et
@@ -629,7 +629,7 @@ public class HesapEkrani extends Activity {
                                     else
                                         ikramMi = "2";
 
-                                    g.commonAsyncTask.client.sendMessage("komut=iptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + urunListesiToplam.get(info.position).siparisFiyati + "&adisyonNotu=&ikramYeniMiEskiMi=" + ikramMi + "&porsiyon=" + urunListesiToplam.get(info.position).siparisPorsiyonu + "&iptalNedeni=" + iptalNedeni);
+                                    g.commonAsyncTask.client.sendMessage("komut=iptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + urunListesiToplam.get(info.position).siparisFiyati + "&adisyonNotu=&ikramYeniMiEskiMi=" + ikramMi + "&porsiyon=" + urunListesiToplam.get(info.position).siparisPorsiyonu + "&iptalNedeni=" + iptalNedeni.getText());
                                     positiveButton.setEnabled(false);
                                     negativeButton.setEnabled(false);
                                 } else {
@@ -719,59 +719,59 @@ public class HesapEkrani extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            //all events will be received here
-            //get message
-            String srvrMessage = intent.getStringExtra("message");
+        //all events will be received here
+        //get message
+        String srvrMessage = intent.getStringExtra("message");
 
-            if (srvrMessage != null) {
-                String[] parametreler = srvrMessage.split("&");
-                String[] esitlik;
-                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
-                for (String parametre : parametreler) {
-                    esitlik = parametre.split("=");
-                    if (esitlik.length == 2)
-                        collection.put(esitlik[0], esitlik[1]);
-                }
+        if (srvrMessage != null) {
+            String[] parametreler = srvrMessage.split("&");
+            String[] esitlik;
+            final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+            for (String parametre : parametreler) {
+                esitlik = parametre.split("=");
+                if (esitlik.length == 2)
+                    collection.put(esitlik[0], esitlik[1]);
+            }
 
-                String gelenkomut = collection.get("komut");
-                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+            String gelenkomut = collection.get("komut");
+            GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
 
-                switch (komut) {
-                    case iptal:
-                        if(collection.get("masa").contentEquals(masaAdi) && collection.get("departmanAdi").contentEquals(departmanAdi))
+            switch (komut) {
+                case iptal:
+                    if(collection.get("masa").contentEquals(masaAdi) && collection.get("departmanAdi").contentEquals(departmanAdi))
+                    {
+                        String yemekAdi = collection.get("yemekAdi");
+                        Double fiyat = Double.parseDouble(collection.get("dusulecekDeger").replace(',','.'));
+                        int ikramMi = Integer.parseInt(collection.get("ikramYeniMiEskiMi"));
+                        Double porsiyon = Double.parseDouble(collection.get("porsiyon").replace(',','.'));
+                        int miktar = Integer.parseInt(collection.get("miktar"));
+                        for(int i=0;i<urunListesiToplam.size();i++)
                         {
-                            String yemekAdi = collection.get("yemekAdi");
-                            Double fiyat = Double.parseDouble(collection.get("dusulecekDeger"));
-                            int ikramMi = Integer.parseInt(collection.get("ikramYeniMiEskiMi"));
-                            Double porsiyon = Double.parseDouble(collection.get("porsiyon"));
-                            int miktar = Integer.parseInt(collection.get("miktar"));
-                            for(int i=0;i<urunListesiToplam.size();i++)
+                            if(urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon)
                             {
-                                if(urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon)
+                                urunListesiToplam.get(i).siparisAdedi -= miktar;
+
+                                if (ikramMi == 2) // iptali istenilen ürün ikram değilse kalan hesaptan da düşülmeli
                                 {
-                                    urunListesiToplam.get(i).siparisAdedi -= miktar;
-
-                                    if (ikramMi == 2) // iptali istenilen ürün ikram değilse kalan hesaptan da düşülmeli
-                                    {
-                                        toplamHesap -= (fiyat*miktar);
-                                        hesapButton.setText("Hesap İste  /  Toplam = " + String.format("%.2f", toplamHesap) + " TL");
-                                    }
-
-                                    if (urunListesiToplam.get(i).siparisAdedi <= 0)
-                                    {
-                                        urunListesiToplam.remove(i);
-                                    }
-                                    adapterHesap.notifyDataSetChanged();
-                                    builder.dismiss();
-                                    return;
+                                    toplamHesap -= (fiyat*miktar);
+                                    hesapButton.setText("Hesap İste  /  Toplam = " + String.format("%.2f", toplamHesap) + " TL");
                                 }
+
+                                if (urunListesiToplam.get(i).siparisAdedi <= 0)
+                                {
+                                    urunListesiToplam.remove(i);
+                                }
+                                adapterHesap.notifyDataSetChanged();
+                                builder.dismiss();
+                                return;
                             }
                         }
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                default:
+                    break;
             }
+        }
         }
     };
 }
