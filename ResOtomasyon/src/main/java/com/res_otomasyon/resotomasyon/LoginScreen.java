@@ -76,7 +76,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
 
         preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
         MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
-
+        employee = new Employee();
         if (MasaKilitliMi) {
             this.setVisible(false);
             employee.PinCode = preferences.getString("PinCode", "0000");

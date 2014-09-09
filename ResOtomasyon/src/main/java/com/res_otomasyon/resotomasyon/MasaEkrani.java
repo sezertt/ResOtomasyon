@@ -33,6 +33,7 @@ import android.view.WindowManager;
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.BildirimBilgileriIslemler;
+import ekclasslar.GarsonIste;
 import ekclasslar.SiparisIslemler;
 import ekclasslar.CollectionPagerAdapter;
 import ekclasslar.FileIO;
@@ -119,6 +120,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     srvrMessage = intent.getStringExtra("message");
+//                    srvrMessage = "komut=garson&departmanAdi=Departman&masa=RP20";
                     String[] parametreler = srvrMessage.split("&");
                     String[] esitlik;
                     collection = new Hashtable<String, String>(parametreler.length);
@@ -157,8 +159,11 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                         case siparis:
                             //Sipariş geldiğinde yapılacak işlemler.
                             SiparisIslemler siparisIslemler = new SiparisIslemler(collection, g);
+
+                            masaKilitliMi = preferences.getBoolean("MasaKilitli", masaKilitliMi);
+
                             //Gelen sipariş seçilen masalara ait ise titreşim yarat.
-                            if (siparisIslemler.Islem()) {
+                            if (siparisIslemler.Islem() && !masaKilitliMi) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -223,6 +228,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                 }
                             });
 
+                            break;
+                        case garson:
+                            GarsonIste garsonIste = new GarsonIste(collection, g);
+                            garsonIste.Islem();
                             break;
                         default:
                             break;
