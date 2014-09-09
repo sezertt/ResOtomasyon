@@ -1,8 +1,12 @@
 package ekclasslar;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,18 +14,12 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.TextView;
-
 import com.res_otomasyon.resotomasyon.GlobalApplication;
 import com.res_otomasyon.resotomasyon.R;
-
 import java.util.ArrayList;
-
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 
-/**
- * Created by Mustafa on 23.8.2014.
- */
 public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
 
 
@@ -116,7 +114,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         if (convertView == null)
             convertView = inflater.inflate(R.layout.notification_gorunumu_layout, parent, false);
-        Siparis siparis = (Siparis) getChild(groupPosition, childPosition);
+        final Siparis siparis = (Siparis) getChild(groupPosition, childPosition);
         TextView textYemekAdi;
         TextView textAdet;
         Button btnClear;
@@ -128,7 +126,8 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 MasaninSiparisleri masaninSiparisleri = groups.get(groupPosition);
                 Siparis siparis1 = groups.get(groupPosition).siparisler.get(childPosition);
-                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa="+masaninSiparisleri.MasaAdi+"&departmanAdi="+masaninSiparisleri.DepartmanAdi+"&yemekAdi="+siparis1.siparisYemekAdi+"&adedi="+siparis1.siparisAdedi+"&porsiyonu="+siparis1.siparisPorsiyonu);
+                if (!siparis1.siparisYemekAdi.contentEquals("Garson İsteği") && !siparis1.siparisYemekAdi.contentEquals("Masa Temizleme İsteği"))
+                    g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + masaninSiparisleri.MasaAdi + "&departmanAdi=" + masaninSiparisleri.DepartmanAdi + "&yemekAdi=" + siparis1.siparisYemekAdi + "&adedi=" + siparis1.siparisAdedi + "&porsiyonu=" + siparis1.siparisPorsiyonu);
                 groups.get(groupPosition).siparisler.remove(childPosition);
                 if (groups.get(groupPosition).siparisler.size() == 0)
                     groups.remove(groupPosition);
@@ -136,7 +135,29 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             }
         });
         textYemekAdi.setText(siparis.siparisYemekAdi);
-        textAdet.setText(siparis.siparisAdedi+"");
+        textAdet.setText(siparis.siparisAdedi + "");
+        if (siparis.siparisYemekAdi.contentEquals("Garson İsteği")) {
+
+            convertView.setBackgroundColor(Color.YELLOW);
+            ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(255, 80, 80), Color.WHITE);
+            colorAnim.setDuration(1000);
+            colorAnim.setEvaluator(new ArgbEvaluator());
+            colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+            colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+            colorAnim.start();
+
+            /*ColorDrawable[] color = {new ColorDrawable(Color.BLUE), new ColorDrawable(Color.RED)};
+            TransitionDrawable trans = new TransitionDrawable(color);
+            trans.startTransition(1500);
+            convertView.setBackground(trans);*/
+
+            /*Animation anim = new AlphaAnimation(0.5f, 1.0f);
+            anim.setDuration(1500); //You can manage the time of the blink with this parameter
+            anim.setStartOffset(100);
+            anim.setRepeatMode(Animation.REVERSE);
+            anim.setRepeatCount(Animation.INFINITE);
+            convertView.startAnimation(anim);*/
+        }
         return convertView;
     }
 
