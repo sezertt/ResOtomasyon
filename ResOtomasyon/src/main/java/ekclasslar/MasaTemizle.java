@@ -8,16 +8,16 @@ import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 
 /**
- * Created by Mustafa on 8.9.2014.
+ * Created by Mustafa on 9.9.2014.
  */
-public class GarsonIste {
+public class MasaTemizle {
 
     Dictionary<String, String> collection;
     Siparis siparis;
     MasaninSiparisleri masaninSiparisleri;
     GlobalApplication g;
 
-    public GarsonIste(Dictionary<String, String> collection, GlobalApplication g) {
+    public MasaTemizle(Dictionary<String, String> collection, GlobalApplication g) {
         this.collection = collection;
         siparis = new Siparis();
         this.g = g;
@@ -29,7 +29,7 @@ public class GarsonIste {
         siparis = new Siparis();
         masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
         masaninSiparisleri.MasaAdi = collection.get("masa");
-        siparis.siparisYemekAdi = "Garson İsteği";
+        siparis.siparisYemekAdi = "Masa Temizleme İsteği";
         if (g.secilenMasalar.size() > 0) {
             for (DepartmanMasalari dptMasa : g.secilenMasalar) {
                 for (String masa : dptMasa.Masalar) {

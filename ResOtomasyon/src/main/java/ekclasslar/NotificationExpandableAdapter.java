@@ -14,9 +14,12 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.TextView;
+
 import com.res_otomasyon.resotomasyon.GlobalApplication;
 import com.res_otomasyon.resotomasyon.R;
+
 import java.util.ArrayList;
+
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 
@@ -135,28 +138,26 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             }
         });
         textYemekAdi.setText(siparis.siparisYemekAdi);
-        textAdet.setText(siparis.siparisAdedi + "");
+        if (siparis.siparisAdedi == 0)
+            textAdet.setText("");
+        else
+            textAdet.setText(siparis.siparisAdedi + "");
         if (siparis.siparisYemekAdi.contentEquals("Garson İsteği")) {
-
-            convertView.setBackgroundColor(Color.YELLOW);
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(255, 80, 80), Color.WHITE);
             colorAnim.setDuration(1000);
             colorAnim.setEvaluator(new ArgbEvaluator());
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
             colorAnim.start();
-
-            /*ColorDrawable[] color = {new ColorDrawable(Color.BLUE), new ColorDrawable(Color.RED)};
-            TransitionDrawable trans = new TransitionDrawable(color);
-            trans.startTransition(1500);
-            convertView.setBackground(trans);*/
-
-            /*Animation anim = new AlphaAnimation(0.5f, 1.0f);
-            anim.setDuration(1500); //You can manage the time of the blink with this parameter
-            anim.setStartOffset(100);
-            anim.setRepeatMode(Animation.REVERSE);
-            anim.setRepeatCount(Animation.INFINITE);
-            convertView.startAnimation(anim);*/
+        }
+        else if(siparis.siparisYemekAdi.contentEquals("Masa Temizleme İsteği"))
+        {
+            ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(80, 255, 80), Color.WHITE);
+            colorAnim.setDuration(1000);
+            colorAnim.setEvaluator(new ArgbEvaluator());
+            colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+            colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+            colorAnim.start();
         }
         return convertView;
     }

@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+
 import Entity.UrunlerinListesi;
 import ekclasslar.FileIO;
 import ekclasslar.TryConnection;
@@ -314,8 +315,7 @@ public class MenuEkrani extends ActionBarActivity {
 
         for (int i = 0; i < urunListesi.size(); i++) {
             UrunBilgileri group = new UrunBilgileri(urunListesi.get(i).urunKategorisi);
-            if (i + 1 < urunListesi.size())
-            {
+            if (i + 1 < urunListesi.size()) {
                 while (urunListesi.get(i).urunKategorisi.contentEquals(urunListesi.get(i + 1).urunKategorisi)) // bir sonraki ürünün kategorisi, eklenen ürünün kategorisi ile aynı olduğu sürece devam et
                 {
                     group.productName.add(urunListesi.get(i).urunAdi);
@@ -324,10 +324,8 @@ public class MenuEkrani extends ActionBarActivity {
                     group.productPortionClass.add(urunListesi.get(i).urunPorsiyonSinifi);
 
                     String miktar = "0";
-                    for (int k = 0; k < g.siparisListesi.size(); k++)
-                    {
-                        if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi))
-                        {
+                    for (int k = 0; k < g.siparisListesi.size(); k++) {
+                        if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi)) {
                             miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);
                         }
                     }
@@ -347,10 +345,8 @@ public class MenuEkrani extends ActionBarActivity {
                 group.productPortionClass.add(urunListesi.get(i).urunPorsiyonSinifi);
 
                 String miktar = "0";
-                for (int k = 0; k < g.siparisListesi.size(); k++)
-                {
-                    if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi))
-                    {
+                for (int k = 0; k < g.siparisListesi.size(); k++) {
+                    if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi)) {
                         miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);
                     }
                 }
@@ -390,6 +386,7 @@ public class MenuEkrani extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         this.item = item;
+        String komut;
         switch (id) {
             case R.id.action_lockTable:
                 if (item.getTitle().toString().contentEquals("Masayı Kilitle")) {
@@ -436,16 +433,17 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_masaTemizleyin:
-
+                komut = "komut=masaTemizle&departmanAdi=" + departmanAdi + "%masa=" + masaAdi + "";
+                g.commonAsyncTask.client.sendMessage(komut);
                 break;
 
             case R.id.action_gorusOneri:
-                //Garson iste
 
                 break;
 
             case R.id.action_garsonIstiyorum:
-
+                komut = "komut=garson&departmanAdi=" + departmanAdi + "%masa=" + masaAdi + "";
+                g.commonAsyncTask.client.sendMessage(komut);
                 break;
             default:
                 break;

@@ -34,6 +34,8 @@ import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.GarsonIste;
+import ekclasslar.HesapIste;
+import ekclasslar.MasaTemizle;
 import ekclasslar.SiparisIslemler;
 import ekclasslar.CollectionPagerAdapter;
 import ekclasslar.FileIO;
@@ -120,7 +122,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     srvrMessage = intent.getStringExtra("message");
-//                    srvrMessage = "komut=garson&departmanAdi=Departman&masa=RP20";
+//                    srvrMessage = "komut=hesapIste&departmanAdi=Departman&masa=RP20";
                     String[] parametreler = srvrMessage.split("&");
                     String[] esitlik;
                     collection = new Hashtable<String, String>(parametreler.length);
@@ -232,6 +234,14 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                         case garson:
                             GarsonIste garsonIste = new GarsonIste(collection, g);
                             garsonIste.Islem();
+                            break;
+                        case masaTemizle:
+                            MasaTemizle masaTemizle = new MasaTemizle(collection, g);
+                            masaTemizle.Islem();
+                            break;
+                        case hesapIste:
+                            HesapIste hesapIste = new HesapIste(collection,g);
+                            hesapIste.Islem();
                             break;
                         default:
                             break;
