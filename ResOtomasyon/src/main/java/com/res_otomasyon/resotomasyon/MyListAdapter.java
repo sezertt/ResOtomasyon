@@ -62,10 +62,10 @@ public class MyListAdapter extends BaseAdapter {
         TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewFiyat);
         TextView textPorsiyon = (TextView) convertView.findViewById(R.id.textViewPorsiyon);
 
-        String miktar = "-";
+        String miktar = "";
 
         if(siparisListesi.get(position).siparisAdedi != 0)
-            miktar = String.valueOf(siparisListesi.get(position).siparisAdedi);
+            miktar = "x" + String.valueOf(siparisListesi.get(position).siparisAdedi);
 
         Double doubleFiyat;
         try
@@ -95,8 +95,6 @@ public class MyListAdapter extends BaseAdapter {
         df.setMinimumFractionDigits(0);
         df.setGroupingUsed(false);
 
-        String result = miktar;
-
         textYemekAdi.setText(siparisListesi.get(position).siparisYemekAdi);
 
        if(siparisListesi.get(position).siparisPorsiyonu > 0)
@@ -106,13 +104,7 @@ public class MyListAdapter extends BaseAdapter {
             textPorsiyon.setText("");
         }
 
-        if(!result.contentEquals("-")) {
-            textAdet.setText("x"+result);
-        }
-        else
-        {
-            textAdet.setText("");
-        }
+        textAdet.setText(miktar);
 
         if(selectedIndex!= -1 && position == selectedIndex)
         {
