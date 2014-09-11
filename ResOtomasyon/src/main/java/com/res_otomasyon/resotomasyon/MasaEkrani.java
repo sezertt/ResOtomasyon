@@ -33,7 +33,7 @@ import android.view.WindowManager;
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.BildirimBilgileriIslemler;
-import ekclasslar.GarsonIste;
+import ekclasslar.GarsonIslemler;
 import ekclasslar.HesapIste;
 import ekclasslar.MasaTemizle;
 import ekclasslar.SiparisIslemler;
@@ -122,7 +122,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     srvrMessage = intent.getStringExtra("message");
-//                    srvrMessage = "komut=hesapIste&departmanAdi=Departman&masa=RP20";
+//                    srvrMessage = "komut=garsonIstendi&departmanAdi=Departman&masa=RP20";
                     String[] parametreler = srvrMessage.split("&");
                     String[] esitlik;
                     collection = new Hashtable<String, String>(parametreler.length);
@@ -231,17 +231,51 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             });
 
                             break;
-                        case garson:
-                            GarsonIste garsonIste = new GarsonIste(collection, g);
-                            garsonIste.Islem();
+                        case garsonIstendi:
+                            GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
+                            garsonIslemler.Istendi();
                             break;
                         case masaTemizle:
                             MasaTemizle masaTemizle = new MasaTemizle(collection, g);
                             masaTemizle.Islem();
                             break;
                         case hesapIste:
-                            HesapIste hesapIste = new HesapIste(collection,g);
+                            HesapIste hesapIste = new HesapIste(collection, g);
                             hesapIste.Islem();
+                            break;
+                        case bildirimGoruldu:
+                            int masaSiparisCounter = 0;
+                            boolean hepsiSilindi = false;
+                            for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
+                                if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
+                                    int siparisSize = msp.siparisler.size();
+                                    for (int i = 0; i < siparisSize; i++) {
+                                        Siparis siparis = msp.siparisler.get(i);
+                                        if (siparis.siparisYemekAdi.contentEquals(collection.get("yemekAdi")) && siparis.siparisAdedi == Integer.parseInt(collection.get("adedi")) && siparis.siparisPorsiyonu == Double.parseDouble(collection.get("porsiyonu"))) {
+                                            msp.siparisler.remove(i);
+                                            break;
+                                        }
+                                        else if(collection.get("yemekAdi").contentEquals("hepsi"))
+                                        {
+                                            g.lstMasaninSiparisleri.remove(masaSiparisCounter);
+                                            hepsiSilindi = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if(hepsiSilindi)
+                                    break;
+                                masaSiparisCounter++;
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    g.adapter.notifyDataSetChanged();
+                                }
+                            });
+                            break;
+                        case garsonGoruldu:
+
                             break;
                         default:
                             break;
@@ -465,6 +499,14 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         return super.onOptionsItemSelected(item);
         */
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if (g.broadcastReceiver != null) {
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(g.broadcastReceiver);
+        }
     }
 
     @Override

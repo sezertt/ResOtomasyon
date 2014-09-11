@@ -96,8 +96,10 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi&adedi=hepsi&porsiyonu=hepsi");
-                                groups.remove(groupPosition);
-                                notifyDataSetChanged();
+//                                groups.remove(groupPosition);
+//                                notifyDataSetChanged();
+                                if (groups.get(groupPosition).siparisler.size() == 0)
+                                    groups.remove(groupPosition);
                             }
                         }).setNegativeButton("İptal", new DialogInterface.OnClickListener() {
                     @Override
@@ -129,12 +131,20 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             public void onClick(View v) {
                 MasaninSiparisleri masaninSiparisleri = groups.get(groupPosition);
                 Siparis siparis1 = groups.get(groupPosition).siparisler.get(childPosition);
+                if(siparis1.siparisYemekAdi.contentEquals("Garson İsteği"))
+                {
+                    g.commonAsyncTask.client.sendMessage("komut=garsonGoruldu&masa="+masaninSiparisleri.MasaAdi+"&departmanAdi="+masaninSiparisleri.DepartmanAdi+"");
+                }
+
                 if (!siparis1.siparisYemekAdi.contentEquals("Garson İsteği") && !siparis1.siparisYemekAdi.contentEquals("Masa Temizleme İsteği"))
                     g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + masaninSiparisleri.MasaAdi + "&departmanAdi=" + masaninSiparisleri.DepartmanAdi + "&yemekAdi=" + siparis1.siparisYemekAdi + "&adedi=" + siparis1.siparisAdedi + "&porsiyonu=" + siparis1.siparisPorsiyonu);
-                groups.get(groupPosition).siparisler.remove(childPosition);
+                else {
+                    //Garson goruldu
+                }
+//                groups.get(groupPosition).siparisler.remove(childPosition);
                 if (groups.get(groupPosition).siparisler.size() == 0)
                     groups.remove(groupPosition);
-                notifyDataSetChanged();
+//                notifyDataSetChanged();
             }
         });
         textYemekAdi.setText(siparis.siparisYemekAdi);
@@ -149,9 +159,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
             colorAnim.start();
-        }
-        else if(siparis.siparisYemekAdi.contentEquals("Masa Temizleme İsteği"))
-        {
+        } else if (siparis.siparisYemekAdi.contentEquals("Masa Temizleme İsteği")) {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(80, 255, 80), Color.WHITE);
             colorAnim.setDuration(1000);
             colorAnim.setEvaluator(new ArgbEvaluator());

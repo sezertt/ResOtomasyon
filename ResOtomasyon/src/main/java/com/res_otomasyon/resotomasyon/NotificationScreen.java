@@ -17,7 +17,6 @@ import ekclasslar.NotificationExpandableAdapter;
 public class NotificationScreen extends ActionBarActivity {
     GlobalApplication g;
     public String srvrMessage;
-    NotificationExpandableAdapter adapter;
     Context context = this;
 
     @Override
@@ -28,8 +27,8 @@ public class NotificationScreen extends ActionBarActivity {
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(this, g.lstMasaninSiparisleri, g);
         ExpandableListView listView = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
-        adapter = expandableAdapter;
-        listView.setAdapter(adapter);
+        g.adapter = expandableAdapter;
+        listView.setAdapter(g.adapter);
     }
 
 
@@ -90,7 +89,7 @@ public class NotificationScreen extends ActionBarActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    adapter.notifyDataSetChanged();
+                                    g.adapter.notifyDataSetChanged();
                                 }
                             });
                         break;
