@@ -231,15 +231,15 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             });
 
                             break;
-                        case garsonIstendi:
+                        case GarsonIstendi:
                             GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
                             garsonIslemler.Istendi();
                             break;
-                        case masaTemizle:
+                        case TemizlikIstendi:
                             MasaTemizle masaTemizle = new MasaTemizle(collection, g);
                             masaTemizle.Islem();
                             break;
-                        case hesapIste:
+                        case HesapIstendi:
                             HesapIste hesapIste = new HesapIste(collection, g);
                             hesapIste.Islem();
                             break;
