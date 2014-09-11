@@ -118,7 +118,7 @@ public class MenuEkrani extends ActionBarActivity {
                     if (g.commonAsyncTask.client != null) {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
-                            MenuEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlı)");
 
                             t.stopTimer();
                         } else {
@@ -433,7 +433,7 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_masaTemizleyin:
-                komut = "komut=masaTemizle&departmanAdi=" + departmanAdi + "%masa=" + masaAdi + "";
+                komut = "komut=TemizlikIstendi&departmanAdi=" + departmanAdi + "%masa=" + masaAdi;
                 g.commonAsyncTask.client.sendMessage(komut);
                 break;
 
@@ -442,7 +442,7 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_garsonIstiyorum:
-                komut = "komut=garson&departmanAdi=" + departmanAdi + "%masa=" + masaAdi + "";
+                komut = "komut=GarsonIstendi&departmanAdi=" + departmanAdi + "%masa=" + masaAdi;
                 g.commonAsyncTask.client.sendMessage(komut);
                 break;
             default:
