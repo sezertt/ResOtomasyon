@@ -83,12 +83,12 @@ public class HesapEkrani extends Activity {
                             .setPositiveButton("Evet", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    String komut = "komut=hesapIste&departmanAdi=" + departmanAdi + "&masa=" + masaAdi + "";
+                                    String komut = "komut=HesapIstendi&departmanAdi=" + departmanAdi + "&masa=" + masaAdi + "&kalanHesap=" + toplamHesap;
                                     g.commonAsyncTask.client.sendMessage(komut);
                                     SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.hesapEkrani), false);
                                     callHesapIste();
-                                    progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap Bekleniyor...",
-                                            "Hesap isteği iletildi.", false);
+                                    progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap isteği iletildi",
+                                            "Hesap bekleniyor...", false);
                                 }
                             }).setNegativeButton("Hayır", new DialogInterface.OnClickListener() {
                         @Override
@@ -131,9 +131,7 @@ public class HesapEkrani extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (timerRunning)
-            return;
-        else
+        if (!timerRunning)
             super.onBackPressed();
     }
 
@@ -322,12 +320,12 @@ public class HesapEkrani extends Activity {
                         .setPositiveButton("Evet", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                String komut = "komut=hesapIste&departmanAdi=" + departmanAdi + "&masa=" + masaAdi + "";
+                                String komut = "komut=HesapIstendi&departmanAdi=" + departmanAdi + "&masa=" + masaAdi + "&kalanHesap=" + toplamHesap;
                                 g.commonAsyncTask.client.sendMessage(komut);
                                 SetViewGroupEnabled.setViewGroupEnabled((ViewGroup) findViewById(R.id.hesapEkrani), false);
                                 callHesapIste();
-                                progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap Bekleniyor...",
-                                        "Hesap isteği iletildi.", false);
+                                progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap isteği iletildi",
+                                        "Hesap bekleniyor...", false);
                             }
                         }).setNegativeButton("Hayır", new DialogInterface.OnClickListener() {
                     @Override
@@ -378,9 +376,7 @@ public class HesapEkrani extends Activity {
         buttonSepet.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 ListView listView = (ListView) findViewById(R.id.listViewSecilenSiparisler);
-                if (listView.getCount() == 0)
-                    return;
-                else
+                if (listView.getCount() != 0)
                     alertDialog.show();
             }
         });
@@ -881,7 +877,10 @@ public class HesapEkrani extends Activity {
             String gelenkomut = collection.get("komut");
             GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
 
+            AlertDialog.Builder aBuilder;
+            AlertDialog alertDialog;
             switch (komut) {
+
                 case siparis:
                     if(collection.get("masa").contentEquals(masaAdi) && collection.get("departmanAdi").contentEquals(departmanAdi))
                     {
@@ -1070,6 +1069,32 @@ public class HesapEkrani extends Activity {
                             }
                         }
                     }
+                    break;
+                case hesapGeliyor:
+                    aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                    aBuilder.setTitle("Hesap Denetimi")
+                            .setMessage("Hesap istediğiniz için işleminiz gerçekleştirilememektedir")
+                            .setCancelable(false)
+                            .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int item) {
+                                    if(!progressDialog.isShowing())
+                                        progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap İsteği İletildi", "Hesap isteği iletildi.", false);
+                                }
+                            })
+                            .create();
+                    alertDialog = aBuilder.create();
+                    alertDialog.show();
+                    break;
+                case hesapIslemde:
+                    aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                    aBuilder.setTitle("Hesap Denetimi")
+                            .setMessage("Hesabınızla ilgili işlem yapılmaktadır, lütfen kısa süre sonra tekrar deneyiniz")
+                            .setCancelable(false)
+                            .setPositiveButton("Tamam",null)
+                            .create();
+                    alertDialog = aBuilder.create();
+                    alertDialog.show();
                     break;
                 default:
                     break;

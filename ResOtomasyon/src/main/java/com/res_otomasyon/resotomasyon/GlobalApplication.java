@@ -18,6 +18,7 @@ import Entity.Siparis;
 import TCPClientSide.CommonAsyncTask;
 import TCPClientSide.TCPClient;
 import ekclasslar.DepartmanMasalari;
+import ekclasslar.NotificationExpandableAdapter;
 
 public class GlobalApplication extends Application {
 
@@ -34,11 +35,14 @@ public class GlobalApplication extends Application {
     Dictionary<String,Bitmap> bitmapDictionary = new Hashtable<String, Bitmap>();
     public ArrayList<MasaninSiparisleri> lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();
 
+    NotificationExpandableAdapter adapter;
+
     public enum Komutlar {
         Default, OdemeBilgileriTablet, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,masaAcildi, masaKapandi, AdisyonNotu,
-        IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj,garson,
-        masaTemizle,hesapIste,bildirimGoruldu
+        IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj,
+        GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, garsonGoruldu, hesapGoruldu, temizlikGoruldu, hesapGeliyor,
+        hesapIslemde
     }
 
     public void connectServer(Handler myHandler) throws Exception {
