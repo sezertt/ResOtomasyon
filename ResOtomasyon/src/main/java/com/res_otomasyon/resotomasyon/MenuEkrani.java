@@ -11,9 +11,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +25,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -33,8 +37,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+import Entity.MasaninSiparisleri;
+import Entity.Siparis;
 import Entity.UrunlerinListesi;
+import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.FileIO;
+import ekclasslar.GarsonIslemler;
+import ekclasslar.HesapIste;
+import ekclasslar.MasaTemizle;
+import ekclasslar.SetViewGroupEnabled;
+import ekclasslar.SiparisIslemler;
 import ekclasslar.TryConnection;
 import ekclasslar.UrunBilgileri;
 import Entity.Employee;
@@ -60,6 +72,9 @@ public class MenuEkrani extends ActionBarActivity {
     // more efficient than HashMap for mapping integers to objects
     SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
     MyExpandableListAdapter adapter;
+    Button buttonMasaAc;
+    ImageView imageMasaAc;
+    Boolean masaAcikMi;
 
     public Handler myHandler = new Handler() {
         @Override
@@ -92,6 +107,8 @@ public class MenuEkrani extends ActionBarActivity {
                                 passCorrect = passwordHash.validatePassword(m_Text, employee.PinCode);
                                 if (passCorrect && masaKilitliMi) {
                                     masaKilitliMi = false;
+                                    buttonMasaAc.setVisibility(View.INVISIBLE);
+                                    imageMasaAc.setVisibility(View.INVISIBLE);
                                     item.setTitle(R.string.masa_kilitle);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     editor.apply();
@@ -149,8 +166,6 @@ public class MenuEkrani extends ActionBarActivity {
 
     @Override
     protected void onResume() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(rec, new IntentFilter("myevent"));
-
         hesapEkraniAcilicak = false;
 
         if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
@@ -178,87 +193,139 @@ public class MenuEkrani extends ActionBarActivity {
         activityVisible = false;
         if (!masaKilitliMi && !hesapEkraniAcilicak) {
             g.siparisListesi.clear();
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(g.broadcastReceiverMenuEkrani);
         }
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
     }
 
     @Override
     public void onBackPressed() {
         if (!masaKilitliMi)
+        {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(g.broadcastReceiverMenuEkrani);
             this.finish();
-    }
-
-    BroadcastReceiver rec = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //all events will be received here
-            //get message
-            String srvrMessage = intent.getStringExtra("message");
-
-            if (srvrMessage != null) {
-                String[] parametreler = srvrMessage.split("&");
-                String[] esitlik;
-                final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
-                for (String parametre : parametreler) {
-                    esitlik = parametre.split("=");
-                    if (esitlik.length == 2)
-                        collection.put(esitlik[0], esitlik[1]);
-                }
-
-                String gelenkomut = collection.get("komut");
-                GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
-
-                switch (komut) {
-                    case baglanti:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (activityVisible) {
-                                    if (!t.timerRunning)
-                                        t.startTimer();
-                                    MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlantı yok)");
-                                }
-                            }
-                        });
-                        break;
-                    case LoadSiparis:
-                        siparisler = collection.get("siparisBilgileri");
-                        g.commonAsyncTask.client.sendMessage("komut=OdemeBilgileriTablet&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
-                        break;
-                    case OdemeBilgileriTablet:
-                        Intent hesapEkrani = new Intent(MenuEkrani.this, HesapEkrani.class);
-                        hesapEkrani.putExtra("siparisler", siparisler); // eski siparişler
-                        hesapEkrani.putExtra("DepartmanAdi", departmanAdi);
-                        hesapEkrani.putExtra("MasaAdi", masaAdi);
-                        hesapEkrani.putExtra("Employee", employee);
-                        hesapEkrani.putExtra("alinanOdemeler", collection.get("alinanOdemeler"));
-                        hesapEkrani.putExtra("indirimler", collection.get("indirimler"));
-                        hesapEkraniAcilicak = true;
-                        startActivity(hesapEkrani);
-                        break;
-                    default:
-                        break;
-                }
-            }
         }
-    };
+    }
 
     @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        g = (GlobalApplication) getApplicationContext();
-
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_menu_ekrani);
+
+
+        try {
+            g = (GlobalApplication) getApplicationContext();
+
+            if (g.broadcastReceiverMenuEkrani != null) {
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(g.broadcastReceiverMenuEkrani);
+            }
+            g.broadcastReceiverMenuEkrani = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String srvrMessage = intent.getStringExtra("message");
+//                    srvrMessage = "komut=garsonIstendi&departmanAdi=Departman&masa=RP20";
+                    String[] parametreler = srvrMessage.split("&");
+                    String[] esitlik;
+                    final Dictionary<String, String> collection = new Hashtable<String, String>(parametreler.length);
+                    for (String parametre : parametreler) {
+                        esitlik = parametre.split("=");
+                        if (esitlik.length == 2)
+                            collection.put(esitlik[0], esitlik[1]);
+                    }
+                    String gelenkomut = collection.get("komut");
+                    GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
+                    switch (komut) {
+                        case baglanti:
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (activityVisible) {
+                                        if (!t.timerRunning)
+                                            t.startTimer();
+                                        MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlantı yok)");
+                                    }
+                                }
+                            });
+                            break;
+                        case LoadSiparis:
+                            siparisler = collection.get("siparisBilgileri");
+                            g.commonAsyncTask.client.sendMessage("komut=OdemeBilgileriTablet&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
+                            break;
+                        case OdemeBilgileriTablet:
+                            Intent hesapEkrani = new Intent(MenuEkrani.this, HesapEkrani.class);
+                            hesapEkrani.putExtra("siparisler", siparisler); // eski siparişler
+                            hesapEkrani.putExtra("DepartmanAdi", departmanAdi);
+                            hesapEkrani.putExtra("MasaAdi", masaAdi);
+                            hesapEkrani.putExtra("Employee", employee);
+                            hesapEkrani.putExtra("alinanOdemeler", collection.get("alinanOdemeler"));
+                            hesapEkrani.putExtra("indirimler", collection.get("indirimler"));
+                            hesapEkraniAcilicak = true;
+                            startActivity(hesapEkrani);
+                            break;
+                        case masaKapandi:
+                            g.siparisListesi.clear();
+                            if(masaKilitliMi)
+                            {
+                                groups.clear();
+                                createData();
+                                adapter.notifyDataSetChanged();
+                                //resim ve buton visible yapılacak
+                                buttonMasaAc.setVisibility(View.VISIBLE);
+                                imageMasaAc.setVisibility(View.VISIBLE);
+                            }
+                            else
+                            {
+                                onBackPressed();
+                            }
+                            break;
+                        case masaAcildi:
+                            //resim ve button invisible yapılacak
+                            buttonMasaAc.setVisibility(View.INVISIBLE);
+                            imageMasaAc.setVisibility(View.INVISIBLE);
+
+                        default:
+                            break;
+                    }
+
+                }
+            };
+            LocalBroadcastManager.getInstance(context).registerReceiver(g.broadcastReceiverMenuEkrani, new IntentFilter("myevent"));
+        } catch (Exception ignored) {
+
+        }
+
+
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
         masaAdi = extras.getString("MasaAdi");
         employee = (Employee) extras.getSerializable("Employee");
+        masaAcikMi = extras.getBoolean("MasaAcikMi");
+
         FileIO fileIO = new FileIO();
         List<File> files = null;
+
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+        masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+
+        buttonMasaAc = (Button) findViewById(R.id.buttonMasaAc);
+        imageMasaAc = (ImageView) findViewById(R.id.imageView);
+
+        if(masaKilitliMi && !masaAcikMi)
+        {
+            buttonMasaAc.setVisibility(View.VISIBLE);
+            imageMasaAc.setVisibility(View.VISIBLE);
+        }
+
+        buttonMasaAc.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                buttonMasaAc.setVisibility(View.INVISIBLE);
+                imageMasaAc.setVisibility(View.INVISIBLE);
+                g.commonAsyncTask.client.sendMessage("komut=masaAcildi&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
+                g.commonAsyncTask.client.sendMessage("komut=masayiAc&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
+            }
+        });
 
         try {
             files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
@@ -290,6 +357,7 @@ public class MenuEkrani extends ActionBarActivity {
         activityVisible = false;
         if (!masaKilitliMi && !hesapEkraniAcilicak) {
             g.siparisListesi.clear();
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(g.broadcastReceiverMenuEkrani);
         }
         super.onStop();
     }
@@ -301,7 +369,7 @@ public class MenuEkrani extends ActionBarActivity {
         if (!masaKilitliMi && !hesapEkraniAcilicak) {
             g.siparisListesi.clear();
         }
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(g.broadcastReceiverMenuEkrani);
         super.onDestroy();
     }
 
@@ -391,11 +459,16 @@ public class MenuEkrani extends ActionBarActivity {
             case R.id.action_lockTable:
                 if (item.getTitle().toString().contentEquals("Masayı Kilitle")) {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("Masa Kilitle");
+                    builder.setTitle("Masayı Kilitle");
                     builder.setPositiveButton("Masayı Kilitle", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             myHandler.sendEmptyMessage(0);
+                            if(!masaAcikMi)
+                            {
+                                buttonMasaAc.setVisibility(View.VISIBLE);
+                                imageMasaAc.setVisibility(View.VISIBLE);
+                            }
                         }
                     });
                     builder.setNegativeButton("Çıkış", new DialogInterface.OnClickListener() {
@@ -408,9 +481,10 @@ public class MenuEkrani extends ActionBarActivity {
 //                    return false;
                 } else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("Masa kilitlensin mi?");
+                    builder.setTitle("Masa kilidini kaldır");
 
                     final EditText input = new EditText(context);
+                    input.setHint("Şifre");
                     // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                     input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
                     builder.setView(input);
@@ -433,7 +507,7 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_masaTemizleyin:
-                komut = "komut=TemizlikIstendi&departmanAdi=" + departmanAdi + "%masa=" + masaAdi;
+                komut = "komut=TemizlikIstendi&departmanAdi=" + departmanAdi + "&masa=" + masaAdi;
                 g.commonAsyncTask.client.sendMessage(komut);
                 break;
 
@@ -442,7 +516,7 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_garsonIstiyorum:
-                komut = "komut=GarsonIstendi&departmanAdi=" + departmanAdi + "%masa=" + masaAdi;
+                komut = "komut=GarsonIstendi&departmanAdi=" + departmanAdi + "&masa=" + masaAdi;
                 g.commonAsyncTask.client.sendMessage(komut);
                 break;
             default:

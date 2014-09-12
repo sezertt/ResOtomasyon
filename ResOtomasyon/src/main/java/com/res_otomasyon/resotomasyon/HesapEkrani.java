@@ -51,7 +51,7 @@ public class HesapEkrani extends Activity {
     String departmanAdi, masaAdi;
     Employee employee;
     SharedPreferences preferences = null;
-    boolean MasaKilitliMi = false;
+    boolean masaKilitliMi = false;
     MyListAdapter adapterSecilenSiparisler, adapterHesap;
     ArrayList<Siparis> urunListesiToplam = new ArrayList<Siparis>();
     int selectedSiparisItemPosition = -1;
@@ -152,7 +152,7 @@ public class HesapEkrani extends Activity {
         g = (GlobalApplication) getApplicationContext();
 
         preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
-        MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+        masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
 
         String yemeginAdi;
         Boolean ikramMi;
@@ -590,7 +590,7 @@ public class HesapEkrani extends Activity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if(!MasaKilitliMi)
+        if(!masaKilitliMi)
         {
             if (v.getId()==R.id.listViewHesap && !urunListesiToplam.get(((AdapterView.AdapterContextMenuInfo)menuInfo).position).siparisYemekAdi.contentEquals("İndirim") && !urunListesiToplam.get(((AdapterView.AdapterContextMenuInfo)menuInfo).position).siparisYemekAdi.contentEquals("Ödemeler")) {
                 MenuInflater inflater = getMenuInflater();
@@ -1095,6 +1095,11 @@ public class HesapEkrani extends Activity {
                             .create();
                     alertDialog = aBuilder.create();
                     alertDialog.show();
+                    break;
+                case masaKapandi:
+                    timerRunning = false;
+                    g.siparisListesi.clear();
+                    onBackPressed();
                     break;
                 default:
                     break;

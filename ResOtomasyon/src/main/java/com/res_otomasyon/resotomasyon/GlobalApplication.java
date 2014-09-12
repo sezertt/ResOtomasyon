@@ -25,7 +25,7 @@ public class GlobalApplication extends Application {
     public CommonAsyncTask commonAsyncTask;
     SharedPreferences preferences;
     Activity activity;
-    public BroadcastReceiver broadcastReceiver;
+    public BroadcastReceiver broadcastReceiver,broadcastReceiverMenuEkrani;
     public boolean isMenuEkraniRunning = false;
 
     public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
@@ -41,7 +41,7 @@ public class GlobalApplication extends Application {
         Default, OdemeBilgileriTablet, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,masaAcildi, masaKapandi, AdisyonNotu,
         IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj,
-        GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, garsonGoruldu, hesapGoruldu, temizlikGoruldu, hesapGeliyor,
+        GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, GarsonGoruldu, HesapGoruldu, TemizlikGoruldu, hesapGeliyor,
         hesapIslemde
     }
 

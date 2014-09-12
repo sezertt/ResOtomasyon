@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -116,10 +117,12 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                         for (String aMasalar : masalar) {
                             masaButton = (Button) fragmentView.findViewWithTag(aMasalar);
                             masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                            masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyle);
                             for (String masaAdi : acikMasalar) {
                                 if (masaButton.getTag().toString().contentEquals(masaAdi)) {
                                     masaButton.setBackgroundResource(R.drawable.buttonstyleacikmasa);
                                     masaButton.setOnClickListener(FragmentMasaEkrani.this);
+                                    masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyleacikmasa);
                                 }
                             }
                         }
@@ -127,17 +130,45 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                         for (String aMasalar : masalar) {
                             masaButton = (Button) fragmentView.findViewWithTag(aMasalar);
                             masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                            masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyle);
                             masaButton.setOnClickListener(FragmentMasaEkrani.this);
+                        }
+                    }
+                    preferences = getActivity().getSharedPreferences("KilitliMasa",
+                            Context.MODE_PRIVATE);
+                    departmanAdi = getArguments().getString("departmanAdi");
+                    employee = (Employee) getArguments().getSerializable("Employee");
+                    MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+                    if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
+                        if (MasaKilitliMi) {
+                            Boolean masaAcikMi = false;
+
+                            masaButton = (Button) fragmentView.findViewWithTag(preferences.getString("masaAdi", ""));
+
+                            if (masaButton.getTag(R.drawable.buttonstyle).equals(R.drawable.buttonstyleacikmasa))
+                                masaAcikMi = true;
+
+                            if (g == null)
+                                g = (GlobalApplication) getActivity().getApplicationContext();
+                            Intent intent = new Intent(getActivity(), MenuEkrani.class);
+                            intent.putExtra("DepartmanAdi", departmanAdi);
+                            intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
+                            intent.putExtra("Employee", employee);
+                            intent.putExtra("MasaAcikMi", masaAcikMi);
+                            startActivity(intent);
+                            g.isMenuEkraniRunning = true;
                         }
                     }
                     break;
                 case 1:
                     masaButton = (Button) fragmentView.findViewWithTag(kapananMasa);
                     masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                    masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyle);
                     break;
                 case 2:
                     masaButton = (Button) fragmentView.findViewWithTag(acilanMasa);
                     masaButton.setBackgroundResource(R.drawable.buttonstyleacikmasa);
+                    masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyleacikmasa);
                     break;
                 default:
                     break;
@@ -150,23 +181,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     @SuppressWarnings("unchecked")
     @Override
     public void onAttach(Activity activity) {
-        preferences = getActivity().getSharedPreferences("KilitliMasa",
-                Context.MODE_PRIVATE);
-        this.departmanAdi = getArguments().getString("departmanAdi");
-        this.employee = (Employee) getArguments().getSerializable("Employee");
-        MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
-        if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
-            if (MasaKilitliMi) {
-                if (g == null)
-                    g = (GlobalApplication) getActivity().getApplicationContext();
-                Intent intent = new Intent(getActivity(), MenuEkrani.class);
-                intent.putExtra("DepartmanAdi", this.departmanAdi);
-                intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
-                intent.putExtra("Employee", this.employee);
-                startActivity(intent);
-                g.isMenuEkraniRunning = true;
-            }
-        }
+
         super.onAttach(activity);
     }
 
@@ -186,10 +201,18 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (!g.isMenuEkraniRunning) {
+            Boolean masaAcikMi = false;
+
+            masaButton = (Button) fragmentView.findViewWithTag(preferences.getString("masaAdi", ""));
+
+            if (masaButton.getTag(R.drawable.buttonstyle).equals(R.drawable.buttonstyleacikmasa))
+                masaAcikMi = true;
+
             Intent intent = new Intent(getActivity(), MenuEkrani.class);
-            intent.putExtra("DepartmanAdi", this.departmanAdi);
+            intent.putExtra("DepartmanAdi", departmanAdi);
             intent.putExtra("MasaAdi", v.getTag().toString());
-            intent.putExtra("Employee", this.employee);
+            intent.putExtra("Employee", employee);
+            intent.putExtra("MasaAcikMi", masaAcikMi);
 
             startActivity(intent);
             g.isMenuEkraniRunning = true;
@@ -198,6 +221,12 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
 
     public FragmentMasaEkrani() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+
+        super.onActivityCreated(savedInstanceState);
     }
 
     @SuppressWarnings("unchecked")
@@ -240,6 +269,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
             for (int j = 0; j < 3; j++) {
                 masaButton = new Button(tr.getContext());
                 masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyle);
                 masaButton.setText(masalar.get(masaCounter));
                 masaButton.setTag(masalar.get(masaCounter));
                 masaButton.setWidth(160);
@@ -257,6 +287,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
             for (int j = 0; j < numberOfButtonsForLastRow; j++) {
                 masaButton = new Button(fragmentView.getContext());
                 masaButton.setBackgroundResource(R.drawable.buttonstyle);
+                masaButton.setTag(R.drawable.buttonstyle,R.drawable.buttonstyle);
                 masaButton.setText(masalar.get(masaCounter));
                 masaButton.setTag(masalar.get(masaCounter));
                 masaButton.setHeight(160);
