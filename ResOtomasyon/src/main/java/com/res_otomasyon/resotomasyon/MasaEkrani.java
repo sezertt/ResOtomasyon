@@ -112,6 +112,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
         try {
             g = (GlobalApplication) getApplicationContext();
 
@@ -122,7 +123,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     srvrMessage = intent.getStringExtra("message");
-//                    srvrMessage = "komut=garsonIstendi&departmanAdi=Departman&masa=RP20";
                     String[] parametreler = srvrMessage.split("&");
                     String[] esitlik;
                     collection = new Hashtable<String, String>(parametreler.length);
@@ -214,6 +214,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             //bağlı olduğu için onResume() metodunun bildirdimBilgilerinden sonra çalışması gerekmektedir.
                             //Bu yüzden runOnUiThread e konmuştur. bildirimBilgileri için gerekli mesaj ise onAttachedToWindow metdodunda
                             //gönderildi.
+                            int bild = 1;
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -232,8 +233,19 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
 
                             break;
                         case GarsonIstendi:
-                            GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
-                            garsonIslemler.Istendi();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
+                                    if (garsonIslemler.Istendi()){
+                                        if (!menu.findItem(R.id.action_notification).isVisible())
+                                            menu.findItem(R.id.action_notification).setVisible(true);
+                                        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                                            menu.findItem(R.id.action_notification).setVisible(true);
+                                            v.vibrate(2000);
+                                    }
+                                }
+                            });
                             break;
                         case TemizlikIstendi:
                             MasaTemizle masaTemizle = new MasaTemizle(collection, g);
@@ -274,8 +286,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                 }
                             });
                             break;
-                        case garsonGoruldu:
-
+                        case GarsonGoruldu:
+                            int a = 1;
                             break;
                         default:
                             break;
@@ -298,7 +310,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
         this.masaPlanIsmi = readXML.masaPlanIsimleri;
-        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
         if (preferences.getBoolean("MasaKilitli", masaKilitliMi)) {
             this.setVisible(false);
         }

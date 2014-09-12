@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.ExpandableListView;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -22,6 +23,8 @@ public class NotificationScreen extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Notification bar (status bar) kilitleme
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_notifications);
         g = (GlobalApplication) getApplicationContext();
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));

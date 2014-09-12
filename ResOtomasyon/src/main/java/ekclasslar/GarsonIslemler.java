@@ -42,15 +42,12 @@ public class GarsonIslemler {
                                     for (Siparis siparis1 : msp.siparisler) {
                                         if (siparis1.siparisYemekAdi.contentEquals("Garson İsteği")) {
                                             garsonIstegiMevcut = true;
-                                            ayniMasaVarMi = true;
-                                            break;
+                                            return false;
                                         }
                                     }
-                                    if (!garsonIstegiMevcut) {
-                                        msp.siparisler.add(siparis);
-                                        ayniMasaVarMi = true;
-                                        break;
-                                    }
+                                    msp.siparisler.add(siparis);
+                                    ayniMasaVarMi = true;
+                                    break;
                                 }
                             }
                             if (!ayniMasaVarMi) {
@@ -72,16 +69,13 @@ public class GarsonIslemler {
                     if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
                         for (Siparis siparis1 : msp.siparisler) {
                             if (siparis1.siparisYemekAdi.contentEquals("Garson İsteği")) {
-                                garsonIstegiMevcut = true;
-                                ayniMasaVarMi = true;
-                                break;
+//                                garsonIstegiMevcut = true;
+                                return false;
                             }
                         }
-                        if(!garsonIstegiMevcut) {
-                            msp.siparisler.add(siparis);
-                            ayniMasaVarMi = true;
-                            break;
-                        }
+                        msp.siparisler.add(siparis);
+                        ayniMasaVarMi = true;
+                        break;
                     }
                 }
                 if (!ayniMasaVarMi) {
