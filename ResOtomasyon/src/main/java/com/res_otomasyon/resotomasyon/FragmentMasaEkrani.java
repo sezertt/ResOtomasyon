@@ -203,7 +203,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         if (!g.isMenuEkraniRunning) {
             Boolean masaAcikMi = false;
 
-            masaButton = (Button) fragmentView.findViewWithTag(preferences.getString("masaAdi", ""));
+            masaButton = (Button) fragmentView.findViewWithTag(v.getTag().toString());
 
             if (masaButton.getTag(R.drawable.buttonstyle).equals(R.drawable.buttonstyleacikmasa))
                 masaAcikMi = true;

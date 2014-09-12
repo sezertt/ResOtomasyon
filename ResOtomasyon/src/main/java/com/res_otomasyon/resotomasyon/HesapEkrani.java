@@ -365,7 +365,14 @@ public class HesapEkrani extends Activity {
 
                 for (int i = 0; i < siparisSayisi; i++) {
                     sonSiparisMi--;
-                    g.commonAsyncTask.client.sendMessage("komut=siparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + g.siparisListesi.get(0).siparisAdedi + "&yemekAdi=" + g.siparisListesi.get(0).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + g.siparisListesi.get(0).siparisFiyati + "&adisyonNotu=" + iptalNedeni.getText() + "&sonSiparisMi=" + sonSiparisMi + "&porsiyon=" + new DecimalFormat("#.##").format(g.siparisListesi.get(0).siparisPorsiyonu));
+                    if(masaKilitliMi)
+                    {
+                        g.commonAsyncTask.client.sendMessage("komut=siparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + g.siparisListesi.get(0).siparisAdedi + "&yemekAdi=" + g.siparisListesi.get(0).siparisYemekAdi + "&siparisiGirenKisi=Müşteri&dusulecekDeger=" + g.siparisListesi.get(0).siparisFiyati + "&adisyonNotu=" + iptalNedeni.getText() + "&sonSiparisMi=" + sonSiparisMi + "&porsiyon=" + new DecimalFormat("#.##").format(g.siparisListesi.get(0).siparisPorsiyonu));
+                    }
+                    else
+                    {
+                        g.commonAsyncTask.client.sendMessage("komut=siparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + g.siparisListesi.get(0).siparisAdedi + "&yemekAdi=" + g.siparisListesi.get(0).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + g.siparisListesi.get(0).siparisFiyati + "&adisyonNotu=" + iptalNedeni.getText() + "&sonSiparisMi=" + sonSiparisMi + "&porsiyon=" + new DecimalFormat("#.##").format(g.siparisListesi.get(0).siparisPorsiyonu));
+                    }
                     g.siparisListesi.remove(g.siparisListesi.get(0));
                 }
                 adapterSecilenSiparisler.notifyDataSetChanged();
