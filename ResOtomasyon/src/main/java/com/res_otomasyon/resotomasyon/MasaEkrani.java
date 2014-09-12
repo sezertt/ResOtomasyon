@@ -455,11 +455,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                 }
                 counter++;
             }
-            komut += masalar.substring(1, masalar.length() - 1);
+            komut += masalar.substring(1, masalar.length());
         } else {
             komut = "komut=bildirim&masalar=hepsi";
         }
-        komut += "";
         return komut;
     }
 

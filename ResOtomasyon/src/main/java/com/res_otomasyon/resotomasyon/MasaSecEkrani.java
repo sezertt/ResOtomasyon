@@ -139,8 +139,10 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                         }
                         masaSayac++;
                     }
-                    departmanMasalari.DepartmanAdi = dpt.DepartmanAdi;
-                    secilenMasalar.add(departmanMasalari);
+                    if(departmanMasalari.Masalar.size() >0) {
+                        departmanMasalari.DepartmanAdi = dpt.DepartmanAdi;
+                        secilenMasalar.add(departmanMasalari);
+                    }
                 }
                 g.secilenMasalar = secilenMasalar;
                 AlertDialog.Builder aBuilder = new AlertDialog.Builder(this);

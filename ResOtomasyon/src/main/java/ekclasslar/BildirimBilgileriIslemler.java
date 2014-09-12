@@ -45,7 +45,7 @@ public class BildirimBilgileriIslemler {
                 if (g.secilenMasalar.size() > 0) {
                     for (DepartmanMasalari dptMasa : g.secilenMasalar) {
                         for (String masa : dptMasa.Masalar) {
-                            if (masa.contentEquals(siparisDetay[1]) && dptMasa.DepartmanAdi.contentEquals(siparisDetay[2])) {
+                            if (masa.contentEquals(siparisDetay[1]) && dptMasa.DepartmanAdi.contentEquals(siparisDetay[0])) {
                                 if (g.lstMasaninSiparisleri.size() > 0) {
                                     boolean ayniMasaVarMi = false;
                                     for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
