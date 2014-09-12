@@ -96,14 +96,11 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             activityVisible = true;
             if (g == null) {
                 g = (GlobalApplication) getApplicationContext();
-                g.isServerReachable = false;
             }
             if (t == null)
                 t = new TryConnection(g, myHandler);
 
-            g.isServerReachable = g.commonAsyncTask != null && g.commonAsyncTask.client != null && g.commonAsyncTask.client.mRun;
-
-            if (!g.isServerReachable && !t.timerRunning) {
+            if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
                 t.startTimer();
             }
         }

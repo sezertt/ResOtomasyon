@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import java.io.File;
@@ -28,7 +27,7 @@ public class GlobalApplication extends Application {
     Activity activity;
     public BroadcastReceiver broadcastReceiver,broadcastReceiverMenuEkrani;
     public boolean isMenuEkraniRunning = false;
-    public boolean isServerReachable = false;
+    public boolean baglantiVarMi= false;
 
     public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
 
@@ -51,7 +50,7 @@ public class GlobalApplication extends Application {
         preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         TCPClient.SERVERIP = preferences.getString("IPAddress", "0");
         TCPClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
-        commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity, myHandler).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,(Handler[]) null);
+        commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity,myHandler).execute((Handler[]) null);
     }
 
     public Dictionary<String, Bitmap> getImages() {

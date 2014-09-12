@@ -88,7 +88,7 @@ public class TCPClient {
     }
 
     void callPingToServer() {
-        timer.schedule(new pingToServer(), 3000, 20000);
+        timer.schedule(new pingToServer(), 3000, 10000);
     }
 
     //Eğer bağlantı kopmuş ise ping atmayı durdur.
