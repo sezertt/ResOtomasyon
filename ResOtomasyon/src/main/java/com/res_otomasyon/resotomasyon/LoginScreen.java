@@ -94,11 +94,16 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             this.setVisible(true);
             ((EditText) findViewById(R.id.editTextPin)).setText("");
             activityVisible = true;
-            if (g == null)
+            if (g == null) {
                 g = (GlobalApplication) getApplicationContext();
+                g.isServerReachable = false;
+            }
             if (t == null)
                 t = new TryConnection(g, myHandler);
-            if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
+
+            g.isServerReachable = g.commonAsyncTask != null && g.commonAsyncTask.client != null && g.commonAsyncTask.client.mRun;
+
+            if (!g.isServerReachable && !t.timerRunning) {
                 t.startTimer();
             }
         }
