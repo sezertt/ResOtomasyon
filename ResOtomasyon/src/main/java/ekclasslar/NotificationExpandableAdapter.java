@@ -77,6 +77,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
     public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null)
             convertView = inflater.inflate(R.layout.notification_kategori_gorunum, parent, false);
+        convertView.setBackgroundColor(Color.rgb(180,180,180));
         MasaninSiparisleri group = (MasaninSiparisleri) getGroup(groupPosition);
         CheckedTextView textGroupDepartmanAdi;
         Button btnClearAll;
@@ -165,7 +166,16 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
             colorAnim.start();
-        } else {
+        }
+        else if(siparis.siparisYemekAdi.contentEquals("Hesap İsteği")){
+            ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(232, 228, 104), Color.WHITE);
+            colorAnim.setDuration(1000);
+            colorAnim.setEvaluator(new ArgbEvaluator());
+            colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+            colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+            colorAnim.start();
+        }
+        else {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.WHITE, Color.WHITE);
             colorAnim.setDuration(100);
             colorAnim.setEvaluator(new ArgbEvaluator());

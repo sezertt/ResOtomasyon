@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="50dp"
     android:orientation="vertical"
     android:paddingLeft="38dp"
@@ -9,16 +9,20 @@
     android:descendantFocusability="blocksDescendants"
     android:focusable="false"
     android:focusableInTouchMode="false"
-    android:background="@android:color/holo_green_light"
+    android:background="@android:color/holo_blue_light"
     android:paddingBottom="2dp"
     >
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"/>
+
     <CheckedTextView
         android:id="@+id/textViewProductGroupHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:gravity="center_vertical"
-        android:text="@string/hello_world"
+        android:text="Deneme"
         android:layout_centerVertical="true"
         android:longClickable="false"
         android:clickable="false"
@@ -27,19 +31,18 @@
         android:textSize="27dp">
     </CheckedTextView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="50dp"/>
-
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="fill_parent"
         android:text="Tamamı Görüldü"
         android:background="@drawable/buttonstyle2"
         android:id="@+id/btnClearAll"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"/>
 
 
 </RelativeLayout>

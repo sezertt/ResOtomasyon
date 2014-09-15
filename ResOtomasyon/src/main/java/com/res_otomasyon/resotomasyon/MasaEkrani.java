@@ -97,6 +97,11 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
                             SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), true);
                             t.stopTimer();
+                            if(menu.findItem(R.id.action_notification).isVisible())
+                            {
+                                menu.findItem(R.id.action_notification).setEnabled(true);
+                            }
+                            g.commonAsyncTask.client.sendMessage(notificationMessage());
                         } else {
                             hataVer();
                         }
@@ -143,6 +148,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                             t.startTimer();
                                         MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                         SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), false);
+                                        if(menu.findItem(R.id.action_notification).isVisible())
+                                        {
+                                            menu.findItem(R.id.action_notification).setEnabled(false);
+                                        }
                                     }
                                 }
                             });
@@ -287,7 +296,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             });
                             break;
                         case GarsonGoruldu:
-                            int a = 1;
+                            
                             break;
                         default:
                             break;
