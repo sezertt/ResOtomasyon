@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:descendantFocusability="beforeDescendants"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+
+    <View
+        android:layout_width="match_parent"
+        android:gravity="center_vertical"
+        android:layout_height="40dp"/>
+
+    <TextView
+        android:id="@+id/textViewYemekAdi"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:inputType="textNoSuggestions"
+        android:text="Fırında Makarna"
+        android:textSize="18sp"
+        android:layout_toRightOf="@+id/textViewPorsiyon"
+        android:layout_toEndOf="@+id/textViewPorsiyon"
+        android:layout_toStartOf="@+id/textViewAdet"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/textViewAdet">
+    </TextView>
+
+    <TextView
+        android:id="@+id/textViewPorsiyon"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        android:text="0.75"
+        android:minWidth="40dp"
+        android:layout_marginRight="10dp"
+        android:textSize="18sp"
+        android:layout_marginLeft="10dp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+        </TextView>
+
+    <TextView
+        android:id="@+id/textViewFiyat"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        android:text="23.50 TL"
+        android:minWidth="100dp"
+        android:textSize="18sp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/editTextTasinacakMiktar"
+        android:layout_toStartOf="@+id/editTextTasinacakMiktar">
+    </TextView>
+
+    <TextView
+        android:id="@+id/textViewAdet"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        android:text="x3"
+        android:minWidth="40dp"
+        android:textSize="18sp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_toStartOf="@+id/textViewFiyat"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/textViewFiyat">
+    </TextView>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/editTextTasinacakMiktar"
+        android:singleLine="true"
+        android:text="0"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_marginRight="10dp"
+        android:selectAllOnFocus="true"
+        android:width="100dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true" />
+
+</RelativeLayout>

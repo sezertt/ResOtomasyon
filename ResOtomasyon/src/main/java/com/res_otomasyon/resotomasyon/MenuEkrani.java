@@ -11,12 +11,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Vibrator;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,16 +34,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-import Entity.MasaninSiparisleri;
-import Entity.Siparis;
 import Entity.UrunlerinListesi;
-import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.FileIO;
-import ekclasslar.GarsonIslemler;
-import ekclasslar.HesapIste;
-import ekclasslar.MasaTemizle;
-import ekclasslar.SetViewGroupEnabled;
-import ekclasslar.SiparisIslemler;
 import ekclasslar.TryConnection;
 import ekclasslar.UrunBilgileri;
 import Entity.Employee;
@@ -168,9 +157,13 @@ public class MenuEkrani extends ActionBarActivity {
     protected void onResume() {
         hesapEkraniAcilicak = false;
 
-        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
-            t.startTimer();
-        }
+        if (g == null)
+            g = (GlobalApplication) getApplicationContext();
+        if (t == null)
+            t = new TryConnection(g, myHandler);
+
+        if (!g.commonAsyncTask.client.mRun && !t.timerRunning)
+                    t.startTimer();
 
         groups.clear();
         createData();

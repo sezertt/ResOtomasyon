@@ -179,7 +179,7 @@ public class ReadXML {
                                     Node nNodeString = nListString.item(k);
                                     if (!nNodeString.getTextContent().contentEquals("")) {
                                         m.MasaAdi = nNodeString.getTextContent();
-                                        m.MasaPlanAdi = elementNodeMasaDizayn.getElementsByTagName("masaPlanIsmi").item(0).getTextContent();
+                                        m.DepartmanAdi = elementNodeMasaDizayn.getElementsByTagName("masaPlanIsmi").item(0).getTextContent();
                                         lstMasaDizayn.add(m);
                                     }
                                 }

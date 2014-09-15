@@ -4,5 +4,5 @@ import java.io.Serializable;
 
 public class MasaDizayn implements Serializable {
     public String MasaAdi;
-    public String MasaPlanAdi;
+    public String DepartmanAdi;
 }

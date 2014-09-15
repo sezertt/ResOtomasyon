@@ -50,7 +50,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                     departmanMasalari.Masalar = new ArrayList<String>();
                     departmanMasalari.mDurumu = new ArrayList<Boolean>();
                     for (MasaDizayn masaDizayn : lstMasaDizayn) {
-                        if (masaDizayn.MasaPlanAdi.contentEquals(departman.DepartmanEkrani)) {
+                        if (masaDizayn.DepartmanAdi.contentEquals(departman.DepartmanEkrani)) {
                             departmanMasalari.Masalar.add(masaDizayn.MasaAdi);
                             departmanMasalari.mDurumu.add(false);
                         }

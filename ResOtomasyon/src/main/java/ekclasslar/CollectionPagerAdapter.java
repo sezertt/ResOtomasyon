@@ -48,7 +48,7 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
                     if (departman.DepartmanEkrani.contentEquals(masaPlanIsmi[i])) {
                         masaIsimleri = new ArrayList<String>();
                         for (MasaDizayn masaDizayn : lstMasaDizayn) {
-                            if (masaDizayn.MasaPlanAdi.contentEquals(departman.DepartmanEkrani)) {
+                            if (masaDizayn.DepartmanAdi.contentEquals(departman.DepartmanEkrani)) {
                                 masaIsimleri.add(masaDizayn.MasaAdi);
                             }
                         }

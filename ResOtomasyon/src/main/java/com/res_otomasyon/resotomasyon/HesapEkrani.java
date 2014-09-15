@@ -19,6 +19,7 @@ import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,6 +45,7 @@ import java.util.TimerTask;
 
 import Entity.Employee;
 import Entity.Siparis;
+import Entity.UrunTasimaListesi;
 import ekclasslar.SetViewGroupEnabled;
 
 public class HesapEkrani extends Activity {
@@ -53,11 +55,12 @@ public class HesapEkrani extends Activity {
     SharedPreferences preferences = null;
     boolean masaKilitliMi = false;
     MyListAdapter adapterSecilenSiparisler, adapterHesap;
+    UrunTasimaListAdapter adapterUrunTasima;
     ArrayList<Siparis> urunListesiToplam = new ArrayList<Siparis>();
     int selectedSiparisItemPosition = -1;
     GlobalApplication g;
     ArrayList<String> porsiyonlarPozitif = new ArrayList<String>();
-
+    ArrayList<UrunTasimaListesi> urunTasimaListesi = new ArrayList<UrunTasimaListesi>();
     Integer kacAdet;
     Double  yemeginFiyati, toplamHesap = 0d;
     Button buttonSepet;
@@ -66,8 +69,10 @@ public class HesapEkrani extends Activity {
     Button hesapButton;
     AlertDialog builder;
 
-    boolean timerRunning = false;
+    AlertDialog.Builder aBuilder;
+    AlertDialog alertDialog2;
 
+    boolean timerRunning = false;
 
     public Handler myHandler = new Handler() {
         @Override
@@ -124,11 +129,6 @@ public class HesapEkrani extends Activity {
         timerRunning = true;
     }
 
-    void stopHesapIste() {
-        timer.cancel();
-        timer.purge();
-    }
-
     @Override
     public void onBackPressed() {
         if (!timerRunning)
@@ -143,6 +143,13 @@ public class HesapEkrani extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_hesap_ekrani);
+
+        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+
+        masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+
+        invalidateOptionsMenu();
+
         Bundle extras = getIntent().getExtras();
         departmanAdi = extras.getString("DepartmanAdi");
         departmanAdi = extras.getString("DepartmanAdi");
@@ -150,9 +157,6 @@ public class HesapEkrani extends Activity {
         employee = (Employee) extras.getSerializable("Employee");
 
         g = (GlobalApplication) getApplicationContext();
-
-        preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
-        masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
 
         String yemeginAdi;
         Boolean ikramMi;
@@ -836,19 +840,170 @@ public class HesapEkrani extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.hesap_ekrani, menu);
+        if(masaKilitliMi)
+        {
+            MenuItem item = menu.findItem(R.id.action_uruntasi);
+            item.setVisible(false);
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+
+        if (id == R.id.action_uruntasi) {
+            if(urunListesiToplam.size() > 0)
+            {
+                //Ürün taşıma listesini göster
+                for (Siparis anUrunListesiToplam : urunListesiToplam) {
+                    if (anUrunListesiToplam.siparisAdedi != 0) {
+                        UrunTasimaListesi listeyeEkle = new UrunTasimaListesi();
+                        listeyeEkle.tasinacakUrunAdedi = anUrunListesiToplam.siparisAdedi;
+                        listeyeEkle.tasinacakUrunFiyati = anUrunListesiToplam.siparisFiyati;
+                        listeyeEkle.tasinacakUrunPorsiyonu = anUrunListesiToplam.siparisPorsiyonu;
+                        listeyeEkle.tasinacakUrunYemekAdi = anUrunListesiToplam.siparisYemekAdi;
+                        listeyeEkle.tasinacakUrunSecilenAdet = 0;
+                        if(anUrunListesiToplam.siparisFiyati.contentEquals("ikram"))
+                            listeyeEkle.siparisPorsiyonSinifi = Double.parseDouble(anUrunListesiToplam.siparisFiyati);
+                        urunTasimaListesi.add(listeyeEkle);
+                    }
+                }
+
+                adapterUrunTasima = new UrunTasimaListAdapter(urunTasimaListesi, this);
+
+                LayoutInflater inflater = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+
+                ListView tasinacakUrunleriGosterenListe = (ListView) inflater.inflate(R.layout.listviewalert, null, false);
+
+                tasinacakUrunleriGosterenListe.setItemsCanFocus(true);
+
+                tasinacakUrunleriGosterenListe.setAdapter(adapterUrunTasima);
+
+                final AlertDialog urunTasimaAlertDialog = new AlertDialog.Builder(HesapEkrani.this)
+                        .setTitle("Ürün Taşıma")
+                        .setCancelable(false)
+                        .setView(tasinacakUrunleriGosterenListe)
+                        .setPositiveButton("Tamam", null)
+                        .setNegativeButton("Vazgeç", null)
+                        .create();
+
+                urunTasimaAlertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                    @Override
+                    public void onShow(DialogInterface dialog) {
+                        final Button positiveButton = urunTasimaAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        final Button negativeButton = urunTasimaAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+
+                        positiveButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                String aktarmaBilgileri = "";
+
+                                Double tasinacakUrunlerinToplamFiyati = 0d;
+                                for(int i = 0; i< urunTasimaListesi.size();i++)
+                                {
+                                    int adet = urunTasimaListesi.get(i).tasinacakUrunSecilenAdet;
+
+                                    //Eğer taşınmak istenen ürünlerin  miktarı 0 yapılmışsa, 0 yapılanları taşımaya çalışma
+                                    if(adet == 0)
+                                        continue;
+
+                                    if(adet > urunTasimaListesi.get(i).tasinacakUrunAdedi)
+                                    {
+                                        aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                                        aBuilder.setTitle("Ürün Taşıma")
+                                                .setMessage("Seçilen taşıma miktarı, bulunan ürün miktarını geçmektedir. Lütfen geçerli bir miktar giriniz")
+                                                .setCancelable(false)
+                                                .setPositiveButton("Tamam",null)
+                                                .create();
+                                        alertDialog2 = aBuilder.create();
+                                        alertDialog2.show();
+                                        return;
+                                    }
+
+                                    String yemekAdi = urunTasimaListesi.get(i).tasinacakUrunYemekAdi;
+                                    Double porsiyonu = urunTasimaListesi.get(i).tasinacakUrunPorsiyonu;
+                                    String fiyati = urunTasimaListesi.get(i).tasinacakUrunFiyati;
+
+                                    if(fiyati.contentEquals("ikram"))
+                                    {
+                                        aktarmaBilgileri += "*" + yemekAdi + "-" + urunTasimaListesi.get(i).siparisPorsiyonSinifi + "-" + adet + "-1-" + porsiyonu;
+                                    }
+                                    else
+                                    {
+                                        aktarmaBilgileri += "*" + yemekAdi + "-" + fiyati + "-" + adet + "-0-" + porsiyonu;
+                                    }
+
+                                    try
+                                    {
+                                        tasinacakUrunlerinToplamFiyati += Double.parseDouble(fiyati) * adet;
+                                    }
+                                    catch (Exception ignored)
+                                    { }
+                                }
+
+                                if(aktarmaBilgileri.length() > 0)
+                                {
+                                    aktarmaBilgileri = aktarmaBilgileri.substring(1, aktarmaBilgileri.length());
+                                }
+                                else
+                                {
+                                    //Eğer taşınması gereken ürün sayılarında 0 yapılanlar varsa ve onların dışında taşınacak ürün yoksa, ürün taşıma
+                                    urunTasimaAlertDialog.dismiss();
+                                    return;
+                                }
+
+                                //Eğer taşınmak istenen ürünlerin fiyatları hesabı aşıyorsa ürünleri taşıma
+                                if(tasinacakUrunlerinToplamFiyati > toplamHesap)
+                                {
+                                    aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                                    aBuilder.setTitle("Ürün Taşıma")
+                                            .setMessage("Taşınmak istenen ürünlerin toplam fiyatı kalan hesabı geçmektedir. Lütfen geçerli bir miktar giriniz")
+                                            .setCancelable(false)
+                                            .setPositiveButton("Tamam",null)
+                                            .create();
+                                    alertDialog2 = aBuilder.create();
+                                    alertDialog2.show();
+                                    return;
+                                }
+
+                                //Koşullar sağlandıysa ürünlerin taşınacağı masanın seçilmesi için masaları göster
+
+
+                                //Bittiğinde bak eğer masada ürün kalmadıysa listebos mesajı yolla
+                            }
+                        });
+
+                        negativeButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // edittext boşsa 0 olarak al
+                                urunTasimaListesi.clear();
+                                urunTasimaAlertDialog.dismiss();
+                            }
+                        });
+                    }
+                });
+                urunTasimaAlertDialog.show();
+                urunTasimaAlertDialog.getWindow().clearFlags( WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+                urunTasimaAlertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+            }
+        }
+
+        return id == R.id.action_uruntasi || super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(rec);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+       // if(t.timerRunning)
+          //  t.stopTimer();
     }
 
     @Override
@@ -884,8 +1039,7 @@ public class HesapEkrani extends Activity {
             String gelenkomut = collection.get("komut");
             GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
 
-            AlertDialog.Builder aBuilder;
-            AlertDialog alertDialog;
+
             switch (komut) {
 
                 case siparis:
@@ -1078,30 +1232,40 @@ public class HesapEkrani extends Activity {
                     }
                     break;
                 case hesapGeliyor:
-                    aBuilder = new AlertDialog.Builder(HesapEkrani.this);
-                    aBuilder.setTitle("Hesap Denetimi")
-                            .setMessage("Hesap istediğiniz için işleminiz gerçekleştirilememektedir")
-                            .setCancelable(false)
-                            .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int item) {
-                                    if(!progressDialog.isShowing())
-                                        progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap İsteği İletildi", "Hesap isteği iletildi.", false);
-                                }
-                            })
-                            .create();
-                    alertDialog = aBuilder.create();
-                    alertDialog.show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                            aBuilder.setTitle("Hesap Denetimi")
+                                    .setMessage("Hesap istediğiniz için işleminiz gerçekleştirilememektedir")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int item) {
+                                            if(!progressDialog.isShowing())
+                                                progressDialog = ProgressDialog.show(HesapEkrani.this, "Hesap İsteği İletildi", "Hesap bekleniyor...", false);
+                                        }
+                                    })
+                                    .create();
+                            alertDialog2 = aBuilder.create();
+                            alertDialog2.show();
+                        }
+                    });
                     break;
                 case hesapIslemde:
-                    aBuilder = new AlertDialog.Builder(HesapEkrani.this);
-                    aBuilder.setTitle("Hesap Denetimi")
-                            .setMessage("Hesabınızla ilgili işlem yapılmaktadır, lütfen kısa süre sonra tekrar deneyiniz")
-                            .setCancelable(false)
-                            .setPositiveButton("Tamam",null)
-                            .create();
-                    alertDialog = aBuilder.create();
-                    alertDialog.show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                            aBuilder.setTitle("Hesap Denetimi")
+                                    .setMessage("Hesabınızla ilgili işlem yapılmaktadır, lütfen kısa süre sonra tekrar deneyiniz")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Tamam",null)
+                                    .create();
+                            alertDialog2 = aBuilder.create();
+                            alertDialog2.show();
+                        }
+                    });
                     break;
                 case masaKapandi:
                     timerRunning = false;
