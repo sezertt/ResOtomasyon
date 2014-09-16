@@ -27,6 +27,8 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_screen);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         this.setVisible(false);
         String sdcardReady = Environment.getExternalStorageState();
 

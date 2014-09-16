@@ -37,6 +37,11 @@ public class HesapIste {
                             boolean ayniMasaVarMi = false;
                             for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
                                 if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
+                                    for (Siparis siparis1 : msp.siparisler) {
+                                        if (siparis1.siparisYemekAdi.contentEquals("Hesap İsteği")) {
+                                            return false;
+                                        }
+                                    }
                                     msp.siparisler.add(siparis);
                                     ayniMasaVarMi = true;
                                     break;
@@ -59,6 +64,12 @@ public class HesapIste {
                 boolean ayniMasaVarMi = false;
                 for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
                     if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
+                        for (Siparis siparis1 : msp.siparisler) {
+                            if (siparis1.siparisYemekAdi.contentEquals("Hesap İsteği")) {
+//                                garsonIstegiMevcut = true;
+                                return false;
+                            }
+                        }
                         msp.siparisler.add(siparis);
                         ayniMasaVarMi = true;
                         break;

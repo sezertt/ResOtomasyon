@@ -30,6 +30,8 @@ import java.util.List;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import Entity.GlobalDepartman;
+import Entity.GlobalMasalar;
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.BildirimBilgileriIslemler;
@@ -163,9 +165,24 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             mesajGeldi = false;
                             kapananMasa = collection.get("masa");
                             kapananMasaDepartman = collection.get("departmanAdi");
-                            fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
-                                    .getCurrentItem()];
+                            fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
                             fragment[0].startKapananMasa(kapananMasa, kapananMasaDepartman);
+
+                            for(int i=0;i< g.globalDepartmanlar.size();i++)
+                            {
+                                if(g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(collection.get("departmanAdi")))
+                                {
+                                    for(int x=0;x<g.globalDepartmanlar.get(i).globalMasalar.size();x++)
+                                    {
+                                        if(g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAdi.contentEquals(collection.get("masa")))
+                                        {
+                                            g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAcikMi = false;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
                             break;
                         case siparis:
                             //Sipariş geldiğinde yapılacak işlemler.
@@ -201,6 +218,22 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager
                                     .getCurrentItem()];
                             fragment[0].startAcilanMasa(acilanMasa, acilanMasaDepartman);
+
+                            for(int i=0;i< g.globalDepartmanlar.size();i++)
+                            {
+                                if(g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(collection.get("departmanAdi")))
+                                {
+                                    for(int x=0;x<g.globalDepartmanlar.get(i).globalMasalar.size();x++)
+                                    {
+                                        if(g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAdi.contentEquals(collection.get("masa")))
+                                        {
+                                            g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAcikMi = true;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
                             break;
                         case departman:
                             mesajGeldi = false;
@@ -223,7 +256,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             //bağlı olduğu için onResume() metodunun bildirdimBilgilerinden sonra çalışması gerekmektedir.
                             //Bu yüzden runOnUiThread e konmuştur. bildirimBilgileri için gerekli mesaj ise onAttachedToWindow metdodunda
                             //gönderildi.
-                            int bild = 1;
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -296,7 +328,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             });
                             break;
                         case GarsonGoruldu:
-                            
                             break;
                         default:
                             break;
@@ -318,6 +349,26 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         ReadXML readXML = new ReadXML();
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
+
+        for (Departman aLstDepartmanlar : lstDepartmanlar) {
+            GlobalDepartman departman = new GlobalDepartman();
+            departman.globalDepartmanAdi = aLstDepartmanlar.DepartmanAdi;
+            departman.globalMasalar = new ArrayList<GlobalMasalar>();
+
+            for (MasaDizayn aLstMasaDizayn : lstMasaDizayn) {
+                if (aLstMasaDizayn.MasaEkraniAdi.contentEquals(aLstDepartmanlar.DepartmanEkrani)) {
+                    GlobalMasalar masa = new GlobalMasalar();
+                    masa.globalMasaAdi = aLstMasaDizayn.MasaAdi;
+                    masa.globalMasaAcikMi = false;
+                    departman.globalMasalar.add(masa);
+                } else {
+                    if (departman.globalMasalar.size() > 0)
+                        break;
+                }
+            }
+            g.globalDepartmanlar.add(departman);
+        }
+
         this.masaPlanIsmi = readXML.masaPlanIsimleri;
         if (preferences.getBoolean("MasaKilitli", masaKilitliMi)) {
             this.setVisible(false);

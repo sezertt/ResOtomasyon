@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -38,7 +37,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     TableLayout tableView;
     ScrollView scrollView;
     LinearLayout linearLayout;
-    boolean MasaKilitliMi = false;
+    boolean masaKilitliMi = false;
 
     Button masaButton;
 
@@ -138,9 +137,9 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                             Context.MODE_PRIVATE);
                     departmanAdi = getArguments().getString("departmanAdi");
                     employee = (Employee) getArguments().getSerializable("Employee");
-                    MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+                    masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
                     if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
-                        if (MasaKilitliMi) {
+                        if (masaKilitliMi) {
                             Boolean masaAcikMi = false;
 
                             masaButton = (Button) fragmentView.findViewWithTag(preferences.getString("masaAdi", ""));
@@ -201,6 +200,10 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (!g.isMenuEkraniRunning) {
+            masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+            if(masaKilitliMi)
+                return;
+
             Boolean masaAcikMi = false;
 
             masaButton = (Button) fragmentView.findViewWithTag(v.getTag().toString());

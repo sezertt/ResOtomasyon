@@ -6,7 +6,7 @@
     tools:context="com.res_otomasyon.resotomasyon.MasaSecEkrani">
 
     <ExpandableListView
-        android:id="@+id/listView"
+        android:id="@+id/expandableListViewMasaSec"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_marginBottom="45dp">

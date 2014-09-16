@@ -7,7 +7,7 @@
     tools:context="com.res_otomasyon.resotomasyon.MenuEkrani">
 
     <ExpandableListView
-        android:id="@+id/listView"
+        android:id="@+id/expandableListViewMenuEkrani"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_above="@+id/buttonSepet">
@@ -40,7 +40,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/listView"
+        android:layout_below="@+id/expandableListViewMenuEkrani"
         android:visibility="invisible" />
 
     <ImageView

@@ -89,6 +89,7 @@ public class MenuEkrani extends ActionBarActivity {
                                     editor.putString("UserName", employee.UserName);
                                     editor.apply();
                                     item.setTitle(R.string.masa_ac);
+                                    menu.findItem(R.id.templeRun).setVisible(true);
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
@@ -100,6 +101,7 @@ public class MenuEkrani extends ActionBarActivity {
                                     imageMasaAc.setVisibility(View.INVISIBLE);
                                     item.setTitle(R.string.masa_kilitle);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
+                                    menu.findItem(R.id.templeRun).setVisible(false);
                                     editor.apply();
                                 }
 //                                if (masaKilitliMi) {
@@ -168,10 +170,10 @@ public class MenuEkrani extends ActionBarActivity {
         groups.clear();
         createData();
 
-        ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
+        ExpandableListView expandableListViewMenuEkrani = (ExpandableListView) findViewById(R.id.expandableListViewMenuEkrani);
         adapter = new MyExpandableListAdapter(this, groups, this, g);
         adapter.bitmapDictionary = g.bitmapDictionary;
-        listView.setAdapter(adapter);
+        expandableListViewMenuEkrani.setAdapter(adapter);
 
         adapter.notifyDataSetChanged();
 
@@ -438,7 +440,10 @@ public class MenuEkrani extends ActionBarActivity {
         if (masaKilitliMi) {
             this.item = menu.findItem(R.id.action_lockTable);
             item.setTitle(R.string.masa_ac);
+            menu.findItem(R.id.templeRun).setVisible(true);
         }
+        else
+            menu.findItem(R.id.templeRun).setVisible(false);
         return true;
     }
 
@@ -513,6 +518,10 @@ public class MenuEkrani extends ActionBarActivity {
             case R.id.action_garsonIstiyorum:
                 komut = "komut=GarsonIstendi&departmanAdi=" + departmanAdi + "&masa=" + masaAdi;
                 g.commonAsyncTask.client.sendMessage(komut);
+                break;
+            case R.id.templeRun:
+                Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage("com.imangi.templerun2");
+                startActivity(LaunchIntent);
                 break;
             default:
                 break;

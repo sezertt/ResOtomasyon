@@ -50,7 +50,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
                     departmanMasalari.Masalar = new ArrayList<String>();
                     departmanMasalari.mDurumu = new ArrayList<Boolean>();
                     for (MasaDizayn masaDizayn : lstMasaDizayn) {
-                        if (masaDizayn.DepartmanAdi.contentEquals(departman.DepartmanEkrani)) {
+                        if (masaDizayn.MasaEkraniAdi.contentEquals(departman.DepartmanEkrani)) {
                             departmanMasalari.Masalar.add(masaDizayn.MasaAdi);
                             departmanMasalari.mDurumu.add(false);
                         }
@@ -80,11 +80,11 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
 
         Button btnMasaKaydet = (Button) findViewById(R.id.masaKaydet);
         btnMasaKaydet.setOnClickListener(this);
-        ExpandableListView listView = (ExpandableListView) findViewById(R.id.listView);
+        ExpandableListView expandableListViewMasaSec = (ExpandableListView) findViewById(R.id.expandableListViewMasaSec);
         final MasaExpandableListAdapter masaExpandableListAdapter = new MasaExpandableListAdapter(this, dptMasalar, lstDepartmanlar, g);
-        listView.setAdapter(masaExpandableListAdapter);
-        listView.setChoiceMode(ExpandableListView.CHOICE_MODE_MULTIPLE);
-        listView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+        expandableListViewMasaSec.setAdapter(masaExpandableListAdapter);
+        expandableListViewMasaSec.setChoiceMode(ExpandableListView.CHOICE_MODE_MULTIPLE);
+        expandableListViewMasaSec.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 if (!dptMasalar.get(groupPosition).mDurumu.get(childPosition)) {

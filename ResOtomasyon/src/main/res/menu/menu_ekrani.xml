@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.res_otomasyon.resotomasyon.MenuEkrani" >
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+tools:context="com.res_otomasyon.resotomasyon.MenuEkrani" >
     <item android:id="@+id/action_lockTable"
           android:title="Masayı Kilitle"
           android:orderInCategory="10"/>
@@ -13,4 +14,9 @@
     <item android:id="@+id/action_gorusOneri"
           android:title="Görüş ve Öneriler"
           android:orderInCategory="3"/>
+    <item android:id="@+id/templeRun"
+        android:title="Temple Run 2"
+        android:icon="@drawable/templerun2"
+        app:showAsAction="always"
+    />
 </menu>

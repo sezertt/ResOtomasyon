@@ -25,14 +25,12 @@ public class UrunTasimaListAdapter extends BaseAdapter {
     public LayoutInflater inflater;
     public Activity activity;
     ArrayList<UrunTasimaListesi> urunTasimaSiparisListesi = new ArrayList<UrunTasimaListesi>();
-    private int selectedIndex;
     EditText editTextTasinacakMiktar;
 
     public UrunTasimaListAdapter(ArrayList<UrunTasimaListesi> urunTasimaSiparisListesi,Activity act) {
         activity = act;
         inflater = act.getLayoutInflater();
         this.urunTasimaSiparisListesi = urunTasimaSiparisListesi;
-        selectedIndex = -1;
     }
 
     @Override
@@ -128,16 +126,6 @@ public class UrunTasimaListAdapter extends BaseAdapter {
         }
 
         textAdet.setText(miktar);
-
-        if(selectedIndex!= -1 && position == selectedIndex)
-        {
-            convertView.setBackgroundColor(Color.rgb(51, 181, 229));
-        }
-        else
-        {
-            int selectedColor = Color.WHITE;
-            convertView.setBackgroundColor(selectedColor);
-        }
 
         return convertView;
     }

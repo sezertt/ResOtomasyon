@@ -8,43 +8,39 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.TextView;
-import java.util.ArrayList;
-import Entity.Departman;
-import ekclasslar.DepartmanMasalari;
 
-public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
+import Entity.GlobalDepartman;
+import Entity.GlobalMasalar;
+
+public class TasimaIcinMasaSecimiExpandableListAdapter extends BaseExpandableListAdapter {
     public Activity activity;
     public LayoutInflater inflater;
-    private ArrayList<DepartmanMasalari> groups;
-    public ArrayList<Departman> lstDepartmantlar;
     public GlobalApplication g;
 
-    public MasaExpandableListAdapter(Activity act, ArrayList<DepartmanMasalari> groups, ArrayList<Departman> lstDepartmantlar,GlobalApplication g) {
+    public TasimaIcinMasaSecimiExpandableListAdapter(Activity act, GlobalApplication g) {
         this.activity = act;
         this.inflater = act.getLayoutInflater();
-        this.groups = groups;
-        this.lstDepartmantlar = lstDepartmantlar;
         this.g = g;
     }
 
     @Override
     public int getGroupCount() {
-        return lstDepartmantlar.size();
+        return g.globalDepartmanlar.size();
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return lstDepartmantlar.get(groupPosition);
+        return g.globalDepartmanlar.get(groupPosition);
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return groups.get(groupPosition).Masalar.size();
+        return g.globalDepartmanlar.get(groupPosition).globalMasalar.size();
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return groups.get(groupPosition).Masalar.get(childPosition);
+        return g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition);
     }
 
     @Override
@@ -67,25 +63,25 @@ public class MasaExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.kategori_gorunumu, parent, false);
         }
-        Departman group = (Departman) getGroup(groupPosition);
+        GlobalDepartman group = (GlobalDepartman) getGroup(groupPosition);
 
         CheckedTextView textGroupDepartmanAdi = (CheckedTextView) convertView.findViewById(R.id.textViewProductGroupHeader);
-        textGroupDepartmanAdi.setText(group.DepartmanAdi);
+        textGroupDepartmanAdi.setText(group.globalDepartmanAdi);
         textGroupDepartmanAdi.setChecked(isExpanded);
         return convertView;
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        String MasaAdi = (String) getChild(groupPosition, childPosition);
+        GlobalMasalar MasaAdi = (GlobalMasalar) getChild(groupPosition, childPosition);
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.masa_gorunumu, parent, false);
         }
         TextView textMasaAdi = (TextView) convertView.findViewById(R.id.textViewChildMasaAdi);
-        textMasaAdi.setText(MasaAdi);
+        textMasaAdi.setText(MasaAdi.globalMasaAdi);
 
-        if (groups.get(groupPosition).mDurumu.get(childPosition))
+        if (g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAcikMi)
             convertView.setBackgroundColor(Color.rgb(51, 181, 229));
         else {
             convertView.setBackgroundColor(Color.WHITE);

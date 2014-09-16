@@ -13,6 +13,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+import Entity.GlobalDepartman;
 import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import TCPClientSide.CommonAsyncTask;
@@ -29,6 +31,8 @@ public class GlobalApplication extends Application {
     public boolean isMenuEkraniRunning = false;
     public boolean baglantiVarMi= false;
 
+    public ArrayList<GlobalDepartman> globalDepartmanlar = new ArrayList<GlobalDepartman>();
+
     public ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
 
     public ArrayList<Siparis> siparisListesi = new ArrayList<Siparis>();
@@ -43,7 +47,7 @@ public class GlobalApplication extends Application {
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,masaAcildi, masaKapandi, AdisyonNotu,
         IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj,
         GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, GarsonGoruldu, HesapGoruldu, TemizlikGoruldu, hesapGeliyor,
-        hesapIslemde
+        hesapIslemde, departmanMasaSecimiIcin
     }
 
     public void connectServer(Handler myHandler) throws Exception {

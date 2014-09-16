@@ -29,9 +29,9 @@ public class NotificationScreen extends ActionBarActivity {
         g = (GlobalApplication) getApplicationContext();
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
         final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(this, g.lstMasaninSiparisleri, g);
-        ExpandableListView listView = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
+        ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
         g.adapter = expandableAdapter;
-        listView.setAdapter(g.adapter);
+        expandableListviewNotification.setAdapter(g.adapter);
     }
 
 
@@ -96,6 +96,27 @@ public class NotificationScreen extends ActionBarActivity {
                                 }
                             });
                         break;
+                    case GarsonIstendi:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                g.adapter.notifyDataSetChanged();
+                            }
+                        });                        break;
+                    case TemizlikIstendi:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                g.adapter.notifyDataSetChanged();
+                            }
+                        });                        break;
+                    case HesapIstendi:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                g.adapter.notifyDataSetChanged();
+                            }
+                        });                        break;
                     default:
                         break;
                 }
