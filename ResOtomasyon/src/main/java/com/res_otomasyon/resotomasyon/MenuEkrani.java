@@ -256,11 +256,13 @@ public class MenuEkrani extends ActionBarActivity {
                             hesapEkrani.putExtra("Employee", employee);
                             hesapEkrani.putExtra("alinanOdemeler", collection.get("alinanOdemeler"));
                             hesapEkrani.putExtra("indirimler", collection.get("indirimler"));
+                            hesapEkrani.putExtra("MasaAcikMi", masaAcikMi);
                             hesapEkraniAcilicak = true;
                             startActivity(hesapEkrani);
                             break;
                         case masaKapandi:
                             g.siparisListesi.clear();
+                            masaAcikMi = false;
                             if(masaKilitliMi)
                             {
                                 groups.clear();
@@ -279,7 +281,7 @@ public class MenuEkrani extends ActionBarActivity {
                             //resim ve button invisible yapılacak
                             buttonMasaAc.setVisibility(View.INVISIBLE);
                             imageMasaAc.setVisibility(View.INVISIBLE);
-
+                            masaAcikMi = true;
                         default:
                             break;
                     }
@@ -471,7 +473,7 @@ public class MenuEkrani extends ActionBarActivity {
                             }
                         }
                     });
-                    builder.setNegativeButton("Çıkış", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton("Vazgeç", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
@@ -496,7 +498,7 @@ public class MenuEkrani extends ActionBarActivity {
                             myHandler.sendEmptyMessage(0);
                         }
                     });
-                    builder.setNegativeButton("Çıkış", new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton("Vazgeç", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
