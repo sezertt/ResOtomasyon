@@ -11,8 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ExpandableListView;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
+
 import ekclasslar.NotificationExpandableAdapter;
 
 public class NotificationScreen extends ActionBarActivity {
@@ -70,6 +72,7 @@ public class NotificationScreen extends ActionBarActivity {
     }
 
     BroadcastReceiver rec;
+
     {
         rec = new BroadcastReceiver() {
             @Override
@@ -89,12 +92,12 @@ public class NotificationScreen extends ActionBarActivity {
                 GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
                 switch (komut) {
                     case siparis:
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    g.adapter.notifyDataSetChanged();
-                                }
-                            });
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                g.adapter.notifyDataSetChanged();
+                            }
+                        });
                         break;
                     case GarsonIstendi:
                         runOnUiThread(new Runnable() {
@@ -102,21 +105,24 @@ public class NotificationScreen extends ActionBarActivity {
                             public void run() {
                                 g.adapter.notifyDataSetChanged();
                             }
-                        });                        break;
+                        });
+                        break;
                     case TemizlikIstendi:
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 g.adapter.notifyDataSetChanged();
                             }
-                        });                        break;
+                        });
+                        break;
                     case HesapIstendi:
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 g.adapter.notifyDataSetChanged();
                             }
-                        });                        break;
+                        });
+                        break;
                     default:
                         break;
                 }

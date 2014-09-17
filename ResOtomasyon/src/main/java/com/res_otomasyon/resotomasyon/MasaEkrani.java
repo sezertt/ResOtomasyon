@@ -36,8 +36,8 @@ import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.GarsonIslemler;
-import ekclasslar.HesapIste;
-import ekclasslar.MasaTemizle;
+import ekclasslar.HesapIslemer;
+import ekclasslar.MasaTemizleIslemler;
 import ekclasslar.SiparisIslemler;
 import ekclasslar.CollectionPagerAdapter;
 import ekclasslar.FileIO;
@@ -99,8 +99,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
                             SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), true);
                             t.stopTimer();
-                            if(menu.findItem(R.id.action_notification).isVisible())
-                            {
+                            if (menu.findItem(R.id.action_notification).isVisible()) {
                                 menu.findItem(R.id.action_notification).setEnabled(true);
                             }
                             g.commonAsyncTask.client.sendMessage(notificationMessage());
@@ -150,8 +149,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                             t.startTimer();
                                         MasaEkrani.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                         SetViewGroupEnabled.setViewGroupEnabled((ViewPager) findViewById(R.id.masaEkrani), false);
-                                        if(menu.findItem(R.id.action_notification).isVisible())
-                                        {
+                                        if (menu.findItem(R.id.action_notification).isVisible()) {
                                             menu.findItem(R.id.action_notification).setEnabled(false);
                                         }
                                     }
@@ -168,14 +166,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             fragment[0] = (FragmentMasaEkrani) collectionPagerAdapter.fragments[mViewPager.getCurrentItem()];
                             fragment[0].startKapananMasa(kapananMasa, kapananMasaDepartman);
 
-                            for(int i=0;i< g.globalDepartmanlar.size();i++)
-                            {
-                                if(g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(collection.get("departmanAdi")))
-                                {
-                                    for(int x=0;x<g.globalDepartmanlar.get(i).globalMasalar.size();x++)
-                                    {
-                                        if(g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAdi.contentEquals(collection.get("masa")))
-                                        {
+                            for (int i = 0; i < g.globalDepartmanlar.size(); i++) {
+                                if (g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
+                                    for (int x = 0; x < g.globalDepartmanlar.get(i).globalMasalar.size(); x++) {
+                                        if (g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAdi.contentEquals(collection.get("masa"))) {
                                             g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAcikMi = false;
                                             break;
                                         }
@@ -219,14 +213,10 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                     .getCurrentItem()];
                             fragment[0].startAcilanMasa(acilanMasa, acilanMasaDepartman);
 
-                            for(int i=0;i< g.globalDepartmanlar.size();i++)
-                            {
-                                if(g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(collection.get("departmanAdi")))
-                                {
-                                    for(int x=0;x<g.globalDepartmanlar.get(i).globalMasalar.size();x++)
-                                    {
-                                        if(g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAdi.contentEquals(collection.get("masa")))
-                                        {
+                            for (int i = 0; i < g.globalDepartmanlar.size(); i++) {
+                                if (g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
+                                    for (int x = 0; x < g.globalDepartmanlar.get(i).globalMasalar.size(); x++) {
+                                        if (g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAdi.contentEquals(collection.get("masa"))) {
                                             g.globalDepartmanlar.get(i).globalMasalar.get(x).globalMasaAcikMi = true;
                                             break;
                                         }
@@ -278,23 +268,37 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                 @Override
                                 public void run() {
                                     GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
-                                    if (garsonIslemler.Istendi()){
+                                    if (garsonIslemler.Istendi()) {
                                         if (!menu.findItem(R.id.action_notification).isVisible())
                                             menu.findItem(R.id.action_notification).setVisible(true);
                                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                                            menu.findItem(R.id.action_notification).setVisible(true);
-                                            v.vibrate(2000);
+                                        v.vibrate(2000);
                                     }
                                 }
                             });
                             break;
                         case TemizlikIstendi:
-                            MasaTemizle masaTemizle = new MasaTemizle(collection, g);
-                            masaTemizle.Islem();
+                            MasaTemizleIslemler masaTemizle = new MasaTemizleIslemler(collection, g);
+                            if (masaTemizle.Islem()) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (!menu.findItem(R.id.action_notification).isVisible())
+                                            menu.findItem(R.id.action_notification).setVisible(true);
+                                    }
+                                });
+                            }
                             break;
                         case HesapIstendi:
-                            HesapIste hesapIste = new HesapIste(collection, g);
-                            hesapIste.Islem();
+                            HesapIslemer hesapIste = new HesapIslemer(collection, g);
+                            hesapIste.Istendi();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!menu.findItem(R.id.action_notification).isVisible())
+                                        menu.findItem(R.id.action_notification).setVisible(true);
+                                }
+                            });
                             break;
                         case bildirimGoruldu:
                             int masaSiparisCounter = 0;
@@ -306,17 +310,17 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                         Siparis siparis = msp.siparisler.get(i);
                                         if (siparis.siparisYemekAdi.contentEquals(collection.get("yemekAdi")) && siparis.siparisAdedi == Integer.parseInt(collection.get("adedi")) && siparis.siparisPorsiyonu == Double.parseDouble(collection.get("porsiyonu"))) {
                                             msp.siparisler.remove(i);
+                                            if (msp.siparisler.size() == 0)
+                                                g.lstMasaninSiparisleri.remove(masaSiparisCounter);
                                             break;
-                                        }
-                                        else if(collection.get("yemekAdi").contentEquals("hepsi"))
-                                        {
+                                        } else if (collection.get("yemekAdi").contentEquals("hepsi")) {
                                             g.lstMasaninSiparisleri.remove(masaSiparisCounter);
                                             hepsiSilindi = true;
                                             break;
                                         }
                                     }
                                 }
-                                if(hepsiSilindi)
+                                if (hepsiSilindi)
                                     break;
                                 masaSiparisCounter++;
                             }
@@ -326,8 +330,38 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                     g.adapter.notifyDataSetChanged();
                                 }
                             });
+
                             break;
                         case GarsonGoruldu:
+                            GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
+                            garsonIslemler.Goruldu();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    g.adapter.notifyDataSetChanged();
+                                }
+                            });
+                            break;
+                        case TemizlikGoruldu:
+                            MasaTemizleIslemler masaTemizle1 = new MasaTemizleIslemler(collection, g);
+                            masaTemizle1.Goruldu();
+                            masaTemizle1.Goruldu();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    g.adapter.notifyDataSetChanged();
+                                }
+                            });
+                            break;
+                        case HesapGoruldu:
+                            HesapIslemer hesapIslemer = new HesapIslemer(collection,g);
+                            hesapIslemer.Goruldu();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    g.adapter.notifyDataSetChanged();
+                                }
+                            });
                             break;
                         default:
                             break;
@@ -435,6 +469,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
 
     @Override
     public void onAttachFragment(Fragment fragment) {
+        if (preferences == null)
+            preferences = MasaEkrani.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         if (preferences.getBoolean("MasaKilitli", masaKilitliMi)) {
             for (int i = 0; i < actionBar.getTabCount(); i++) {
                 if (actionBar.getTabAt(i).getText().toString().contentEquals(preferences.getString

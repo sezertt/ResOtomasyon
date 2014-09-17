@@ -154,14 +154,14 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             textAdet.setText(siparis.siparisAdedi + "");
         if (siparis.siparisYemekAdi.contentEquals("Garson İsteği")) {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(255, 80, 80), Color.WHITE);
-            colorAnim.setDuration(1000);
+            colorAnim.setDuration(1500);
             colorAnim.setEvaluator(new ArgbEvaluator());
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
             colorAnim.start();
         } else if (siparis.siparisYemekAdi.contentEquals("Masa Temizleme İsteği")) {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(80, 255, 80), Color.WHITE);
-            colorAnim.setDuration(1000);
+            colorAnim.setDuration(1500);
             colorAnim.setEvaluator(new ArgbEvaluator());
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
@@ -169,7 +169,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
         }
         else if(siparis.siparisYemekAdi.contentEquals("Hesap İsteği")){
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(232, 228, 104), Color.WHITE);
-            colorAnim.setDuration(1000);
+            colorAnim.setDuration(1500);
             colorAnim.setEvaluator(new ArgbEvaluator());
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
