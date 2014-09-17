@@ -82,7 +82,7 @@ public class TasimaIcinMasaSecimiExpandableListAdapter extends BaseExpandableLis
         textMasaAdi.setText(MasaAdi.globalMasaAdi);
 
         if (g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAcikMi)
-            convertView.setBackgroundColor(Color.rgb(51, 181, 229));
+            convertView.setBackgroundColor(activity.getResources().getColor(android.R.color.holo_red_light));
         else {
             convertView.setBackgroundColor(Color.WHITE);
         }

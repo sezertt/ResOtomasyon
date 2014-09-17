@@ -23,7 +23,7 @@ public class SiparisIslemler {
         siparis = new Siparis();
         masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
         masaninSiparisleri.MasaAdi = collection.get("masa");
-        siparis.siparisAdedi = Integer.parseInt(collection.get("miktar"));
+        siparis.siparisAdedi = Integer.parseInt(collection.get("miktar").replace(',','.'));
         siparis.siparisYemekAdi = collection.get("yemekAdi");
         String porsiyon = collection.get("porsiyon").replace(",",".");
         siparis.siparisPorsiyonu =Double.parseDouble(porsiyon);
