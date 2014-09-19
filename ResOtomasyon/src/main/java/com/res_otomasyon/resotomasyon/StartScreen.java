@@ -57,6 +57,8 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
             g.bitmapDictionary = new Hashtable<String, Bitmap>();
         if (g.bitmapDictionary.size() == 0)
             g.bitmapDictionary = g.getImages();
+
+        g.canPlayGame = preferences.getBoolean("canPlayGame", false);
     }
 
     public Handler myHandler = new Handler() {

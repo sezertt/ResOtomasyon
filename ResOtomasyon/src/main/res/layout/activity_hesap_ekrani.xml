@@ -109,7 +109,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/buttonstyle2"
             android:textColor="@android:color/white"
-            android:text="Hesap İste  /  Toplam = 87.50 TL"
+            android:text="Hesap İste  /  Kalan = 0.00 TL"
             android:id="@+id/buttonHesap"
             android:textSize="20sp"
             android:layout_marginLeft="100dp"

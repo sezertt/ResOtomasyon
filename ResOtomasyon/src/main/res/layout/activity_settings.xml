@@ -95,4 +95,16 @@
         android:layout_alignRight="@+id/editTextTableName"
         android:layout_alignEnd="@+id/editTextTableName"
         android:layout_toRightOf="@+id/textViewPort"/>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp"
+        android:text="Temple Run"
+        android:id="@+id/switchGame"
+        android:layout_below="@+id/editTextTableName"
+        android:layout_alignLeft="@+id/editTextTableName"
+        android:layout_alignStart="@+id/editTextTableName"
+        android:layout_alignRight="@+id/editTextTableName"
+        android:layout_alignEnd="@+id/editTextTableName" />
 </RelativeLayout>

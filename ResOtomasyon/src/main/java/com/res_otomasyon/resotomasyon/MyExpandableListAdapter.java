@@ -83,7 +83,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         final ImageView image;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.urun_gorunumu, parent, false);
+            convertView = inflater.inflate(R.layout.expandable_urun_gorunumu, parent, false);
         }
 
         final TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewChildPrice);

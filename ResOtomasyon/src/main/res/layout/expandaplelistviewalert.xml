@@ -3,6 +3,7 @@
 <ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:id="@+id/expandableListViewUrunTasimaIcinMasaSec"
+    android:transcriptMode="disabled"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_marginBottom="45dp">

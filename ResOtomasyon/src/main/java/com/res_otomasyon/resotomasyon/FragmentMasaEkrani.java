@@ -9,9 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,7 +38,6 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     ScrollView scrollView;
     LinearLayout linearLayout;
     boolean masaKilitliMi = false;
-
     Button masaButton;
 
     public class getKapananMasa implements Runnable {
@@ -202,7 +199,12 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     @Override
     public void onClick(View v) {
         if (!g.isMenuEkraniRunning) {
+            if(preferences == null)
+            {
+                preferences = getActivity().getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
+            }
             masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+
             if(masaKilitliMi)
                 return;
 
@@ -222,16 +224,6 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
             startActivity(intent);
             g.isMenuEkraniRunning = true;
         }
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        return super.onContextItemSelected(item);
     }
 
     public FragmentMasaEkrani() {
@@ -293,6 +285,58 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                 masaButton.setOnClickListener(this);
                 tr.addView(masaButton);
                 masaCounter++;
+
+                masaButton.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        for(int i=0;i<g.globalDepartmanlar.size();i++) {
+                            if (g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(departmanAdi)) {
+                                for (int k = 0; k < g.globalDepartmanlar.get(i).globalMasalar.size(); k++) {
+                                    if (g.globalDepartmanlar.get(i).globalMasalar.get(k).globalMasaAdi.contentEquals(v.getTag().toString())) {
+                                        if(g.globalDepartmanlar.get(i).globalMasalar.get(k).globalMasaAcikMi)
+                                            break;
+                                        else {
+                                            if (!g.isMenuEkraniRunning) {
+                                                masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+                                                if(masaKilitliMi)
+                                                    return true;
+
+                                                Boolean masaAcikMi = false;
+
+                                                masaButton = (Button) fragmentView.findViewWithTag(v.getTag().toString());
+
+                                                if (masaButton.getTag(R.drawable.buttonstyle).equals(R.drawable.buttonstyleacikmasa))
+                                                    masaAcikMi = true;
+
+                                                Intent intent = new Intent(getActivity(), MenuEkrani.class);
+                                                intent.putExtra("DepartmanAdi", departmanAdi);
+                                                intent.putExtra("MasaAdi", v.getTag().toString());
+                                                intent.putExtra("Employee", employee);
+                                                intent.putExtra("MasaAcikMi", masaAcikMi);
+
+                                                startActivity(intent);
+                                                g.isMenuEkraniRunning = true;
+                                            }
+                                            return true;
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+
+                        for(int i=0;i<g.globalDepartmanlar.size();i++)
+                        {
+                            if(i == g.globalDepartmanlar.size()-1)
+                            {
+                                g.commonAsyncTask.client.sendMessage("komut=departmanMasaTasimaIcin&departmanAdi=" + g.globalDepartmanlar.get(i).globalDepartmanAdi + "&masaDepartman=" + v.getTag().toString()+"-" + departmanAdi);
+                            }
+                            else
+                                g.commonAsyncTask.client.sendMessage("komut=departmanMasaTasimaIcin&departmanAdi=" + g.globalDepartmanlar.get(i).globalDepartmanAdi);
+                        }
+                        return true;
+                    }
+                });
             }
             tableView.addView(tr);
         }
@@ -310,6 +354,59 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                 masaButton.setOnClickListener(this);
                 tr.addView(masaButton);
                 masaCounter++;
+
+                masaButton.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        for(int i=0;i<g.globalDepartmanlar.size();i++) {
+                            if (g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(departmanAdi)) {
+                                for (int k = 0; k < g.globalDepartmanlar.get(i).globalMasalar.size(); k++) {
+                                    if (g.globalDepartmanlar.get(i).globalMasalar.get(k).globalMasaAdi.contentEquals(v.getTag().toString())) {
+                                        if(g.globalDepartmanlar.get(i).globalMasalar.get(k).globalMasaAcikMi)
+                                            break;
+                                        else {
+                                            if (!g.isMenuEkraniRunning) {
+                                                masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+                                                if (masaKilitliMi)
+                                                    return true;
+
+                                                Boolean masaAcikMi = false;
+
+                                                masaButton = (Button) fragmentView.findViewWithTag(v.getTag().toString());
+
+                                                if (masaButton.getTag(R.drawable.buttonstyle).equals(R.drawable.buttonstyleacikmasa))
+                                                    masaAcikMi = true;
+
+                                                Intent intent = new Intent(getActivity(), MenuEkrani.class);
+                                                intent.putExtra("DepartmanAdi", departmanAdi);
+                                                intent.putExtra("MasaAdi", v.getTag().toString());
+                                                intent.putExtra("Employee", employee);
+                                                intent.putExtra("MasaAcikMi", masaAcikMi);
+
+                                                startActivity(intent);
+                                                g.isMenuEkraniRunning = true;
+                                            }
+                                            return true;
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+
+                        for(int i=0;i<g.globalDepartmanlar.size();i++)
+                        {
+                            if(i == g.globalDepartmanlar.size()-1)
+                            {
+                                g.commonAsyncTask.client.sendMessage("komut=departmanMasaTasimaIcin&departmanAdi=" + g.globalDepartmanlar.get(i).globalDepartmanAdi + "&masaDepartman=" + v.getTag()+"-" + departmanAdi);
+                            }
+                            else
+                                g.commonAsyncTask.client.sendMessage("komut=departmanMasaTasimaIcin&departmanAdi=" + g.globalDepartmanlar.get(i).globalDepartmanAdi);
+
+                        }
+                        return true;
+                    }
+                });
             }
             tableView.addView(tr);
         }

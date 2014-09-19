@@ -29,7 +29,8 @@ public class GlobalApplication extends Application {
     Activity activity;
     public BroadcastReceiver broadcastReceiver,broadcastReceiverMenuEkrani;
     public boolean isMenuEkraniRunning = false;
-    public boolean baglantiVarMi= false;
+
+    public boolean canPlayGame;
 
     public ArrayList<GlobalDepartman> globalDepartmanlar = new ArrayList<GlobalDepartman>();
 
@@ -42,19 +43,23 @@ public class GlobalApplication extends Application {
 
     NotificationExpandableAdapter adapter;
 
+    public boolean baglantiVarMi= false;
+
     public enum Komutlar {
         Default, OdemeBilgileriTablet, siparis, iptal, hesapOdeniyor, masaGirilebilirMi, masaDegistir, urunTasindi, ikram, ikramIptal,
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,masaAcildi, masaKapandi, AdisyonNotu,
         IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj,
         GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, GarsonGoruldu, HesapGoruldu, TemizlikGoruldu, hesapGeliyor,
-        hesapIslemde, departmanMasaSecimiIcin, urunuTasiTablet
+        hesapIslemde, departmanMasaSecimiIcin, urunuTasiTablet, departmanMasaTasimaIcin, OdemeBilgileriGuncelleTablet,
+        OdemeIndirimOnayTablet, siparisListesineGeriEkle
+
     }
 
     public void connectServer(Handler myHandler) throws Exception {
         preferences = this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         TCPClient.SERVERIP = preferences.getString("IPAddress", "0");
         TCPClient.SERVERPORT = Integer.parseInt(preferences.getString("Port", "13759"));
-        commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity,myHandler).execute((Handler[]) null);
+        commonAsyncTask = (CommonAsyncTask) new CommonAsyncTask(activity,myHandler,this).execute((Handler[]) null);
     }
 
     public Dictionary<String, Bitmap> getImages() {

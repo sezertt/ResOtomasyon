@@ -17,8 +17,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -28,8 +31,7 @@ import ekclasslar.ShowAlertDialog;
 
 public class Settings extends Activity implements View.OnClickListener {
 
-    Button btnSave;
-    Button btnCancel;
+    Button btnSave,btnCancel;
     ShowAlertDialog showAlertDialog;
     Context context = this;
     GlobalApplication g;
@@ -38,6 +40,7 @@ public class Settings extends Activity implements View.OnClickListener {
     Boolean dosyaAktarimiVarMi = false;
     int kacinci = 1;
     SharedPreferences preferences;
+    Switch switchGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +71,14 @@ public class Settings extends Activity implements View.OnClickListener {
 
         btnSave = (Button) findViewById(R.id.button);
         btnCancel = (Button) findViewById(R.id.btnIptal);
+
+        switchGame = (Switch) findViewById(R.id.switchGame);
+
+        switchGame.setChecked(preferences.getBoolean("canPlayGame",false));
+
         btnSave.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
-        SharedPreferences preferences = this.getSharedPreferences("MyPreferences",
-                Context.MODE_PRIVATE);
+
         if (preferences != null) {
             EditText textIP = (EditText) findViewById(R.id.editTextIP);
             textIP.setText(preferences.getString("IPAddress", ""));
@@ -138,7 +145,9 @@ public class Settings extends Activity implements View.OnClickListener {
                             .toString());
                     editor.putString("TabletName", ((EditText) findViewById(R.id.editTextTableName)).getText()
                             .toString());
+                    editor.putBoolean("canPlayGame", switchGame.isChecked());
                     editor.apply();
+                    g.canPlayGame = switchGame.isChecked();
                     showAlertDialog = new ShowAlertDialog();
                     AlertDialog alertDialog = showAlertDialog.showAlert(context, "Kayıt başarılı",
                             "Ayarlar kayıt edildi.");

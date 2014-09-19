@@ -2,10 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:id="@+id/notificationScreen"
     tools:context="com.res_otomasyon.resotomasyon.NotificationScreen">
 
     <ExpandableListView
         android:id="@+id/expandable_notification_listview"
+        android:transcriptMode="disabled"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
     </ExpandableListView>

@@ -10,6 +10,7 @@
         android:id="@+id/expandableListViewMenuEkrani"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:transcriptMode="disabled"
         android:layout_above="@+id/buttonSepet">
     </ExpandableListView>
 

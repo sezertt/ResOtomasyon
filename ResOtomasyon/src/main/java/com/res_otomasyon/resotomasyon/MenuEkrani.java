@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -61,9 +62,11 @@ public class MenuEkrani extends ActionBarActivity {
     // more efficient than HashMap for mapping integers to objects
     SparseArray<UrunBilgileri> groups = new SparseArray<UrunBilgileri>();
     MyExpandableListAdapter adapter;
-    Button buttonMasaAc;
+    Button buttonMasaAc, buttonSepet;
     ImageView imageMasaAc;
     Boolean masaAcikMi;
+    AlertDialog kilitKaldirAlert;
+    ExpandableListView expandableListViewMenuEkrani;
 
     public Handler myHandler = new Handler() {
         @Override
@@ -89,13 +92,20 @@ public class MenuEkrani extends ActionBarActivity {
                                     editor.putString("UserName", employee.UserName);
                                     editor.apply();
                                     item.setTitle(R.string.masa_ac);
-                                    menu.findItem(R.id.templeRun).setVisible(true);
+                                    if(g.canPlayGame)
+                                    {
+                                        menu.findItem(R.id.templeRun).setVisible(true);
+                                    }
+                                    else
+                                    {
+                                        menu.findItem(R.id.templeRun).setVisible(false);
+                                    }
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
                             } else {
                                 passCorrect = passwordHash.validatePassword(m_Text, employee.PinCode);
-                                if (passCorrect && masaKilitliMi) {
+                                if (passCorrect) {
                                     masaKilitliMi = false;
                                     buttonMasaAc.setVisibility(View.INVISIBLE);
                                     imageMasaAc.setVisibility(View.INVISIBLE);
@@ -103,13 +113,19 @@ public class MenuEkrani extends ActionBarActivity {
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     menu.findItem(R.id.templeRun).setVisible(false);
                                     editor.apply();
+                                    kilitKaldirAlert.dismiss();
                                 }
-//                                if (masaKilitliMi) {
-//                                    masaKilitliMi = false;
-//                                    item.setTitle(R.string.masa_ac);
-//                                    editor.putBoolean("MasaKilitli", masaKilitliMi);
-//                                    editor.commit();
-//                                }
+                                else
+                                {
+                                    AlertDialog.Builder aBuilder = new AlertDialog.Builder(MenuEkrani.this);
+                                    aBuilder.setTitle("Pin Hatası");
+                                    aBuilder.setMessage("Hatalı pin kodu girdiniz")
+                                            .setCancelable(false)
+                                            .setPositiveButton("Tamam", null);
+                                    AlertDialog alertDialog = aBuilder.create();
+                                    alertDialog.show();
+                                    return;
+                                }
                             }
                         } catch (Exception ex) {
                             ex.printStackTrace();
@@ -127,7 +143,8 @@ public class MenuEkrani extends ActionBarActivity {
                         if (g.commonAsyncTask.client.out != null) {
                             g.commonAsyncTask.client.sendMessage(girisKomutu);
                             MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlı)");
-
+                            buttonSepet.setEnabled(true);
+                            SetMenuItemsVisible(true);
                             t.stopTimer();
                         } else {
                             hataVer();
@@ -170,7 +187,18 @@ public class MenuEkrani extends ActionBarActivity {
         groups.clear();
         createData();
 
-        ExpandableListView expandableListViewMenuEkrani = (ExpandableListView) findViewById(R.id.expandableListViewMenuEkrani);
+        expandableListViewMenuEkrani = (ExpandableListView) findViewById(R.id.expandableListViewMenuEkrani);
+
+        expandableListViewMenuEkrani.setOnScrollListener(new AbsListView.OnScrollListener() {
+            public void onScroll(AbsListView view, int first, int visible, int total) {
+                    if (expandableListViewMenuEkrani.getTranscriptMode() != 0)
+                        expandableListViewMenuEkrani.setTranscriptMode(0);
+            }
+
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+        });
+
         adapter = new MyExpandableListAdapter(this, groups, this, g);
         adapter.bitmapDictionary = g.bitmapDictionary;
         expandableListViewMenuEkrani.setAdapter(adapter);
@@ -198,6 +226,33 @@ public class MenuEkrani extends ActionBarActivity {
         {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(g.broadcastReceiverMenuEkrani);
             this.finish();
+        }
+    }
+
+    public void SetMenuItemsVisible(boolean isVisible)
+    {
+        for(int i = 0; i< menu.size();i++)
+        {
+            if(menu.getItem(i).getItemId() == R.id.templeRun)
+            {
+                if(masaKilitliMi)
+                {
+                    if(g.canPlayGame)
+                    {
+                        menu.findItem(R.id.templeRun).setVisible(true);
+                    }
+                    else
+                    {
+                        menu.findItem(R.id.templeRun).setVisible(false);
+                    }
+                }
+                else
+                    menu.getItem(i).setVisible(false);
+            }
+            else
+            {
+                menu.getItem(i).setVisible(isVisible);
+            }
         }
     }
 
@@ -240,6 +295,8 @@ public class MenuEkrani extends ActionBarActivity {
                                         if (!t.timerRunning)
                                             t.startTimer();
                                         MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlantı yok)");
+                                        SetMenuItemsVisible(false);
+                                        buttonSepet.setEnabled(false);
                                     }
                                 }
                             });
@@ -341,7 +398,9 @@ public class MenuEkrani extends ActionBarActivity {
         }
         t = new TryConnection(g, myHandler);
 
-        findViewById(R.id.buttonSepet).setOnClickListener(new Button.OnClickListener() {
+        buttonSepet = (Button) findViewById(R.id.buttonSepet);
+
+        buttonSepet.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 g.commonAsyncTask.client.sendMessage("komut=LoadSiparis&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
             }
@@ -442,7 +501,14 @@ public class MenuEkrani extends ActionBarActivity {
         if (masaKilitliMi) {
             this.item = menu.findItem(R.id.action_lockTable);
             item.setTitle(R.string.masa_ac);
-            menu.findItem(R.id.templeRun).setVisible(true);
+            if(g.canPlayGame)
+            {
+                menu.findItem(R.id.templeRun).setVisible(true);
+            }
+            else
+            {
+                menu.findItem(R.id.templeRun).setVisible(false);
+            }
         }
         else
             menu.findItem(R.id.templeRun).setVisible(false);
@@ -482,29 +548,43 @@ public class MenuEkrani extends ActionBarActivity {
                     builder.show();
 //                    return false;
                 } else if (item.getTitle().toString().contentEquals("Masa Kilidini Kaldır")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("Masa kilidini kaldır");
+
 
                     final EditText input = new EditText(context);
                     input.setHint("Şifre");
                     // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
                     input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                    builder.setView(input);
 
-                    builder.setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            m_Text = input.getText().toString();
-                            myHandler.sendEmptyMessage(0);
-                        }
-                    });
-                    builder.setNegativeButton("Vazgeç", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.show();
+                    kilitKaldirAlert = new AlertDialog.Builder(context)
+                            .setTitle("Masa kilidini kaldır")
+                            .setView(input)
+                            .setCancelable(false)
+                            .setPositiveButton("Kilidi Kaldır",null)
+                            .setNegativeButton("Vazgeç", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .create();
+
+                    kilitKaldirAlert.setOnShowListener(new DialogInterface.OnShowListener() {
+                                  @Override
+                                  public void onShow(DialogInterface dialog) {
+
+                                      final Button positiveButton = kilitKaldirAlert.getButton(AlertDialog.BUTTON_POSITIVE);
+
+                                      positiveButton.setOnClickListener(new View.OnClickListener() {
+                                          @Override
+                                          public void onClick(View view) {
+                                              m_Text = input.getText().toString();
+                                              myHandler.sendEmptyMessage(0);
+                                          }
+                                      });
+                                  }
+                     });
+
+                    kilitKaldirAlert.show();
                 }
                 break;
 
@@ -522,8 +602,11 @@ public class MenuEkrani extends ActionBarActivity {
                 g.commonAsyncTask.client.sendMessage(komut);
                 break;
             case R.id.templeRun:
-                Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage("com.imangi.templerun2");
-                startActivity(LaunchIntent);
+                if(g.canPlayGame)
+                {
+                    Intent LaunchIntent = getPackageManager().getLaunchIntentForPackage("com.imangi.templerun2");
+                    startActivity(LaunchIntent);
+                }
                 break;
             default:
                 break;

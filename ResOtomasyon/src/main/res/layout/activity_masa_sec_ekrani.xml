@@ -9,6 +9,7 @@
         android:id="@+id/expandableListViewMasaSec"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:transcriptMode="disabled"
         android:layout_marginBottom="45dp">
     </ExpandableListView>
 
