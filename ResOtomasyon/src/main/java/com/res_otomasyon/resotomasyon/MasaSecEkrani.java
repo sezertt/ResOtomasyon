@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 
@@ -34,6 +35,7 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
         g = (GlobalApplication) getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_masa_sec_ekrani);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         FileIO fileIO = new FileIO();
         List<File> files;
         files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));

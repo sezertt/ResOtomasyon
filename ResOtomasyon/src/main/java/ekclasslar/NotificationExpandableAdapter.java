@@ -77,7 +77,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
     public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null)
             convertView = inflater.inflate(R.layout.notification_kategori_gorunum, parent, false);
-        convertView.setBackgroundColor(Color.rgb(180,180,180));
+        convertView.setBackgroundColor(Color.rgb(180, 180, 180));
         MasaninSiparisleri group = (MasaninSiparisleri) getGroup(groupPosition);
         CheckedTextView textGroupDepartmanAdi;
         Button btnClearAll;
@@ -123,9 +123,11 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
 //        final Siparis siparis = (Siparis) getChild(groupPosition, childPosition);
         TextView textYemekAdi;
         TextView textAdet;
+        TextView textPorsiyon;
         Button btnClear;
         textYemekAdi = (TextView) convertView.findViewById(R.id.textViewChildInfo);
         textAdet = (TextView) convertView.findViewById(R.id.textViewAdet);
+        textPorsiyon = (TextView) convertView.findViewById(R.id.textPorsiyon);
         btnClear = (Button) convertView.findViewById(R.id.buttonClear);
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,10 +150,13 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             }
         });
         textYemekAdi.setText(siparis.siparisYemekAdi);
-        if (siparis.siparisAdedi == 0)
+        if (siparis.siparisAdedi == 0) {
             textAdet.setText("");
-        else
-            textAdet.setText(siparis.siparisAdedi + "");
+            textPorsiyon.setText("");
+        } else {
+            textAdet.setText("x" + siparis.siparisAdedi + "");
+            textPorsiyon.setText(siparis.siparisPorsiyonu + "");
+        }
         if (siparis.siparisYemekAdi.contentEquals("Garson İsteği")) {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(255, 80, 80), Color.WHITE);
             colorAnim.setDuration(1500);
@@ -166,16 +171,14 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
             colorAnim.start();
-        }
-        else if(siparis.siparisYemekAdi.contentEquals("Hesap İsteği")){
+        } else if (siparis.siparisYemekAdi.contentEquals("Hesap İsteği")) {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.rgb(232, 228, 104), Color.WHITE);
             colorAnim.setDuration(1500);
             colorAnim.setEvaluator(new ArgbEvaluator());
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
             colorAnim.start();
-        }
-        else {
+        } else {
             ValueAnimator colorAnim = ObjectAnimator.ofInt(convertView, "backgroundColor", Color.WHITE, Color.WHITE);
             colorAnim.setDuration(100);
             colorAnim.setEvaluator(new ArgbEvaluator());

@@ -45,7 +45,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
     Button btnGiris;
     final Context context = this;
     ArrayList<Employee> lstEmployees;
-    boolean MasaKilitliMi = false;
+    boolean masaKilitliMi = false;
     SharedPreferences preferences = null;
     boolean activityVisible = true;
     GlobalApplication g;
@@ -53,13 +53,8 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
     TryConnection t;
     Employee employee;
 
-    @Override
-    protected void onResume() {
-        btnGiris.setEnabled(true);
 
-//        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
-//        checkNetwork.onReceive(context,intent);
-
+    public boolean kilitliMasayaGit() {
         FileIO fileIO = new FileIO();
         List<File> files = null;
         try {
@@ -75,9 +70,9 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
         }
 
         preferences = this.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE);
-        MasaKilitliMi = preferences.getBoolean("MasaKilitli", false);
+        masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
         employee = new Employee();
-        if (MasaKilitliMi) {
+        if (masaKilitliMi && g.baglantiVarMi) {
             this.setVisible(false);
             employee.PinCode = preferences.getString("PinCode", "0000");
             employee.Title = preferences.getString("Title", null);
@@ -90,6 +85,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             intent.putExtra("Employee", employee);
             startActivity(intent);
         } else {
+            menu.setGroupVisible(0,true);
             LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
             this.setVisible(true);
             ((EditText) findViewById(R.id.editTextPin)).setText("");
@@ -104,19 +100,31 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                 t.startTimer();
             }
         }
+        return masaKilitliMi;
+    }
+
+    @Override
+    protected void onResume() {
+        btnGiris.setEnabled(true);
+
+//        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
+//        checkNetwork.onReceive(context,intent);
+
+
+        kilitliMasayaGit();
         super.onResume();
     }
 
     @Override
     protected void onDestroy() {
-        if (!MasaKilitliMi)
+        if (!masaKilitliMi)
             LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
-        if (!MasaKilitliMi)
+        if (!masaKilitliMi)
             LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
         activityVisible = false;
         if (t.timerRunning)
@@ -193,6 +201,8 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                                 LoginScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
                                 EditText e = (EditText) findViewById(R.id.editTextPin);
                                 btnGiris.setEnabled(false);
+                                if(masaKilitliMi)
+                                    menu.setGroupVisible(0,false);
                                 e.setFocusable(false);
                             }
                         }
@@ -224,10 +234,10 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                             e.setFocusable(true);
                             btnGiris.setEnabled(true);
                             LoginScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
-
-                            if (t != null && t.timer != null) {
+                            if (t != null && t.timer != null)
                                 t.stopTimer();
-                            }
+                            if(kilitliMasayaGit())
+                                activityVisible = false;
                         }
                     }
                     break;
@@ -282,8 +292,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
                     if (!pass.contentEquals("")) {
                         for (int i = 0; i < lstEmployees.size(); i++) {
                             passCorrect = passwordHash.validatePassword(pass, lstEmployees.get(i).PinCode);
-                            if (passCorrect)
-                            {
+                            if (passCorrect) {
                                 getCurrentEmployee = i;
                                 break;
                             }

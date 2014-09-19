@@ -4,28 +4,91 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ExpandableListView;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import Entity.Departman;
+import Entity.MasaninSiparisleri;
+import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.NotificationExpandableAdapter;
+import ekclasslar.SetViewGroupEnabled;
+import ekclasslar.TryConnection;
 
 public class NotificationScreen extends ActionBarActivity {
     GlobalApplication g;
     public String srvrMessage;
     Context context = this;
+    boolean activityVisible = true;
+    TryConnection t;
+    SharedPreferences preferences;
+    ArrayList<Departman> lstDepartmanlar;
+
+    public Handler myHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 2:
+                    //Server ile bağlantı kurulup kurulmadığını kontrol etmek için gönderilen mesaj.
+                    preferences = NotificationScreen.this.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+                    String girisKomutu = "komut=giris&nick=" + preferences.getString("TabletName", "Tablet");
+
+                    if (g.commonAsyncTask.client != null) {
+                        if (g.commonAsyncTask.client.out != null) {
+                            g.commonAsyncTask.client.sendMessage(girisKomutu);
+                            NotificationScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlı)");
+                            SetViewGroupEnabled.setViewGroupEnabled((android.view.ViewGroup) findViewById(R.id.notificationScreen), true);
+                            t.stopTimer();
+                            g.commonAsyncTask.client.sendMessage(notificationMessage());
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    public String notificationMessage() {
+        int counter = 0;
+        String komut, masalar = "";
+        komut = "komut=bildirim&masalar=";
+        if (g.secilenMasalar.size() > 0) {
+            for (Departman dpt : lstDepartmanlar) {
+                if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
+                    if (g.secilenMasalar.get(counter).Masalar.size() > 0) {
+                        masalar += "*" + dpt.DepartmanAdi;
+                        for (String dptMasalar : g.secilenMasalar.get(counter).Masalar) {
+                            masalar += "-" + dptMasalar;
+                        }
+                    }
+                }
+                counter++;
+            }
+            komut += masalar.substring(1, masalar.length());
+        } else {
+            komut = "komut=bildirim&masalar=hepsi";
+        }
+        return komut;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //Notification bar (status bar) kilitleme
+        lstDepartmanlar = (ArrayList<Departman>) getIntent().getSerializableExtra("lstDepartmanlar");
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_notifications);
         g = (GlobalApplication) getApplicationContext();
@@ -34,18 +97,25 @@ public class NotificationScreen extends ActionBarActivity {
         ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
         g.adapter = expandableAdapter;
         expandableListviewNotification.setAdapter(g.adapter);
+        t = new TryConnection(g, myHandler);
     }
 
 
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        activityVisible = false;
+        if (t.timerRunning)
+            t.stopTimer();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(rec);
+        activityVisible = false;
+        if (t.timerRunning)
+            t.stopTimer();
         super.onStop();
     }
 
@@ -54,6 +124,19 @@ public class NotificationScreen extends ActionBarActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.notifications, menu);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (g == null)
+            g = (GlobalApplication) getApplicationContext();
+        if (t == null)
+            t = new TryConnection(g, myHandler);
+        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
+            t.startTimer();
+        }
+        activityVisible = true;
     }
 
     @Override
@@ -91,6 +174,48 @@ public class NotificationScreen extends ActionBarActivity {
                 String gelenkomut = collection.get("komut");
                 GlobalApplication.Komutlar komut = GlobalApplication.Komutlar.valueOf(gelenkomut);
                 switch (komut) {
+                    case baglanti:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (activityVisible) {
+                                    if (!t.timerRunning)
+                                        t.startTimer();
+                                    NotificationScreen.this.getSupportActionBar().setTitle(getString(R.string.app_name) + "(Bağlantı yok)");
+                                    SetViewGroupEnabled.setViewGroupEnabled((android.view.ViewGroup) findViewById(R.id.notificationScreen), false);
+                                }
+                            }
+                        });
+                        break;
+
+                    case bildirimBilgileri:
+                        //onResume tetiklendiğin notification uyarı butonunun görnüp görünmeyeceği sipariş listesinin dolu olup olmadığına
+                        //bağlı olduğu için onResume() metodunun bildirdimBilgilerinden sonra çalışması gerekmektedir.
+                        //Bu yüzden runOnUiThread e konmuştur. bildirimBilgileri için gerekli mesaj ise onAttachedToWindow metdodunda
+                        //gönderildi.
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (activityVisible) {
+                                    g.lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();
+                                    if (g.lstMasaninSiparisleri.size() == 0) {
+                                        BildirimBilgileriIslemler bildirimBilgileriIslemler = new BildirimBilgileriIslemler(collection, g);
+                                        if(bildirimBilgileriIslemler.bildirimBilgileri())
+                                        {
+                                            final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(NotificationScreen.this, g.lstMasaninSiparisleri, g);
+                                            ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
+                                            g.adapter = expandableAdapter;
+                                            expandableListviewNotification.setAdapter(g.adapter);
+                                        }
+
+                                    }
+                                }
+                            }
+                        });
+
+                        break;
+
+
                     case siparis:
                         runOnUiThread(new Runnable() {
                             @Override
@@ -131,20 +256,5 @@ public class NotificationScreen extends ActionBarActivity {
         };
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-//    public Handler myHandler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            switch (msg.what) {
-//                case 1:
-//
-//                    break;
-//            }
-//        }
-//    };
 
 }

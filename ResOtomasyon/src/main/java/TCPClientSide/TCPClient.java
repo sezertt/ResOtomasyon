@@ -3,6 +3,9 @@ package TCPClientSide;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+
+import com.res_otomasyon.resotomasyon.GlobalApplication;
+
 import org.apache.http.util.EncodingUtils;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,13 +36,15 @@ public class TCPClient {
     public InetAddress serverAddr;
     boolean serverStatus = false;
     Handler myHandler;
+    GlobalApplication g;
 
     /**
      * Constructor of the class. OnMessagedReceived listens for the messages received from server
      */
-    public TCPClient(OnMessageReceived listener, Handler myHandler) {
+    public TCPClient(OnMessageReceived listener, Handler myHandler,GlobalApplication g) {
         mMessageListener = listener;
         this.myHandler = myHandler;
+        this.g = g;
     }
 
     //Bağlantının kopup kopmadığını anlamak için server a ping at.
@@ -88,7 +93,7 @@ public class TCPClient {
     }
 
     void callPingToServer() {
-        timer.schedule(new pingToServer(), 3000, 10000);
+        timer.schedule(new pingToServer(), 1750, 10000);
     }
 
     //Eğer bağlantı kopmuş ise ping atmayı durdur.
@@ -201,8 +206,10 @@ public class TCPClient {
                 socket.setKeepAlive(true);
                 //send the message to the server
                 out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                if (socket.isConnected())
+                if (socket.isConnected()) {
                     myHandler.sendEmptyMessage(2);
+                    g.baglantiVarMi = true;
+                }
                 Log.e("client.out", "Oluştu");
                 Log.e("TCP Client", "C: Sent.");
 
@@ -250,6 +257,7 @@ public class TCPClient {
             } catch (Exception e) {
                 Log.e("TCP", "S: Error", e);
                 //Bağlantı kopar veya bir hata oluşur ise ping atmayı durdur.
+                g.baglantiVarMi = false;
                 callStopPing();
                 mRun = false;
 
@@ -258,6 +266,7 @@ public class TCPClient {
                 // after it is closed, which means a new socket instance has to be created.
                 socket.close();
                 //Bağlantı kopar veya bir hata oluşur ise ping atmayı durdur.
+                g.baglantiVarMi = false;
                 callStopPing();
                 mRun = false;
             }
@@ -265,6 +274,7 @@ public class TCPClient {
         } catch (Exception e) {
             Log.e("TCP", "C: Error", e);
             //Bağlantı kopar veya bir hata oluşur ise ping atmayı durdur.
+            g.baglantiVarMi = false;
             callStopPing();
             mRun = false;
         }

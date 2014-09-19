@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.res_otomasyon.resotomasyon.GlobalApplication;
+
 public class CommonAsyncTask extends AsyncTask<Handler, String, String> {
 
     OnAsyncRequestComplete caller;
@@ -15,12 +17,14 @@ public class CommonAsyncTask extends AsyncTask<Handler, String, String> {
     public TCPClient client;
     LocalBroadcastManager localBroadcastManager;
     android.os.Handler myHandler;
+    GlobalApplication g;
 
-    public CommonAsyncTask(Activity a, android.os.Handler myHandler) {
+    public CommonAsyncTask(Activity a, android.os.Handler myHandler,GlobalApplication g) {
         caller = (OnAsyncRequestComplete) a;
         context = a;
         localBroadcastManager = LocalBroadcastManager.getInstance(context);
         this.myHandler = myHandler;
+        this.g = g;
     }
 
     public interface OnAsyncRequestComplete {
@@ -37,7 +41,7 @@ public class CommonAsyncTask extends AsyncTask<Handler, String, String> {
                 intent.putExtra("message", message);
                 localBroadcastManager.sendBroadcastSync(intent);
             }
-        }, myHandler);
+        }, myHandler,g);
         client.run();
 
         try {
