@@ -71,6 +71,15 @@
             android:label="@string/title_activity_notifications"
             android:screenOrientation="portrait" >
         </activity>
+        <activity
+            android:name=".SurveyScreen"
+            android:allowBackup="true"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/title_activity_survey_screen"
+            android:theme="@style/SurveyTheme"
+            android:screenOrientation="portrait"
+            >
+        </activity>
     </application>
 
 </manifest>
