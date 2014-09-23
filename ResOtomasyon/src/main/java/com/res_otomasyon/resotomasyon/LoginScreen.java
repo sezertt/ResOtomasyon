@@ -85,7 +85,8 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             intent.putExtra("Employee", employee);
             startActivity(intent);
         } else {
-            menu.setGroupVisible(0,true);
+            if(menu != null)
+                menu.setGroupVisible(0,true);
             LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
             this.setVisible(true);
             ((EditText) findViewById(R.id.editTextPin)).setText("");
@@ -106,6 +107,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         btnGiris.setEnabled(true);
+        g.globalDepartmanlar.clear();
 
 //        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
 //        checkNetwork.onReceive(context,intent);

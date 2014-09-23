@@ -50,8 +50,8 @@ public class GlobalApplication extends Application {
         BulunanYazicilar, giris, IndirimOnay, OdemeOnay, LoadSiparis, OdenenleriGonder, departman,masaAcildi, masaKapandi, AdisyonNotu,
         IslemHatasi, dosyalar, guncellemeyiBaslat, aktarimTamamlandi, baglanti, modemBilgileri, bildirim, bildirimBilgileri, toplumesaj,
         GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, GarsonGoruldu, HesapGoruldu, TemizlikGoruldu, hesapGeliyor,
-        hesapIslemde, departmanMasaSecimiIcin, urunuTasiTablet, departmanMasaTasimaIcin, OdemeBilgileriGuncelleTablet,
-        OdemeIndirimOnayTablet, siparisListesineGeriEkle
+        hesapIslemde, departmanMasaSecimiIcin, urunuTasiTablet, departmanMasaTasimaIcin, OdemeBilgileriGuncelleTablet, masaDegistirTablet,
+        OdemeIndirimOnayTablet, siparisListesineGeriEkle, masaIslemde, masaGeliyor, anketIstegi
 
     }
 

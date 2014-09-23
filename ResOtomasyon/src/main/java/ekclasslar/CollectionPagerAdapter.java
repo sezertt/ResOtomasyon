@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
+import Entity.Menu;
 
 public class CollectionPagerAdapter extends FragmentPagerAdapter {
     public ArrayList<Departman> lstDepartmanlar;
@@ -21,7 +22,7 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
     public String kilitliMasaAdi;
     public String kilitliDepartmanAdi;
 
-    public static FragmentMasaEkrani newInstance(ArrayList<String> masalar, String DepartmanAdi, Employee employee, String kilitliMasaAdi, String kilitliDepartmanAdi) {
+    public static FragmentMasaEkrani newInstance(ArrayList<String> masalar, String DepartmanAdi, Employee employee, String kilitliMasaAdi, String kilitliDepartmanAdi, String departmanMenusu) {
         FragmentMasaEkrani myFragment = new FragmentMasaEkrani();
         Bundle args = new Bundle();
         args.putStringArrayList("masalar", masalar);
@@ -29,6 +30,7 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
         args.putString("kilitliDepartmanAdi", kilitliDepartmanAdi);
         args.putString("kilitliMasaAdi", kilitliMasaAdi);
         args.putSerializable("Employee", employee);
+        args.putSerializable("departmanMenusu", departmanMenusu);
         myFragment.setArguments(args);
         return myFragment;
     }
@@ -55,7 +57,7 @@ public class CollectionPagerAdapter extends FragmentPagerAdapter {
                     }
                 }
                 fragment = newInstance(masaIsimleri, lstDepartmanlar.get(i).DepartmanAdi, employee, this.kilitliMasaAdi,
-                        this.kilitliDepartmanAdi);
+                        this.kilitliDepartmanAdi,lstDepartmanlar.get(i).DepartmanMenuAdi);
             }
         }
         fragments[i] = fragment;

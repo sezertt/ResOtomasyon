@@ -40,7 +40,7 @@ import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import ekclasslar.BildirimBilgileriIslemler;
 import ekclasslar.GarsonIslemler;
-import ekclasslar.HesapIslemer;
+import ekclasslar.HesapIslemler;
 import ekclasslar.MasaTemizleIslemler;
 import ekclasslar.SiparisIslemler;
 import ekclasslar.CollectionPagerAdapter;
@@ -86,7 +86,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     TryConnection t;
     Menu menu;
     Dictionary<String, String> collection;
-    int siparisCounter = 0;
+    int siparisCounter = 0, yapilmasiGerekenIslem;
 
     AlertDialog masaTasimaIcinMasaSecimiAlertDialog,alertDialog2;
     TasimaIcinMasaSecimiExpandableListAdapter tasimaIcinMasaExpandableListAdapter;
@@ -166,31 +166,30 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             break;
                         case iptal:
                             mesajGeldi = false;
-                            int masaCounter = 0;
-                            for (final MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
-                                if (msp.MasaAdi.contentEquals(collection.get("masa")) && msp.DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
-                                    for (int i = 0; i < msp.siparisler.size(); i++) {
-                                        if (msp.siparisler.get(i).siparisYemekAdi.contentEquals(collection.get("yemekAdi"))) {
-                                            int siparisAdedi = msp.siparisler.get(i).siparisAdedi;
+                            for (int j=0; j < g.lstMasaninSiparisleri.size();j++) {
+                                if (g.lstMasaninSiparisleri.get(j).MasaAdi.contentEquals(collection.get("masa")) && g.lstMasaninSiparisleri.get(j).DepartmanAdi.contentEquals(collection.get("departmanAdi"))) {
+                                    for (int i = 0; i < g.lstMasaninSiparisleri.get(j).siparisler.size(); i++) {
+                                        if (g.lstMasaninSiparisleri.get(j).siparisler.get(i).siparisYemekAdi.contentEquals(collection.get("yemekAdi"))) {
+                                            int siparisAdedi = g.lstMasaninSiparisleri.get(j).siparisler.get(i).siparisAdedi;
                                             int iptalAdedi = Integer.parseInt(collection.get("miktar"));
                                             if (siparisAdedi > iptalAdedi)
-                                                msp.siparisler.get(i).siparisAdedi = siparisAdedi - iptalAdedi;
+                                                g.lstMasaninSiparisleri.get(j).siparisler.get(i).siparisAdedi = siparisAdedi - iptalAdedi;
                                             else {
-                                                msp.siparisler.remove(i);
-                                                if (msp.siparisler.size() == 0)
-                                                    g.lstMasaninSiparisleri.remove(masaCounter);
+                                                g.lstMasaninSiparisleri.get(j).siparisler.remove(i);
+                                                if (g.lstMasaninSiparisleri.get(j).siparisler.size() == 0)
+                                                    g.lstMasaninSiparisleri.remove(j);
                                             }
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    g.adapter.notifyDataSetChanged();
+                                                    if(g.adapter != null)
+                                                        g.adapter.notifyDataSetChanged();
                                                 }
                                             });
                                             break;
                                         }
                                     }
                                 }
-                                masaCounter++;
                             }
                             break;
                         case masaKapandi:
@@ -203,14 +202,14 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    int masaSiparisCounter = 0;
-                                    for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
-                                        if (msp.DepartmanAdi.contentEquals(kapananMasaDepartman) && msp.MasaAdi.contentEquals(kapananMasa)) {
-                                            g.lstMasaninSiparisleri.remove(masaSiparisCounter);
-                                            g.adapter.notifyDataSetChanged();
+                                    for (int i= 0; i < g.lstMasaninSiparisleri.size(); i++) {
+                                        if (g.lstMasaninSiparisleri.get(i).DepartmanAdi.contentEquals(kapananMasaDepartman) && g.lstMasaninSiparisleri.get(i).MasaAdi.contentEquals(kapananMasa)) {
+                                            if(g.lstMasaninSiparisleri != null)
+                                                g.lstMasaninSiparisleri.remove(i);
+                                            if(g.adapter != null)
+                                                g.adapter.notifyDataSetChanged();
                                             break;
                                         }
-                                        masaSiparisCounter++;
                                     }
                                 }
                             });
@@ -334,8 +333,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    GarsonIslemler garsonIslemler = new GarsonIslemler(collection, g);
-                                    if (garsonIslemler.Istendi()) {
+                                    GarsonIslemler garsonIstendi = new GarsonIslemler(collection, g);
+                                    if (garsonIstendi.Istendi()) {
                                         if (!menu.findItem(R.id.action_notification).isVisible())
                                             menu.findItem(R.id.action_notification).setVisible(true);
                                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -345,8 +344,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             });
                             break;
                         case TemizlikIstendi:
-                            MasaTemizleIslemler masaTemizle = new MasaTemizleIslemler(collection, g);
-                            if (masaTemizle.Islem()) {
+                            MasaTemizleIslemler masaTemizleIstendi = new MasaTemizleIslemler(collection, g);
+                            if (masaTemizleIstendi.Islem()) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -357,8 +356,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             }
                             break;
                         case HesapIstendi:
-                            HesapIslemer hesapIste = new HesapIslemer(collection, g);
-                            hesapIste.Istendi();
+                            HesapIslemler hesapIstendi = new HesapIslemler(collection, g);
+                            hesapIstendi.Istendi();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -368,33 +367,31 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             });
                             break;
                         case bildirimGoruldu:
-                            int masaSiparisCounter = 0;
-                            boolean hepsiSilindi = false;
-                            for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
-                                if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
-                                    int siparisSize = msp.siparisler.size();
-                                    for (int i = 0; i < siparisSize; i++) {
-                                        Siparis siparis = msp.siparisler.get(i);
+
+                            for (int j=0;j < g.lstMasaninSiparisleri.size(); j++) {
+                                if (g.lstMasaninSiparisleri.get(j).DepartmanAdi.contentEquals(collection.get("departmanAdi")) && g.lstMasaninSiparisleri.get(j).MasaAdi.contentEquals(collection.get("masa"))) {
+
+                                    for (int i = 0; i < g.lstMasaninSiparisleri.get(j).siparisler.size(); i++)
+                                    {
+                                        Siparis siparis = g.lstMasaninSiparisleri.get(j).siparisler.get(i);
                                         if (siparis.siparisYemekAdi.contentEquals(collection.get("yemekAdi")) && siparis.siparisAdedi == Integer.parseInt(collection.get("adedi")) && siparis.siparisPorsiyonu == Double.parseDouble(collection.get("porsiyonu"))) {
-                                            msp.siparisler.remove(i);
-                                            if (msp.siparisler.size() == 0)
-                                                g.lstMasaninSiparisleri.remove(masaSiparisCounter);
+                                            g.lstMasaninSiparisleri.get(j).siparisler.remove(i);
+                                            if (g.lstMasaninSiparisleri.get(j).siparisler.size() == 0)
+                                                g.lstMasaninSiparisleri.remove(j);
                                             break;
                                         } else if (collection.get("yemekAdi").contentEquals("hepsi")) {
-                                            g.lstMasaninSiparisleri.remove(masaSiparisCounter);
-                                            hepsiSilindi = true;
+                                            g.lstMasaninSiparisleri.remove(j);
                                             break;
                                         }
                                     }
-                                }
-                                if (hepsiSilindi)
                                     break;
-                                masaSiparisCounter++;
+                                }
                             }
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    g.adapter.notifyDataSetChanged();
+                                    if(g.adapter != null)
+                                        g.adapter.notifyDataSetChanged();
                                 }
                             });
 
@@ -405,28 +402,30 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    g.adapter.notifyDataSetChanged();
+                                    if(g.adapter != null)
+                                        g.adapter.notifyDataSetChanged();
                                 }
                             });
                             break;
                         case TemizlikGoruldu:
-                            MasaTemizleIslemler masaTemizle1 = new MasaTemizleIslemler(collection, g);
-                            masaTemizle1.Goruldu();
-                            masaTemizle1.Goruldu();
+                            MasaTemizleIslemler masaTemizle = new MasaTemizleIslemler(collection, g);
+                            masaTemizle.Goruldu();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    g.adapter.notifyDataSetChanged();
+                                    if(g.adapter != null)
+                                        g.adapter.notifyDataSetChanged();
                                 }
                             });
                             break;
                         case HesapGoruldu:
-                            HesapIslemer hesapIslemer = new HesapIslemer(collection,g);
-                            hesapIslemer.Goruldu();
+                            HesapIslemler hesapIslemler = new HesapIslemler(collection,g);
+                            hesapIslemler.Goruldu();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    g.adapter.notifyDataSetChanged();
+                                    if(g.adapter != null)
+                                        g.adapter.notifyDataSetChanged();
                                 }
                             });
                             break;
@@ -484,8 +483,25 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                                 runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
+                                                        if(g.globalDepartmanlar.get(groupPosition).globalDepartmanAdi.contentEquals(departmanAdi) && g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAcikMi) // departman değişmedi ve masaların ikisi de açık
+                                                        {
+                                                            yapilmasiGerekenIslem = 0;
+                                                        }
+                                                        else if (g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAcikMi) // masalar açık departman değişti
+                                                        {
+                                                            yapilmasiGerekenIslem = 1;
+                                                        }
+                                                        else if (g.globalDepartmanlar.get(groupPosition).globalDepartmanAdi.contentEquals(departmanAdi)) // departman değişmedi 1 masa açık
+                                                        {
+                                                            yapilmasiGerekenIslem = 2;
+                                                        }
+                                                        else // departmanda değişti 1 masa açık
+                                                        {
+                                                            yapilmasiGerekenIslem = 3;
+                                                        }
+
                                                         AlertDialog.Builder aBuilder = new AlertDialog.Builder(MasaEkrani.this);
-                                                        aBuilder.setTitle("Ürün Taşıma")
+                                                        aBuilder.setTitle("Masa Değiştirme")
                                                                 .setMessage(departmanAdi+" departmanı "+masaAdi+" masası, "+g.globalDepartmanlar.get(groupPosition).globalDepartmanAdi+" departmanı "+g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAdi+ " masası ile yer değiştirilecektir. Onaylıyor musunuz?")
                                                                 .setCancelable(false)
                                                                 .setPositiveButton("Evet", new DialogInterface.OnClickListener() {
@@ -495,7 +511,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                                                             masaTasimaIcinMasaSecimiAlertDialog.dismiss();
                                                                             return;
                                                                         }
-                                                                        //g.commonAsyncTask.client.sendMessage("komut=masayiTasiTablet&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&yeniMasa=" + g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAdi + "&yeniDepartmanAdi=" + g.globalDepartmanlar.get(groupPosition).globalDepartmanAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName);
+                                                                        g.commonAsyncTask.client.sendMessage("komut=masaDegistirTablet&yeniMasa=" + g.globalDepartmanlar.get(groupPosition).globalMasalar.get(childPosition).globalMasaAdi + "&yeniDepartmanAdi=" + g.globalDepartmanlar.get(groupPosition).globalDepartmanAdi + "&eskiMasa=" + masaAdi + "&eskiDepartmanAdi=" + departmanAdi + "&yapilmasiGereken=" + yapilmasiGerekenIslem);
                                                                         masaTasimaIcinMasaSecimiAlertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
                                                                     }
                                                                 })
@@ -510,7 +526,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                         });
 
                                         masaTasimaIcinMasaSecimiAlertDialog = new AlertDialog.Builder(MasaEkrani.this)
-                                                .setTitle("Ürünlerin Taşınacağı Masayı Seçiniz ("+ departmanAdi + " - " + masaAdi + ")")
+                                                .setTitle("Seçilen masanın değiştirilmesi istediğini masayı seçiniz ("+ departmanAdi + " - " + masaAdi + ")")
                                                 .setView(expandableListViewTasimaIcinMasaSec)
                                                 .setCancelable(false)
                                                 .setNegativeButton("Vazgeç", null)
@@ -524,6 +540,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                                 negativeButton.setOnClickListener(new View.OnClickListener() {
                                                     @Override
                                                     public void onClick(View view) {
+
                                                         masaTasimaIcinMasaSecimiAlertDialog.dismiss();
                                                     }
                                                 });
@@ -533,6 +550,21 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                     }
                                 });
                             }
+                            break;
+                        case masaDegistirTablet:
+                            int yapilmasiGerekenIslem = Integer.parseInt(collection.get("yapilmasiGerekenIslem"));
+                            if( yapilmasiGerekenIslem == 2 || yapilmasiGerekenIslem == 3)
+                            {
+                                g.commonAsyncTask.client.sendMessage("komut=masaKapandi&masa=" + collection.get("masa") + "&departmanAdi=" + collection.get("departmanAdi"));
+                                g.commonAsyncTask.client.sendMessage("komut=masaAcildi&masa=" + collection.get("yeniMasa") + "&departmanAdi=" + collection.get("yeniDepartmanAdi"));
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (masaTasimaIcinMasaSecimiAlertDialog != null)
+                                        masaTasimaIcinMasaSecimiAlertDialog.dismiss();
+                                }
+                                });
                             break;
                         default:
                             break;
@@ -554,7 +586,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         ReadXML readXML = new ReadXML();
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
-
         for (Departman aLstDepartmanlar : lstDepartmanlar) {
             GlobalDepartman departman = new GlobalDepartman();
             departman.globalDepartmanAdi = aLstDepartmanlar.DepartmanAdi;
@@ -689,20 +720,18 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
     }
 
     public String notificationMessage() {
-        int counter = 0;
         String komut, masalar = "";
         komut = "komut=bildirim&masalar=";
         if (g.secilenMasalar.size() > 0) {
-            for (Departman dpt : lstDepartmanlar) {
+            for (int i=0; i < lstDepartmanlar.size();i++) {
                 if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
-                    if (g.secilenMasalar.get(counter).Masalar.size() > 0) {
-                        masalar += "*" + dpt.DepartmanAdi;
-                        for (String dptMasalar : g.secilenMasalar.get(counter).Masalar) {
+                    if (g.secilenMasalar.get(i).Masalar.size() > 0) {
+                        masalar += "*" + lstDepartmanlar.get(i).DepartmanAdi;
+                        for (String dptMasalar : g.secilenMasalar.get(i).Masalar) {
                             masalar += "-" + dptMasalar;
                         }
                     }
                 }
-                counter++;
             }
             komut += masalar.substring(1, masalar.length());
         } else {

@@ -13,10 +13,6 @@
     android:paddingBottom="2dp"
     >
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"/>
-
     <CheckedTextView
         android:id="@+id/textViewProductGroupHeader"
         android:layout_width="fill_parent"

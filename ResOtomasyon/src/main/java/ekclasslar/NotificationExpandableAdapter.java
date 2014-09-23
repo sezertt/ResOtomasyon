@@ -28,34 +28,33 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
 
     public GlobalApplication g;
     public Activity activity;
-    private ArrayList<MasaninSiparisleri> groups;
     public LayoutInflater inflater;
 
-    public NotificationExpandableAdapter(Activity act, ArrayList<MasaninSiparisleri> groups, GlobalApplication g) {
+    public NotificationExpandableAdapter(Activity act, GlobalApplication g) {
         this.g = g;
-        this.groups = groups;
+
         this.activity = act;
         this.inflater = act.getLayoutInflater();
     }
 
     @Override
     public int getGroupCount() {
-        return groups.size();
+        return g.lstMasaninSiparisleri.size();
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return groups.get(groupPosition).siparisler.size();
+        return g.lstMasaninSiparisleri.get(groupPosition).siparisler.size();
     }
 
     @Override
     public Object getGroup(int groupPosition) {
-        return groups.get(groupPosition);
+        return g.lstMasaninSiparisleri.get(groupPosition);
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return groups.get(groupPosition).siparisler.get(childPosition);
+        return g.lstMasaninSiparisleri.get(groupPosition).siparisler.get(childPosition);
     }
 
     @Override
@@ -96,11 +95,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
                         .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + groups.get(groupPosition).MasaAdi + "&departmanAdi=" + groups.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi&adedi=hepsi&porsiyonu=hepsi");
-//                                groups.remove(groupPosition);
-//                                notifyDataSetChanged();
-                                if (groups.get(groupPosition).siparisler.size() == 0)
-                                    groups.remove(groupPosition);
+                                g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + g.lstMasaninSiparisleri.get(groupPosition).MasaAdi + "&departmanAdi=" + g.lstMasaninSiparisleri.get(groupPosition).DepartmanAdi + "&yemekAdi=hepsi&adedi=hepsi&porsiyonu=hepsi");
                             }
                         }).setNegativeButton("İptal", new DialogInterface.OnClickListener() {
                     @Override
@@ -119,7 +114,7 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         convertView = inflater.inflate(R.layout.notification_gorunumu_layout, parent, false);
-        Siparis siparis = groups.get(groupPosition).siparisler.get(childPosition);
+        Siparis siparis = g.lstMasaninSiparisleri.get(groupPosition).siparisler.get(childPosition);
 //        final Siparis siparis = (Siparis) getChild(groupPosition, childPosition);
         TextView textYemekAdi;
         TextView textAdet;
@@ -132,8 +127,8 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
         btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MasaninSiparisleri masaninSiparisleri = groups.get(groupPosition);
-                Siparis siparis1 = groups.get(groupPosition).siparisler.get(childPosition);
+                MasaninSiparisleri masaninSiparisleri = g.lstMasaninSiparisleri.get(groupPosition);
+                Siparis siparis1 = g.lstMasaninSiparisleri.get(groupPosition).siparisler.get(childPosition);
                 if (siparis1.siparisYemekAdi.contentEquals("Garson İsteği")) {
                     g.commonAsyncTask.client.sendMessage("komut=GarsonGoruldu&masa=" + masaninSiparisleri.MasaAdi + "&departmanAdi=" + masaninSiparisleri.DepartmanAdi + "");
                 } else if (siparis1.siparisYemekAdi.contentEquals("Masa Temizleme İsteği")) {
@@ -143,10 +138,6 @@ public class NotificationExpandableAdapter extends BaseExpandableListAdapter {
                 } else {
                     g.commonAsyncTask.client.sendMessage("komut=bildirimGoruldu&masa=" + masaninSiparisleri.MasaAdi + "&departmanAdi=" + masaninSiparisleri.DepartmanAdi + "&yemekAdi=" + siparis1.siparisYemekAdi + "&adedi=" + siparis1.siparisAdedi + "&porsiyonu=" + siparis1.siparisPorsiyonu);
                 }
-//                groups.get(groupPosition).siparisler.remove(childPosition);
-                if (groups.get(groupPosition).siparisler.size() == 0)
-                    groups.remove(groupPosition);
-//                notifyDataSetChanged();
             }
         });
         textYemekAdi.setText(siparis.siparisYemekAdi);

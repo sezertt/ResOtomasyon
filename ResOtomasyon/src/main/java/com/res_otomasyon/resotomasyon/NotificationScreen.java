@@ -62,20 +62,18 @@ public class NotificationScreen extends ActionBarActivity {
     };
 
     public String notificationMessage() {
-        int counter = 0;
         String komut, masalar = "";
         komut = "komut=bildirim&masalar=";
         if (g.secilenMasalar.size() > 0) {
-            for (Departman dpt : lstDepartmanlar) {
+            for (int i=0; i < lstDepartmanlar.size(); i++) {
                 if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
-                    if (g.secilenMasalar.get(counter).Masalar.size() > 0) {
-                        masalar += "*" + dpt.DepartmanAdi;
-                        for (String dptMasalar : g.secilenMasalar.get(counter).Masalar) {
+                    if (g.secilenMasalar.get(i).Masalar.size() > 0) {
+                        masalar += "*" + lstDepartmanlar.get(i).DepartmanAdi;
+                        for (String dptMasalar : g.secilenMasalar.get(i).Masalar) {
                             masalar += "-" + dptMasalar;
                         }
                     }
                 }
-                counter++;
             }
             komut += masalar.substring(1, masalar.length());
         } else {
@@ -93,7 +91,7 @@ public class NotificationScreen extends ActionBarActivity {
         setContentView(R.layout.activity_notifications);
         g = (GlobalApplication) getApplicationContext();
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));
-        final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(this, g.lstMasaninSiparisleri, g);
+        final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(this, g);
         ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
         g.adapter = expandableAdapter;
         expandableListviewNotification.setAdapter(g.adapter);
@@ -202,7 +200,7 @@ public class NotificationScreen extends ActionBarActivity {
                                         BildirimBilgileriIslemler bildirimBilgileriIslemler = new BildirimBilgileriIslemler(collection, g);
                                         if(bildirimBilgileriIslemler.bildirimBilgileri())
                                         {
-                                            final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(NotificationScreen.this, g.lstMasaninSiparisleri, g);
+                                            final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(NotificationScreen.this, g);
                                             ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
                                             g.adapter = expandableAdapter;
                                             expandableListviewNotification.setAdapter(g.adapter);

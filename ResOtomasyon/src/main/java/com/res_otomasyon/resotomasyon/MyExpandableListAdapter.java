@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -104,45 +106,43 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
         final TextView textAdet = (TextView) convertView.findViewById(R.id.textViewAdet);
         textAdet.setText(productCount);
 
+        convertView.findViewById(R.id.buttonPlus).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, 2d);
+                return false;
+            }
+        });
+
         convertView.findViewById(R.id.buttonPlus).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(productPortion == 0)
-                    porsiyonEkle(groupPosition,childPosition,textAdet,textName,textFiyat,productPortion,1d);
-                else
-                {
-                    int [] selectedSiparisItemPosition = {-1,-1,-1,-1,-1}; // 0-1.5 porsiyon --- 1-1 porsiyon --- 2-0.75 porsiyon --- 3-0.5 porsiyon --- 4-0.25 porsiyon
-                    for(int i=0;i<g.siparisListesi.size();i++)
-                    {
-                        if(g.siparisListesi.get(i).siparisYemekAdi.contentEquals(textName.getText()))
-                        {
+                if (productPortion == 0)
+                    porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, 1d);
+                else {
+                    int[] selectedSiparisItemPosition = {-1, -1, -1, -1, -1}; // 0-1.5 porsiyon --- 1-1 porsiyon --- 2-0.75 porsiyon --- 3-0.5 porsiyon --- 4-0.25 porsiyon
+                    for (int i = 0; i < g.siparisListesi.size(); i++) {
+                        if (g.siparisListesi.get(i).siparisYemekAdi.contentEquals(textName.getText())) {
                             if (g.siparisListesi.get(i).siparisPorsiyonu == 1.5d) {
                                 selectedSiparisItemPosition[0] = i;
-                            }
-                            else if (g.siparisListesi.get(i).siparisPorsiyonu == 1) {
+                            } else if (g.siparisListesi.get(i).siparisPorsiyonu == 1) {
                                 selectedSiparisItemPosition[1] = i;
-                            }
-                            else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.75d) {
+                            } else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.75d) {
                                 selectedSiparisItemPosition[2] = i;
-                            }
-                            else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.5d) {
+                            } else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.5d) {
                                 selectedSiparisItemPosition[3] = i;
-                            }
-                            else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.25d) {
+                            } else if (g.siparisListesi.get(i).siparisPorsiyonu == 0.25d) {
                                 selectedSiparisItemPosition[4] = i;
                             }
                         }
                     }
 
-                    for(int i = 0; i < selectedSiparisItemPosition.length; i++)
-                    {
+                    for (int i = 0; i < selectedSiparisItemPosition.length; i++) {
                         if (groups.get(groupPosition).productPortionClass.get(childPosition) == 1d && (i == 2 || i == 4)) // ürün yarım porsiyonluk ise 0.25 ve 0.75 eklenmemeli
                             continue; // eğer ürünün çeyrek porsiyon özelliği yoksa, sipariş porsiyonuna 0.75 ve 0.25 eklenmesin
 
-                        if(selectedSiparisItemPosition[i] != -1)
-                        {
-                            switch (i)
-                            {
+                        if (selectedSiparisItemPosition[i] != -1) {
+                            switch (i) {
                                 case 0:
                                     porsiyonlarPozitif.add("1.5 Porsiyon x" + g.siparisListesi.get(selectedSiparisItemPosition[i]).siparisAdedi);
                                     break;
@@ -161,11 +161,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                                 default:
                                     break;
                             }
-                        }
-                        else
-                        {
-                            switch (i)
-                            {
+                        } else {
+                            switch (i) {
                                 case 0:
                                     porsiyonlarPozitif.add("1.5 Porsiyon ");
                                     break;
@@ -187,7 +184,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                         }
                     }
 
-                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,porsiyonlarPozitif);
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, porsiyonlarPozitif);
 
                     final AlertDialog alert = new AlertDialog.Builder(activity)
                             .setTitle("Porsiyon Seçiniz")
@@ -217,16 +214,16 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
                                     porsiyonEkle(groupPosition, childPosition, textAdet, textName, textFiyat, productPortion, porsiyon);
 
-                                    String [] urunBilgileri = porsiyonlarPozitif.get(item).split("x");
+                                    String[] urunBilgileri = porsiyonlarPozitif.get(item).split("x");
 
                                     int adet = 0;
 
-                                    if(urunBilgileri.length > 1)
+                                    if (urunBilgileri.length > 1)
                                         adet = Integer.parseInt(urunBilgileri[1]);
 
                                     adet++;
 
-                                    porsiyonlarPozitif.set(item, urunBilgileri[0] +"x" + adet);
+                                    porsiyonlarPozitif.set(item, urunBilgileri[0] + "x" + adet);
                                     adapter.notifyDataSetChanged();
                                 }
                             })
@@ -234,6 +231,14 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
 
                     alert.show();
                 }
+            }
+        });
+
+        convertView.findViewById(R.id.buttonMinus).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                porsiyonCikar(groupPosition, childPosition, textAdet, textName, 2d);
+                return false;
             }
         });
 
@@ -245,7 +250,8 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                 else if(Double.parseDouble(textAdet.getText().toString())>0)
                 {
                     int [] selectedSiparisItemPosition = {-1,-1,-1,-1,-1}; // 0-1.5 porsiyon --- 1-1 porsiyon --- 2-0.75 porsiyon --- 3-0.5 porsiyon --- 4-0.25 porsiyon
-                    for(int i=0;i<g.siparisListesi.size();i++)
+
+                    for(int i=0; i < g.siparisListesi.size(); i++)
                     {
                         if(g.siparisListesi.get(i).siparisYemekAdi.contentEquals(textName.getText()))
                         {
@@ -297,7 +303,7 @@ public class MyExpandableListAdapter extends BaseExpandableListAdapter {
                         }
                     }
 
-                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,porsiyonlarNegatif);
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, porsiyonlarNegatif);
 
                     final AlertDialog alert = new AlertDialog.Builder(activity)
                             .setTitle("Porsiyon Seçiniz")

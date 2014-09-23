@@ -8,16 +8,15 @@ import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 
 /**
- * Created by Mustafa on 8.9.2014.
+ * Created by Mustafa on 9.9.2014.
  */
-public class GarsonIslemler {
-
+public class HesapIslemler {
     Dictionary<String, String> collection;
     Siparis siparis;
     MasaninSiparisleri masaninSiparisleri;
     GlobalApplication g;
 
-    public GarsonIslemler(Dictionary<String, String> collection, GlobalApplication g) {
+    public HesapIslemler(Dictionary<String, String> collection, GlobalApplication g) {
         this.collection = collection;
         siparis = new Siparis();
         this.g = g;
@@ -29,7 +28,7 @@ public class GarsonIslemler {
         siparis = new Siparis();
         masaninSiparisleri.DepartmanAdi = collection.get("departmanAdi");
         masaninSiparisleri.MasaAdi = collection.get("masa");
-        siparis.siparisYemekAdi = "Garson İsteği";
+        siparis.siparisYemekAdi = "Hesap İsteği";
         if (g.secilenMasalar.size() > 0) {
             for (DepartmanMasalari dptMasa : g.secilenMasalar) {
                 for (String masa : dptMasa.Masalar) {
@@ -39,7 +38,7 @@ public class GarsonIslemler {
                             for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
                                 if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
                                     for (Siparis siparis1 : msp.siparisler) {
-                                        if (siparis1.siparisYemekAdi.contentEquals("Garson İsteği")) {
+                                        if (siparis1.siparisYemekAdi.contentEquals("Hesap İsteği")) {
                                             return false;
                                         }
                                     }
@@ -66,7 +65,7 @@ public class GarsonIslemler {
                 for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
                     if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
                         for (Siparis siparis1 : msp.siparisler) {
-                            if (siparis1.siparisYemekAdi.contentEquals("Garson İsteği")) {
+                            if (siparis1.siparisYemekAdi.contentEquals("Hesap İsteği")) {
                                 return false;
                             }
                         }
@@ -91,12 +90,12 @@ public class GarsonIslemler {
     public boolean Goruldu()
     {
         boolean silindi = false;
-        for (int j=0 ; j < g.lstMasaninSiparisleri.size() ; j++) {
+        for (int j=0; j < g.lstMasaninSiparisleri.size();j++) {
             if (g.lstMasaninSiparisleri.get(j).DepartmanAdi.contentEquals(collection.get("departmanAdi")) && g.lstMasaninSiparisleri.get(j).MasaAdi.contentEquals(collection.get("masa"))) {
                 int siparisSize = g.lstMasaninSiparisleri.get(j).siparisler.size();
                 for (int i = 0; i < siparisSize; i++) {
                     Siparis siparis = g.lstMasaninSiparisleri.get(j).siparisler.get(i);
-                    if (siparis.siparisYemekAdi.contentEquals("Garson İsteği")) {
+                    if (siparis.siparisYemekAdi.contentEquals("Hesap İsteği")) {
                         g.lstMasaninSiparisleri.get(j).siparisler.remove(i);
                         if(g.lstMasaninSiparisleri.get(j).siparisler.size() == 0)
                             g.lstMasaninSiparisleri.remove(j);
@@ -108,4 +107,5 @@ public class GarsonIslemler {
         }
         return silindi;
     }
+
 }

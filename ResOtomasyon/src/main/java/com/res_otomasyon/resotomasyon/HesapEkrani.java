@@ -1362,6 +1362,8 @@ public class HesapEkrani extends ActionBarActivity {
                                     if(progressDialog != null)
                                         if(progressDialog.isShowing())
                                             progressDialog.dismiss();
+                                    if(alertDialog2 != null)
+                                        alertDialog2.dismiss();
                                     timerRunning = false;
                                     g.siparisListesi.clear();
                                     onBackPressed();
@@ -1475,7 +1477,7 @@ public class HesapEkrani extends ActionBarActivity {
                                     });
 
                                     urunTasimaIcinMasaSecimiAlertDialog = new AlertDialog.Builder(HesapEkrani.this)
-                                            .setTitle("Ürünlerin Taşınacağı Masayı Seçiniz("+ departmanAdi + " - " + masaAdi + ")")
+                                            .setTitle("Ürünlerin taşınacağı masayı seçiniz("+ departmanAdi + " - " + masaAdi + ")")
                                             .setView(expandableListViewTasimaIcinMasaSec)
                                             .setCancelable(false)
                                             .setNegativeButton("Vazgeç", null)
@@ -1736,6 +1738,29 @@ public class HesapEkrani extends ActionBarActivity {
                                 adapterSecilenSiparisler.notifyDataSetChanged();
                             }
                         });
+                        break;
+                    case masaDegistir:
+                        if((collection.get("masa").contentEquals(masaAdi) && collection.get("departmanAdi").contentEquals(departmanAdi)) || (collection.get("yeniMasa").contentEquals(masaAdi) && collection.get("yeniDepartmanAdi").contentEquals(departmanAdi)))
+                        {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aBuilder = new AlertDialog.Builder(HesapEkrani.this);
+                                    aBuilder.setTitle("Masa Değişimi")
+                                            .setMessage("Masa değişimi gerçekleştirildi, lütfen hesabınıza tekrar giriniz")
+                                            .setCancelable(false)
+                                            .setPositiveButton("Tamam", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    HesapEkrani.this.finish();
+                                                }
+                                            })
+                                            .create();
+                                    alertDialog2 = aBuilder.create();
+                                    alertDialog2.show();
+                                }
+                            });
+                        }
                         break;
                     default:
                         break;

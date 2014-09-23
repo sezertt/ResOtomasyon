@@ -65,16 +65,14 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
 
             for (int i=0; i < g.secilenMasalar.size(); i++)
             {
-                for (String masa :g.secilenMasalar.get(i).Masalar)
+                for (int j = 0; j < g.secilenMasalar.get(i).Masalar.size(); j++)
                 {
-                    int masaCounter = 0;
-                    for (String masa1 : dptMasalar.get(i).Masalar)
+                    for (int k =0; k < dptMasalar.get(i).Masalar.size();k++)
                     {
-                        if(masa.contentEquals(masa1))
+                        if(g.secilenMasalar.get(i).Masalar.get(j).contentEquals(dptMasalar.get(i).Masalar.get(k)))
                         {
-                            dptMasalar.get(i).mDurumu.set(masaCounter,true);
+                            dptMasalar.get(i).mDurumu.set(k,true);
                         }
-                        masaCounter++;
                     }
                 }
             }
@@ -130,16 +128,13 @@ public class MasaSecEkrani extends Activity implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.masaKaydet:
                 ArrayList<DepartmanMasalari> secilenMasalar = new ArrayList<DepartmanMasalari>();
-                int masaSayac;
                 for (DepartmanMasalari dpt : dptMasalar) {
                     DepartmanMasalari departmanMasalari = new DepartmanMasalari();
-                    masaSayac = 0;
-                    for (String masa : dpt.Masalar) {
-                        if (dpt.mDurumu.get(masaSayac)) {
-                            departmanMasalari.Masalar.add(masa);
+                    for (int j=0 ; j < dpt.Masalar.size();j++) {
+                        if (dpt.mDurumu.get(j)) {
+                            departmanMasalari.Masalar.add(dpt.Masalar.get(j));
                             departmanMasalari.mDurumu.add(true);
                         }
-                        masaSayac++;
                     }
                     if(departmanMasalari.Masalar.size() >0) {
                         departmanMasalari.DepartmanAdi = dpt.DepartmanAdi;

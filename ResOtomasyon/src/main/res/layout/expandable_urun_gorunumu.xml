@@ -9,6 +9,7 @@
     android:paddingLeft="10dp"
     android:paddingStart="10dp"
     android:paddingBottom="2dp"
+    android:id="@+id/expandable_urun_relative_layout"
     tools:context=".MainActivity" >
 
     <TextView
@@ -45,14 +46,12 @@
         android:layout_alignEnd="@+id/textViewChildHeader">
     </TextView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="165dp"/>
-
     <ImageView
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:layout_marginTop="20dp"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         android:src="@drawable/ic_launcher"
         android:id="@+id/imageView"/>
 

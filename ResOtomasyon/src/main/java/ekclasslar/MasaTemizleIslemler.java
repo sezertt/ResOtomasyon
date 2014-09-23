@@ -89,23 +89,21 @@ public class MasaTemizleIslemler {
     }
     public boolean Goruldu()
     {
-        int masaSiparisCounter = 0;
         boolean silindi = false;
-        for (MasaninSiparisleri msp : g.lstMasaninSiparisleri) {
-            if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
-                int siparisSize = msp.siparisler.size();
+        for (int j=0 ; j < g.lstMasaninSiparisleri.size() ; j++) {
+            if (g.lstMasaninSiparisleri.get(j).DepartmanAdi.contentEquals(collection.get("departmanAdi")) && g.lstMasaninSiparisleri.get(j).MasaAdi.contentEquals(collection.get("masa"))) {
+                int siparisSize = g.lstMasaninSiparisleri.get(j).siparisler.size();
                 for (int i = 0; i < siparisSize; i++) {
-                    Siparis siparis = msp.siparisler.get(i);
+                    Siparis siparis = g.lstMasaninSiparisleri.get(j).siparisler.get(i);
                     if (siparis.siparisYemekAdi.contentEquals("Masa Temizleme İsteği")) {
-                        msp.siparisler.remove(i);
-                        if(msp.siparisler.size() == 0)
-                            g.lstMasaninSiparisleri.remove(masaSiparisCounter);
+                        g.lstMasaninSiparisleri.get(j).siparisler.remove(i);
+                        if(g.lstMasaninSiparisleri.get(j).siparisler.size() == 0)
+                            g.lstMasaninSiparisleri.remove(j);
                         silindi = true;
                         break;
                     }
                 }
             }
-            masaSiparisCounter++;
         }
         return silindi;
     }

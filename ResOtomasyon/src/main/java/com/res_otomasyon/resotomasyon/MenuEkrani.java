@@ -48,7 +48,7 @@ public class MenuEkrani extends ActionBarActivity {
 
     Menu menu;
 
-    String departmanAdi, masaAdi, siparisler;
+    String departmanAdi, masaAdi, siparisler, departmanMenusu;
     private String m_Text = "";
     Employee employee;
 
@@ -261,9 +261,8 @@ public class MenuEkrani extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_menu_ekrani);
-
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         try {
             g = (GlobalApplication) getApplicationContext();
@@ -318,27 +317,40 @@ public class MenuEkrani extends ActionBarActivity {
                             startActivity(hesapEkrani);
                             break;
                         case masaKapandi:
-                            g.siparisListesi.clear();
-                            masaAcikMi = false;
-                            if(masaKilitliMi)
-                            {
-                                groups.clear();
-                                createData();
-                                adapter.notifyDataSetChanged();
-                                //resim ve buton visible yapılacak
-                                buttonMasaAc.setVisibility(View.VISIBLE);
-                                imageMasaAc.setVisibility(View.VISIBLE);
-                            }
-                            else
-                            {
-                                onBackPressed();
+                            if(collection.get("masa").contentEquals(masaAdi) && collection.get("departmanAdi").contentEquals(departmanAdi)) {
+                                g.siparisListesi.clear();
+                                masaAcikMi = false;
+                                if (masaKilitliMi) {
+                                    groups.clear();
+                                    createData();
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            adapter.notifyDataSetChanged();
+                                            //resim ve buton visible yapılacak
+                                            buttonMasaAc.setVisibility(View.VISIBLE);
+                                            imageMasaAc.setVisibility(View.VISIBLE);
+                                        }
+                                    });
+                                } else {
+                                    onBackPressed();
+                                }
                             }
                             break;
                         case masaAcildi:
-                            //resim ve button invisible yapılacak
-                            buttonMasaAc.setVisibility(View.INVISIBLE);
-                            imageMasaAc.setVisibility(View.INVISIBLE);
-                            masaAcikMi = true;
+                            if(collection.get("masa").contentEquals(masaAdi) && collection.get("departmanAdi").contentEquals(departmanAdi))
+                            {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //resim ve button invisible yapılacak
+                                        buttonMasaAc.setVisibility(View.INVISIBLE);
+                                        imageMasaAc.setVisibility(View.INVISIBLE);
+                                    }
+                                });
+                                masaAcikMi = true;
+                            }
                         default:
                             break;
                     }
@@ -356,6 +368,7 @@ public class MenuEkrani extends ActionBarActivity {
         masaAdi = extras.getString("MasaAdi");
         employee = (Employee) extras.getSerializable("Employee");
         masaAcikMi = extras.getBoolean("MasaAcikMi");
+        departmanMenusu = extras.getString("departmanMenusu");
 
         FileIO fileIO = new FileIO();
         List<File> files = null;
@@ -439,48 +452,58 @@ public class MenuEkrani extends ActionBarActivity {
         df.setMinimumFractionDigits(0);
         df.setGroupingUsed(false);
 
-        for (int i = 0; i < urunListesi.size(); i++) {
-            UrunBilgileri group = new UrunBilgileri(urunListesi.get(i).urunKategorisi);
-            if (i + 1 < urunListesi.size()) {
-                while (urunListesi.get(i).urunKategorisi.contentEquals(urunListesi.get(i + 1).urunKategorisi)) // bir sonraki ürünün kategorisi, eklenen ürünün kategorisi ile aynı olduğu sürece devam et
-                {
-                    group.productName.add(urunListesi.get(i).urunAdi);
-                    group.productPrice.add(urunListesi.get(i).urunFiyati);
-                    group.productInfo.add(urunListesi.get(i).urunAciklamasi);
-                    group.productPortionClass.add(urunListesi.get(i).urunPorsiyonSinifi);
+        FileIO fileIO = new FileIO();
+        List<File> files = null;
 
-                    String miktar = "0";
-                    for (int k = 0; k < g.siparisListesi.size(); k++) {
-                        if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi)) {
-                            miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);
+        try {
+            files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        ReadXML readMenuler = new ReadXML();
+        ArrayList<Entity.Menu> menuler = readMenuler.readMenuler(files);
+
+        for (Entity.Menu aMenuler : menuler) {
+            if (aMenuler.MenuAdi.contentEquals(departmanMenusu)) {
+                for (int k = 0; k < aMenuler.MenununKategorileri.size(); k++) {
+
+                    UrunBilgileri group = new UrunBilgileri(aMenuler.MenununKategorileri.get(k));
+
+                    int ilkUrununIndexi = -1;
+
+                    for (int l = 0; l < urunListesi.size(); l++) {
+                        if (urunListesi.get(l).urunKategorisi.contentEquals(aMenuler.MenununKategorileri.get(k))) {
+                            ilkUrununIndexi = l;
+                            break;
                         }
                     }
 
-                    group.productCount.add(miktar);
+                    if (ilkUrununIndexi != -1) {
+                        while (urunListesi.get(ilkUrununIndexi).urunKategorisi.contentEquals(aMenuler.MenununKategorileri.get(k))) {
+                            group.productName.add(urunListesi.get(ilkUrununIndexi).urunAdi);
+                            group.productPrice.add(urunListesi.get(ilkUrununIndexi).urunFiyati);
+                            group.productInfo.add(urunListesi.get(ilkUrununIndexi).urunAciklamasi);
+                            group.productPortionClass.add(urunListesi.get(ilkUrununIndexi).urunPorsiyonSinifi);
 
-                    i++;
-                    if (i + 1 >= urunListesi.size())
-                        break;
-                }
-            }
-            // bir sonraki ürünün kategorisi, eklenen ürünün kategorisinden farklı ise kategori değişiyor demektir. o zaman bu ürün kategorisinin son ürünüdür. ekliyoruz.
-            if (i + 1 < urunListesi.size()) {
-                group.productName.add(urunListesi.get(i).urunAdi);
-                group.productPrice.add(urunListesi.get(i).urunFiyati);
-                group.productInfo.add(urunListesi.get(i).urunAciklamasi);
-                group.productPortionClass.add(urunListesi.get(i).urunPorsiyonSinifi);
+                            String miktar = "0";
+                            for (int m = 0; m < g.siparisListesi.size(); m++) {
+                                if (g.siparisListesi.get(m).siparisYemekAdi.contentEquals(urunListesi.get(ilkUrununIndexi).urunAdi)) {
+                                    miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(m).siparisAdedi * g.siparisListesi.get(m).siparisPorsiyonu);
+                                }
+                            }
 
-                String miktar = "0";
-                for (int k = 0; k < g.siparisListesi.size(); k++) {
-                    if (g.siparisListesi.get(k).siparisYemekAdi.contentEquals(urunListesi.get(i).urunAdi)) {
-                        miktar = df.format(Double.parseDouble(miktar) + g.siparisListesi.get(k).siparisAdedi * g.siparisListesi.get(k).siparisPorsiyonu);
+                            group.productCount.add(miktar);
+                            ilkUrununIndexi++;
+                        }
+                    } else {
+                        continue;
                     }
+                    groups.append(j, group);
+                    j++;
                 }
-
-                group.productCount.add(miktar);
+                break;
             }
-            groups.append(j, group);
-            j++;
         }
     }
 
@@ -594,7 +617,8 @@ public class MenuEkrani extends ActionBarActivity {
                 break;
 
             case R.id.action_gorusOneri:
-
+                Intent intent = new Intent(MenuEkrani.this,SurveyScreen.class);
+                startActivity(intent);
                 break;
 
             case R.id.action_garsonIstiyorum:

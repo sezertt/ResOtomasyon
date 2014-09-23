@@ -2,7 +2,7 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="85dp">
 
     <TextView
         android:id="@+id/textViewChildInfo"
@@ -16,11 +16,6 @@
         android:textSize="18sp"
         android:layout_marginRight="70dp">
     </TextView>
-
-    <View
-        android:id="@+id/viewContainer"
-        android:layout_width="fill_parent"
-        android:layout_height="85dp"/>
 
     <Button
         android:layout_width="50dp"

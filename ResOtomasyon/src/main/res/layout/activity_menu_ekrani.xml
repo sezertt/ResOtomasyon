@@ -50,6 +50,8 @@
         android:id="@+id/imageView"
         android:src="@drawable/ic_launcher"
         android:visibility="invisible"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         android:background="#ff0800ff"
         android:clickable="true"
         android:layout_above="@+id/buttonSepet" />

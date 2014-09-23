@@ -28,7 +28,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
     public ArrayList<String> masalar;
     public Employee employee;
 
-    public String departmanAdi;
+    public String departmanAdi, departmanMenusu;
     public String acilanMasa;
     public String kapananMasa;
     public String acilanMasaDepartman;
@@ -135,6 +135,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                     preferences = getActivity().getSharedPreferences("KilitliMasa",
                             Context.MODE_PRIVATE);
                     departmanAdi = getArguments().getString("departmanAdi");
+                    departmanMenusu = getArguments().getString("departmanMenusu");
                     employee = (Employee) getArguments().getSerializable("Employee");
                     masaKilitliMi = preferences.getBoolean("MasaKilitli", false);
                     if (preferences.getString("departmanAdi", "asdfsdgfgdf").contentEquals(departmanAdi)) {
@@ -153,6 +154,8 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                             intent.putExtra("MasaAdi", preferences.getString("masaAdi", ""));
                             intent.putExtra("Employee", employee);
                             intent.putExtra("MasaAcikMi", masaAcikMi);
+                            intent.putExtra("departmanMenusu", departmanMenusu);
+
                             startActivity(intent);
                             g.isMenuEkraniRunning = true;
                         }
@@ -220,6 +223,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
             intent.putExtra("MasaAdi", v.getTag().toString());
             intent.putExtra("Employee", employee);
             intent.putExtra("MasaAcikMi", masaAcikMi);
+            intent.putExtra("departmanMenusu", departmanMenusu);
 
             startActivity(intent);
             g.isMenuEkraniRunning = true;
@@ -248,6 +252,8 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
         this.masalar = getArguments().getStringArrayList("masalar");
         this.departmanAdi = getArguments().getString("departmanAdi");
         this.employee = (Employee) getArguments().getSerializable("Employee");
+        this.departmanMenusu = getArguments().getString("departmanMenusu");
+
         linearLayout = new LinearLayout(getActivity());
         scrollView = new ScrollView(getActivity());
         tableView = new TableLayout(getActivity());
@@ -313,6 +319,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                                                 intent.putExtra("MasaAdi", v.getTag().toString());
                                                 intent.putExtra("Employee", employee);
                                                 intent.putExtra("MasaAcikMi", masaAcikMi);
+                                                intent.putExtra("departmanMenusu", departmanMenusu);
 
                                                 startActivity(intent);
                                                 g.isMenuEkraniRunning = true;
@@ -382,6 +389,7 @@ public class FragmentMasaEkrani extends Fragment implements View.OnClickListener
                                                 intent.putExtra("MasaAdi", v.getTag().toString());
                                                 intent.putExtra("Employee", employee);
                                                 intent.putExtra("MasaAcikMi", masaAcikMi);
+                                                intent.putExtra("departmanMenusu", departmanMenusu);
 
                                                 startActivity(intent);
                                                 g.isMenuEkraniRunning = true;

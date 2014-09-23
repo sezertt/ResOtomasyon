@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import Entity.Departman;
 import Entity.Employee;
 import Entity.MasaDizayn;
+import Entity.Menu;
 import Entity.UrunlerinListesi;
 
 public class ReadXML {
@@ -114,28 +115,37 @@ public class ReadXML {
         return lstUrunler;
     }
 
-    /*
-    public ArrayList<String> readKategoriler(List<File> files) {
+    public ArrayList<Menu> readMenuler(List<File> files) {
         try {
             dBuilder = dbFactory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
-        ArrayList<String> lstKategoriler = new ArrayList<String>();
+        ArrayList<Menu> lstMenuler = new ArrayList<Menu>();
         try {
             for (File file : files) {
                 String fileName = file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("/")
                         + 1);
-                if (fileName.contentEquals("kategoriler.xml")) {
+                if (fileName.contentEquals("menu.xml")) {
                     doc = dBuilder.parse(file);
                     doc.getDocumentElement().normalize();
-                    NodeList nListKategoriler = doc.getElementsByTagName("TumKategoriler");
-                    Element elementArrayOfString = (Element) nListKategoriler.item(0);
-                    NodeList nListString = elementArrayOfString.getElementsByTagName("string");
+                    NodeList nListMenuler = doc.getElementsByTagName("Menuler");
+                    for (int i = 0; i < nListMenuler.getLength(); i++) {
+                        Node nNode = nListMenuler.item(i);
+                        if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                            Menu menu = new Menu();
+                            Element elementMenuler = (Element) nNode;
+                            NodeList nListMenununKategorileri = ((Element) elementMenuler.getElementsByTagName("menukategorileri").item(0)).getElementsByTagName("string");
 
-                    for (int i = 0; i < nListString.getLength(); i++) {
-                        String x = nListString.item(i).getTextContent();
-                        lstKategoriler.add(x);
+                            menu.MenununKategorileri = new ArrayList<String>();
+
+                            for (int k = 0; k < nListMenununKategorileri.getLength(); k++) {
+                                menu.MenununKategorileri.add(nListMenununKategorileri.item(k).getTextContent());
+                            }
+                            menu.MenuAdi = elementMenuler.getElementsByTagName("menuAdi").item(0).getTextContent();
+
+                            lstMenuler.add(menu);
+                        }
                     }
                 }
             }
@@ -144,9 +154,9 @@ public class ReadXML {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return lstKategoriler;
+        return lstMenuler;
     }
-    */
+
 
     public ArrayList<MasaDizayn> readMasaDizayn(List<File> files) {
         try {
