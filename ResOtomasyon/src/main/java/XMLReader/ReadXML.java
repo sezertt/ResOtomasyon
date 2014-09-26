@@ -87,7 +87,7 @@ public class ReadXML {
                             Element elementNodeUrunler = (Element) nNode;
 
                             NodeList nListUrunAdi = ((Element) elementNodeUrunler.getElementsByTagName("urunAdi").item(0)).getElementsByTagName("string");
-                            NodeList nListPorsiyonFiyati = ((Element) elementNodeUrunler.getElementsByTagName("urunFiyati").item(0)).getElementsByTagName("string");
+                            NodeList nListPorsiyonFiyati = ((Element) elementNodeUrunler.getElementsByTagName("urunPorsiyonFiyati").item(0)).getElementsByTagName("string");
                             NodeList nListUrunAciklamasi = ((Element) elementNodeUrunler.getElementsByTagName("urunAciklamasi").item(0)).getElementsByTagName("string");
                             NodeList nListUrunKDV = ((Element) elementNodeUrunler.getElementsByTagName("urunKDV").item(0)).getElementsByTagName("int");
                             NodeList nListUrunPorsiyonu = ((Element) elementNodeUrunler.getElementsByTagName("urunPorsiyonSinifi").item(0)).getElementsByTagName("int");
