@@ -91,8 +91,13 @@ public class ReadXML {
                             NodeList nListUrunAciklamasi = ((Element) elementNodeUrunler.getElementsByTagName("urunAciklamasi").item(0)).getElementsByTagName("string");
                             NodeList nListUrunKDV = ((Element) elementNodeUrunler.getElementsByTagName("urunKDV").item(0)).getElementsByTagName("int");
                             NodeList nListUrunPorsiyonu = ((Element) elementNodeUrunler.getElementsByTagName("urunPorsiyonSinifi").item(0)).getElementsByTagName("int");
+                            NodeList nListUrunTuru = ((Element) elementNodeUrunler.getElementsByTagName("urunTuru").item(0)).getElementsByTagName("string");
 
                             for (int k = 0; k < nListUrunAdi.getLength(); k++) {
+                                // sadece kilogramla satılan ürünler tablette görünmemeli, kilogram ve porsiyon olan ürünler sadece porsiyon olarak satılacaktır ve görünecektir
+                                if(nListUrunTuru.item(k).getTextContent().contentEquals("Kilogram"))
+                                    continue;
+
                                 UrunlerinListesi u = new UrunlerinListesi();
 
                                 u.urunAdi = nListUrunAdi.item(k).getTextContent();

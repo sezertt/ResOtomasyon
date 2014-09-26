@@ -34,6 +34,8 @@ import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -47,6 +49,7 @@ import java.util.TimerTask;
 import Entity.Employee;
 import Entity.Siparis;
 import Entity.UrunTasimaListesi;
+import HashPassword.passwordHash;
 import ekclasslar.SetViewGroupEnabled;
 
 public class HesapEkrani extends ActionBarActivity {
@@ -193,7 +196,6 @@ public class HesapEkrani extends ActionBarActivity {
         invalidateOptionsMenu();
 
         Bundle extras = getIntent().getExtras();
-        departmanAdi = extras.getString("DepartmanAdi");
         departmanAdi = extras.getString("DepartmanAdi");
         masaAdi = extras.getString("MasaAdi");
         employee = (Employee) extras.getSerializable("Employee");
@@ -652,6 +654,24 @@ public class HesapEkrani extends ActionBarActivity {
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        boolean hesapIzinleri = false;
+        try {
+            hesapIzinleri = passwordHash.validatePassword("true", employee.Permissions[4]);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+        if(!hesapIzinleri) {
+            AlertDialog.Builder aBuilder1 = new AlertDialog.Builder(this);
+            aBuilder1.setTitle("Yetki Hatası!");
+            aBuilder1.setMessage("İptal/İkram yetkiniz bulunmamaktadır.")
+                    .setCancelable(true)
+                    .setPositiveButton("Tamam",null);
+            AlertDialog alertDialog = aBuilder1.create();
+            alertDialog.show();
+            return;
+        }
         super.onCreateContextMenu(menu, v, menuInfo);
         if(!masaKilitliMi)
         {
@@ -818,18 +838,18 @@ public class HesapEkrani extends ActionBarActivity {
 
                                     String fiyat;
 
-                                    String ikramMi;
+                                    String ikramMiString;
                                     if (urunListesiToplam.get(info.position).siparisFiyati.contentEquals("ikram"))
                                     {
-                                        ikramMi = "0";//ikramsa 0 veya 1
+                                        ikramMiString = "0";//ikramsa 0 veya 1
                                         fiyat = String.format("%.2f", urunListesiToplam.get(info.position).siparisPorsiyonSinifi);
                                     }
                                     else {
-                                        ikramMi = "2";
+                                        ikramMiString = "2";
                                         fiyat = urunListesiToplam.get(info.position).siparisFiyati;
                                     }
 
-                                    g.commonAsyncTask.client.sendMessage("komut=iptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + fiyat + "&adisyonNotu=&ikramYeniMiEskiMi=" + ikramMi + "&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu) + "&iptalNedeni=" + iptalNedeni.getText());
+                                    g.commonAsyncTask.client.sendMessage("komut=iptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + fiyat + "&adisyonNotu=&ikramYeniMiEskiMi=" + ikramMiString + "&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu) + "&iptalNedeni=" + iptalNedeni.getText());
                                     positiveButton.setEnabled(false);
                                     negativeButton.setEnabled(false);
                                 }
@@ -1126,7 +1146,7 @@ public class HesapEkrani extends ActionBarActivity {
                         {
                             String yemekAdi = collection.get("yemekAdi");
                             Double fiyat = Double.parseDouble(collection.get("dusulecekDeger").replace(',','.'));
-                            int ikramMi = Integer.parseInt(collection.get("ikramYeniMiEskiMi"));
+                            int ikramYeniMiEskiMi = Integer.parseInt(collection.get("ikramYeniMiEskiMi"));
                             Double porsiyon = Double.parseDouble(collection.get("porsiyon").replace(',','.'));
                             int miktar = Integer.parseInt(collection.get("miktar").replace(',', '.'));
 
@@ -1134,7 +1154,7 @@ public class HesapEkrani extends ActionBarActivity {
                             {
                                 if(urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon)
                                 {
-                                    if (ikramMi == 2) // iptali istenilen ürün ikram değilse kalan hesaptan da düşülmeli
+                                    if (ikramYeniMiEskiMi == 2) // iptali istenilen ürün ikram değilse kalan hesaptan da düşülmeli
                                     {
                                         if(urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram"))
                                             continue;
