@@ -97,7 +97,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
             if (t == null)
                 t = new TryConnection(g, myHandler);
 
-            if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
+            if (!g.baglantiVarMi && !t.timerRunning) {
                 t.startTimer();
             }
         }

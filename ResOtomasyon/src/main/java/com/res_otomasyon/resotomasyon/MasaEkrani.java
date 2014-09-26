@@ -709,7 +709,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
             g = (GlobalApplication) getApplicationContext();
         if (t == null)
             t = new TryConnection(g, myHandler);
-        if (!g.commonAsyncTask.client.mRun && !t.timerRunning) {
+        if (!g.baglantiVarMi && !t.timerRunning) {
             t.startTimer();
         }
         activityVisible = true;

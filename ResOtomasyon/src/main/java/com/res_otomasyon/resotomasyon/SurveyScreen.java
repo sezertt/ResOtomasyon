@@ -14,6 +14,7 @@ import android.view.WindowManager;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import ekclasslar.ScrollViewFullScreenAdjustment;
 import ekclasslar.Survey;
 
 
@@ -27,7 +28,9 @@ public class SurveyScreen extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_survey_screen);
+        ScrollViewFullScreenAdjustment.assistActivity(this);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         g = (GlobalApplication) getApplicationContext();
         survey = new Survey(this, g);
         LocalBroadcastManager.getInstance(context).registerReceiver(rec, new IntentFilter("myevent"));

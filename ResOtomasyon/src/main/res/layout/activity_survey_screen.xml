@@ -1,10 +1,9 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/linearLayout"
-    tools:context="com.res_otomasyon.resotomasyon.SurveyScreen"
-    android:layout_alignParentBottom="true">
+    android:id="@+id/relativeLayout"
+    tools:context="com.res_otomasyon.resotomasyon.SurveyScreen">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,13 +12,24 @@
         android:fillViewport="true"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:isScrollContainer="true">
 
         <TableLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/tableLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Görüşleriniz bizim için önemli, teşekkür ederiz..."
+                android:id="@+id/textView"
+                android:textSize="25dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp" />
         </TableLayout>
     </ScrollView>
 
-</RelativeLayout>
+</LinearLayout>

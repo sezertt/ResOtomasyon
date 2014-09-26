@@ -294,6 +294,7 @@ public class MenuEkrani extends ActionBarActivity {
                                         if (!t.timerRunning)
                                             t.startTimer();
                                         MenuEkrani.this.getSupportActionBar().setTitle(departmanAdi + " - " + masaAdi + "(Bağlantı yok)");
+                                        if(menu !=null)
                                         SetMenuItemsVisible(false);
                                         buttonSepet.setEnabled(false);
                                     }
@@ -495,6 +496,8 @@ public class MenuEkrani extends ActionBarActivity {
 
                             group.productCount.add(miktar);
                             ilkUrununIndexi++;
+                            if(ilkUrununIndexi >= urunListesi.size())
+                                break;
                         }
                     } else {
                         continue;
