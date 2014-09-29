@@ -8,5 +8,6 @@ public class UrunTasimaListesi implements Serializable {
     public String tasinacakUrunYemekAdi;
     public double tasinacakUrunPorsiyonu;
     public int tasinacakUrunSecilenAdet;
-    public double siparisPorsiyonSinifi;
+    public double tasinacakUrunPorsiyonSinifi;
+    public boolean tasinacakUrunKiloSatisiMi;
 }

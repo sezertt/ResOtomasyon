@@ -62,10 +62,22 @@ public class MyListAdapter extends BaseAdapter {
         TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewFiyat);
         TextView textPorsiyon = (TextView) convertView.findViewById(R.id.textViewPorsiyon);
 
+        TextView textViewKG = (TextView) convertView.findViewById(R.id.textViewKG);
+
+
         String miktar = "";
 
         if(siparisListesi.get(position).siparisAdedi != 0)
             miktar = "x" + String.valueOf(siparisListesi.get(position).siparisAdedi);
+
+        if(siparisListesi.get(position).siparisKiloSatisiMi)
+        {
+            textViewKG.setText("(KG)");
+        }
+        else
+        {
+            textViewKG.setText("");
+        }
 
         Double doubleFiyat;
         try

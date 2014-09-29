@@ -100,6 +100,7 @@ public class MenuEkrani extends ActionBarActivity {
                                     {
                                         menu.findItem(R.id.templeRun).setVisible(false);
                                     }
+                                    menu.findItem(R.id.action_gorusOneri).setVisible(true);
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }
@@ -112,6 +113,7 @@ public class MenuEkrani extends ActionBarActivity {
                                     item.setTitle(R.string.masa_kilitle);
                                     editor.putBoolean("MasaKilitli", masaKilitliMi);
                                     menu.findItem(R.id.templeRun).setVisible(false);
+                                    menu.findItem(R.id.action_gorusOneri).setVisible(false);
                                     editor.apply();
                                     kilitKaldirAlert.dismiss();
                                 }
@@ -525,6 +527,7 @@ public class MenuEkrani extends ActionBarActivity {
 //        masaKilitliMi = context.getSharedPreferences("KilitliMasa", Context.MODE_PRIVATE).getBoolean
 //                ("MasaKilitli", masaKilitliMi);
         if (masaKilitliMi) {
+            menu.findItem(R.id.action_gorusOneri).setVisible(true);
             this.item = menu.findItem(R.id.action_lockTable);
             item.setTitle(R.string.masa_ac);
             if(g.canPlayGame)
@@ -536,8 +539,10 @@ public class MenuEkrani extends ActionBarActivity {
                 menu.findItem(R.id.templeRun).setVisible(false);
             }
         }
-        else
+        else {
             menu.findItem(R.id.templeRun).setVisible(false);
+            menu.findItem(R.id.action_gorusOneri).setVisible(false);
+        }
         return true;
     }
 

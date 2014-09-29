@@ -339,14 +339,14 @@ public class Survey {
                     alertDialog.show();
                 }
                 else {
-                userInfo.append(name.getText() + "*" + surname.getText() + "*" + email.getText() + "*" + phone.getText());
+                userInfo.append(name.getText()).append("*").append(surname.getText()).append("*").append(email.getText()).append("*").append(phone.getText());
 
                 for (int i = 0; i < onlyQuestions.length; i++) {
                     if (Integer.parseInt(onlyPlaces[i]) < 16)
                         surveyAnswers.append(("*" + ((RatingBar) tableLayout.findViewWithTag(onlyPlaces[i])).getRating()).replace('.', ','));
                     else
-                        surveyAnswers.append("*" + ((EditText) tableLayout.findViewWithTag(onlyPlaces[i])).getText());
-                    surveyQuestions.append("*" + onlyQuestions[i]);
+                        surveyAnswers.append("*").append(((EditText) tableLayout.findViewWithTag(onlyPlaces[i])).getText().toString().replaceAll("\\-",""));
+                    surveyQuestions.append("*").append(onlyQuestions[i]);
                 }
 
                 if (surveyAnswers.length() >= 1) {
