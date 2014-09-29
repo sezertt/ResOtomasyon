@@ -31,6 +31,7 @@ public class GlobalApplication extends Application {
     public boolean isMenuEkraniRunning = false;
 
     public boolean canPlayGame;
+    public boolean notifyWaiter;
 
     public ArrayList<GlobalDepartman> globalDepartmanlar = new ArrayList<GlobalDepartman>();
 

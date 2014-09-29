@@ -215,6 +215,8 @@ public class NotificationScreen extends ActionBarActivity {
 
 
                     case siparis:
+                        if(collection.get("tur").contentEquals("K"))
+                            return;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -239,6 +241,13 @@ public class NotificationScreen extends ActionBarActivity {
                         });
                         break;
                     case HesapIstendi:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                g.adapter.notifyDataSetChanged();
+                            }
+                        });
+                    case urunuTasiTablet:
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
