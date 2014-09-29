@@ -8,4 +8,5 @@ public class Siparis implements Serializable {
     public String siparisYemekAdi;
     public double siparisPorsiyonu;
     public double siparisPorsiyonSinifi;
+    public boolean siparisKiloSatisiMi;
 }

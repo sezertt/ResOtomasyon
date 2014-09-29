@@ -60,6 +60,16 @@ public class UrunTasimaListAdapter extends BaseAdapter {
         TextView textFiyat = (TextView) convertView.findViewById(R.id.textViewFiyat);
         editTextTasinacakMiktar = (EditText) convertView.findViewById(R.id.editTextTasinacakMiktar);
         TextView textPorsiyon = (TextView) convertView.findViewById(R.id.textViewPorsiyon);
+        TextView textViewKG = (TextView) convertView.findViewById(R.id.textViewKG);
+
+        if(urunTasimaSiparisListesi.get(position).tasinacakUrunKiloSatisiMi)
+        {
+            textViewKG.setText("(KG)");
+        }
+        else
+        {
+            textViewKG.setText("");
+        }
 
         String miktar = "x" + String.valueOf(urunTasimaSiparisListesi.get(position).tasinacakUrunAdedi);
 

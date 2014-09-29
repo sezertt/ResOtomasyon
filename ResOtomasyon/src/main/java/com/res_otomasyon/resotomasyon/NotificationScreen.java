@@ -213,11 +213,12 @@ public class NotificationScreen extends ActionBarActivity {
 
                         break;
 
-
                     case siparis:
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if(collection.get("tur").contentEquals("K"))
+                                    return;
                                 g.adapter.notifyDataSetChanged();
                             }
                         });

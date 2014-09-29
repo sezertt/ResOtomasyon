@@ -33,6 +33,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -47,10 +48,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import Entity.Employee;
+import Entity.MasaninSiparisleri;
 import Entity.Siparis;
 import Entity.UrunTasimaListesi;
 import HashPassword.passwordHash;
 import ekclasslar.SetViewGroupEnabled;
+import ekclasslar.SiparisIslemler;
 
 public class HesapEkrani extends ActionBarActivity {
 
@@ -249,12 +252,14 @@ public class HesapEkrani extends ActionBarActivity {
                 yemeginAdi = hesaptakiSiparis[2];
                 ikramMi = Boolean.parseBoolean(hesaptakiSiparis[3]);
 
+                boolean kiloSatisiMi = Boolean.parseBoolean(hesaptakiSiparis[6]);
+
                 int gruptaYeniGelenSiparisVarMi = -1; // ürün hesapta bulunuyor mu ?
 
                 if (!ikramMi) // ikram değilse
                 {
                     for (int j = 0; j < urunListesi.size(); j++) {
-                        if (yemeginAdi.contentEquals(urunListesi.get(j).siparisYemekAdi) && porsiyon == urunListesi.get(j).siparisPorsiyonu) // listede yemek var
+                        if (yemeginAdi.contentEquals(urunListesi.get(j).siparisYemekAdi) && porsiyon == urunListesi.get(j).siparisPorsiyonu && urunListesi.get(j).siparisKiloSatisiMi == kiloSatisiMi) // listede yemek var
                         {
                             gruptaYeniGelenSiparisVarMi = j;
                             break;
@@ -271,6 +276,7 @@ public class HesapEkrani extends ActionBarActivity {
                         yeniSiparis.siparisYemekAdi = yemeginAdi;
                         yeniSiparis.siparisFiyati = String.format("%.2f", yemeginFiyati);
                         yeniSiparis.siparisPorsiyonu = porsiyon;
+                        yeniSiparis.siparisKiloSatisiMi = kiloSatisiMi;
                         urunListesi.add(yeniSiparis);
                     }
                     toplamHesap += yemeginFiyati * kacAdet;
@@ -278,7 +284,7 @@ public class HesapEkrani extends ActionBarActivity {
                 else // ikramsa
                 {
                     for (int j = 0; j < urunListesiIkram.size(); j++) {
-                        if (yemeginAdi.contentEquals(urunListesiIkram.get(j).siparisYemekAdi) && porsiyon == urunListesiIkram.get(j).siparisPorsiyonu) // listede yemek var
+                        if (yemeginAdi.contentEquals(urunListesiIkram.get(j).siparisYemekAdi) && porsiyon == urunListesiIkram.get(j).siparisPorsiyonu && urunListesiIkram.get(j).siparisKiloSatisiMi == kiloSatisiMi) // listede yemek var
                         {
                             gruptaYeniGelenSiparisVarMi = j;
                             break;
@@ -296,6 +302,8 @@ public class HesapEkrani extends ActionBarActivity {
                         yeniSiparis.siparisFiyati = "ikram";
                         yeniSiparis.siparisPorsiyonSinifi = yemeginFiyati;
                         yeniSiparis.siparisPorsiyonu = porsiyon;
+                        yeniSiparis.siparisKiloSatisiMi = kiloSatisiMi;
+
                         urunListesiIkram.add(yeniSiparis);
                     }
                 }
@@ -769,6 +777,10 @@ public class HesapEkrani extends ActionBarActivity {
 
                         int kacAdet = Integer.parseInt(kacAdetIptalveyaIkram.getText().toString());
 
+                        String tur = "P";
+                        if(urunListesiToplam.get(info.position).siparisKiloSatisiMi)
+                            tur = "K";
+
                         if (ikramMi) // ürün ikram edilecek
                         {
                             if (kacAdet > 0)
@@ -776,7 +788,7 @@ public class HesapEkrani extends ActionBarActivity {
                                 if(item.getTitle().toString().contentEquals("İkramı İptal Et"))
                                 {
                                     // ikramı iptal et
-                                    g.commonAsyncTask.client.sendMessage("komut=ikramIptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + String.format("%.2f", urunListesiToplam.get(info.position).siparisPorsiyonSinifi) + "&adisyonNotu=&ikramYeniMiEskiMi=1,0&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu));
+                                    g.commonAsyncTask.client.sendMessage("komut=ikramIptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + String.format("%.2f", urunListesiToplam.get(info.position).siparisPorsiyonSinifi) + "&adisyonNotu=&ikramYeniMiEskiMi=1,0&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu) + "&tur=" + tur);
 
                                     positiveButton.setEnabled(false);
                                     negativeButton.setEnabled(false);
@@ -796,7 +808,7 @@ public class HesapEkrani extends ActionBarActivity {
                                         return;
                                     }
 
-                                    g.commonAsyncTask.client.sendMessage("komut=ikram&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + urunListesiToplam.get(info.position).siparisFiyati + "&adisyonNotu=&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu));
+                                    g.commonAsyncTask.client.sendMessage("komut=ikram&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + urunListesiToplam.get(info.position).siparisFiyati + "&adisyonNotu=&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu) + "&tur=" + tur);
 
                                     positiveButton.setEnabled(false);
                                     negativeButton.setEnabled(false);
@@ -849,7 +861,7 @@ public class HesapEkrani extends ActionBarActivity {
                                         fiyat = urunListesiToplam.get(info.position).siparisFiyati;
                                     }
 
-                                    g.commonAsyncTask.client.sendMessage("komut=iptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + fiyat + "&adisyonNotu=&ikramYeniMiEskiMi=" + ikramMiString + "&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu) + "&iptalNedeni=" + iptalNedeni.getText());
+                                    g.commonAsyncTask.client.sendMessage("komut=iptal&masa=" + masaAdi + "&departmanAdi=" + departmanAdi + "&miktar=" + kacAdet + "&yemekAdi=" + urunListesiToplam.get(info.position).siparisYemekAdi + "&siparisiGirenKisi=" + employee.Name + " " + employee.LastName + "&dusulecekDeger=" + fiyat + "&adisyonNotu=&ikramYeniMiEskiMi=" + ikramMiString + "&porsiyon=" + new DecimalFormat("#.##").format(urunListesiToplam.get(info.position).siparisPorsiyonu) + "&iptalNedeni=" + iptalNedeni.getText() + "&tur=" + tur);
                                     positiveButton.setEnabled(false);
                                     negativeButton.setEnabled(false);
                                 }
@@ -934,8 +946,9 @@ public class HesapEkrani extends ActionBarActivity {
                         listeyeEkle.tasinacakUrunPorsiyonu = anUrunListesiToplam.siparisPorsiyonu;
                         listeyeEkle.tasinacakUrunYemekAdi = anUrunListesiToplam.siparisYemekAdi;
                         listeyeEkle.tasinacakUrunSecilenAdet = 0;
+                        listeyeEkle.tasinacakUrunKiloSatisiMi = anUrunListesiToplam.siparisKiloSatisiMi;
                         if(anUrunListesiToplam.siparisFiyati.contentEquals("ikram"))
-                            listeyeEkle.siparisPorsiyonSinifi = anUrunListesiToplam.siparisPorsiyonSinifi;
+                            listeyeEkle.tasinacakUrunPorsiyonSinifi = anUrunListesiToplam.siparisPorsiyonSinifi;
                         urunTasimaListesi.add(listeyeEkle);
                     }
                 }
@@ -993,10 +1006,14 @@ public class HesapEkrani extends ActionBarActivity {
                                     Double porsiyonu = anUrunTasimaListesi.tasinacakUrunPorsiyonu;
                                     String fiyati = anUrunTasimaListesi.tasinacakUrunFiyati;
 
+                                    String tur= "P";
+                                    if(anUrunTasimaListesi.tasinacakUrunKiloSatisiMi)
+                                        tur = "K";
+
                                     if (fiyati.contentEquals("ikram")) {
-                                        aktarmaBilgileri += "*" + yemekAdi + "-" + anUrunTasimaListesi.siparisPorsiyonSinifi + "-" + adet + "-1-" + porsiyonu;
+                                        aktarmaBilgileri += "*" + yemekAdi + "-" + anUrunTasimaListesi.tasinacakUrunPorsiyonSinifi + "-" + adet + "-1-" + porsiyonu + "-" + tur; // ikramlarda fiyatı porsiyonsınıfında tutuyoruz, o yüzden fiyat yerine porsiyonsınıfını gönderiyoruz
                                     } else {
-                                        aktarmaBilgileri += "*" + yemekAdi + "-" + fiyati + "-" + adet + "-0-" + porsiyonu;
+                                        aktarmaBilgileri += "*" + yemekAdi + "-" + fiyati + "-" + adet + "-0-" + porsiyonu + "-" + tur;
                                     }
 
                                     try {
@@ -1115,7 +1132,12 @@ public class HesapEkrani extends ActionBarActivity {
                             Double porsiyon = Double.parseDouble(collection.get("porsiyon").replace(',','.'));
                             int miktar = Integer.parseInt(collection.get("miktar").replace(',', '.'));
 
-                            int gruptaYeniGelenSiparisVarmi = siparisGruptaVarMi(yemekAdi, porsiyon); //ürün cinsi hesapta var mı bak
+                            String tur = collection.get("tur");
+                            boolean kiloSatisiMi = false;
+                            if(tur.contentEquals("K"))
+                                kiloSatisiMi = true;
+
+                            int gruptaYeniGelenSiparisVarmi = siparisGruptaVarMi(yemekAdi, porsiyon,kiloSatisiMi); //ürün cinsi hesapta var mı bak
 
                             if (gruptaYeniGelenSiparisVarmi == -1) //yoksa ürünü hesaba ekle
                             {
@@ -1124,6 +1146,8 @@ public class HesapEkrani extends ActionBarActivity {
                                 gelenSiparis.siparisYemekAdi = yemekAdi;
                                 gelenSiparis.siparisFiyati = String.format("%.2f", fiyat);
                                 gelenSiparis.siparisPorsiyonu = porsiyon;
+                                gelenSiparis.siparisKiloSatisiMi = kiloSatisiMi;
+
                                 urunListesiToplam.add(gelenSiparis);
                             }
                             else // varsa ürünün hesaptaki değerlerini istenilene göre arttır
@@ -1150,9 +1174,14 @@ public class HesapEkrani extends ActionBarActivity {
                             Double porsiyon = Double.parseDouble(collection.get("porsiyon").replace(',','.'));
                             int miktar = Integer.parseInt(collection.get("miktar").replace(',', '.'));
 
+                            String tur = collection.get("tur");
+                            boolean kiloSatisiMi = false;
+                            if(tur.contentEquals("K"))
+                                kiloSatisiMi = true;
+
                             for(int i=0;i<urunListesiToplam.size();i++)
                             {
-                                if(urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon)
+                                if(urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon && urunListesiToplam.get(i).siparisKiloSatisiMi == kiloSatisiMi)
                                 {
                                     if (ikramYeniMiEskiMi == 2) // iptali istenilen ürün ikram değilse kalan hesaptan da düşülmeli
                                     {
@@ -1201,9 +1230,14 @@ public class HesapEkrani extends ActionBarActivity {
                             Double porsiyon = Double.parseDouble(collection.get("porsiyon").replace(',','.'));
                             int miktar = Integer.parseInt(collection.get("miktar").replace(',', '.'));
 
+                            String tur = collection.get("tur");
+                            boolean kiloSatisiMi = false;
+                            if(tur.contentEquals("K"))
+                                kiloSatisiMi = true;
+
                             for (int i = 0; i < urunListesiToplam.size(); i++)
                             {
-                                if (yemekAdi.equals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyon == urunListesiToplam.get(i).siparisPorsiyonu && !urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram"))
+                                if (yemekAdi.equals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyon == urunListesiToplam.get(i).siparisPorsiyonu && !urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram") && urunListesiToplam.get(i).siparisKiloSatisiMi == kiloSatisiMi) // ikram edilecek ürün kontrolü
                                 {
                                     urunListesiToplam.get(i).siparisAdedi -= miktar;
 
@@ -1213,7 +1247,7 @@ public class HesapEkrani extends ActionBarActivity {
 
                                     for (Siparis anUrunListesiToplam : urunListesiToplam)
                                     {
-                                        if (yemekAdi.equals(anUrunListesiToplam.siparisYemekAdi) && porsiyon == anUrunListesiToplam.siparisPorsiyonu && anUrunListesiToplam.siparisFiyati.contentEquals("ikram")) {
+                                        if (yemekAdi.equals(anUrunListesiToplam.siparisYemekAdi) && porsiyon == anUrunListesiToplam.siparisPorsiyonu && anUrunListesiToplam.siparisFiyati.contentEquals("ikram") && anUrunListesiToplam.siparisKiloSatisiMi == kiloSatisiMi) {// ikram edilecek ürünün ekleneceği yerin kontrolü
                                             anUrunListesiToplam.siparisAdedi += miktar;
                                             ikramYok = false;
                                             break;
@@ -1228,6 +1262,7 @@ public class HesapEkrani extends ActionBarActivity {
                                         gelenSiparis.siparisFiyati = "ikram";
                                         gelenSiparis.siparisPorsiyonSinifi = fiyat;
                                         gelenSiparis.siparisPorsiyonu = porsiyon;
+                                        gelenSiparis.siparisKiloSatisiMi = kiloSatisiMi;
                                         urunListesiToplam.add(gelenSiparis);
                                     }
 
@@ -1257,18 +1292,23 @@ public class HesapEkrani extends ActionBarActivity {
                             Double porsiyon = Double.parseDouble(collection.get("porsiyon").replace(',','.'));
                             int miktar = Integer.parseInt(collection.get("miktar").replace(',', '.'));
 
+                            String tur = collection.get("tur");
+                            boolean kiloSatisiMi = false;
+                            if(tur.contentEquals("K"))
+                                kiloSatisiMi = true;
+
                             for(int i=0;i<urunListesiToplam.size();i++)
                             {
-                                if (urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon && urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram"))
+                                if (urunListesiToplam.get(i).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(i).siparisPorsiyonu == porsiyon && urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram") && urunListesiToplam.get(i).siparisKiloSatisiMi == kiloSatisiMi)
                                 {
                                     urunListesiToplam.get(i).siparisAdedi -= miktar;
-                                    toplamHesap -= (fiyat*miktar);
+                                    toplamHesap += (fiyat*miktar);
 
                                     Boolean urunYok = true;
 
                                     for (Siparis anUrunListesiToplam : urunListesiToplam)
                                     {
-                                        if (yemekAdi.equals(anUrunListesiToplam.siparisYemekAdi) && porsiyon == anUrunListesiToplam.siparisPorsiyonu && !anUrunListesiToplam.siparisFiyati.contentEquals("ikram")) {
+                                        if (yemekAdi.equals(anUrunListesiToplam.siparisYemekAdi) && porsiyon == anUrunListesiToplam.siparisPorsiyonu && !anUrunListesiToplam.siparisFiyati.contentEquals("ikram") && anUrunListesiToplam.siparisKiloSatisiMi == kiloSatisiMi) {
                                             anUrunListesiToplam.siparisAdedi += miktar;
                                             urunYok = false;
                                             break;
@@ -1282,6 +1322,8 @@ public class HesapEkrani extends ActionBarActivity {
                                         gelenSiparis.siparisYemekAdi = yemekAdi;
                                         gelenSiparis.siparisFiyati = String.format("%.2f", fiyat);
                                         gelenSiparis.siparisPorsiyonu = porsiyon;
+                                        gelenSiparis.siparisKiloSatisiMi = kiloSatisiMi;
+
                                         urunListesiToplam.add(gelenSiparis);
                                     }
 
@@ -1538,8 +1580,31 @@ public class HesapEkrani extends ActionBarActivity {
                                 tasinacakUrunIkramMi = Integer.parseInt(detaylari[3]);
                                 porsiyon = Double.parseDouble(detaylari[4].replace(',', '.'));
 
+                                String tur = detaylari[5];
+                                boolean kiloSatisiMi = false;
+                                if(tur.contentEquals("K"))
+                                    kiloSatisiMi = true;
+
+                                for(MasaninSiparisleri msp : g.lstMasaninSiparisleri)
+                                {
+                                    if(msp.DepartmanAdi.contentEquals(departmanAdi)&& msp.MasaAdi.contentEquals(masaAdi))
+                                    {
+                                        for (int z=0; z< msp.siparisler.size();z++)
+                                        {
+                                            if(msp.siparisler.get(z).siparisYemekAdi.contentEquals(yemekAdi) && msp.siparisler.get(z).siparisPorsiyonu == porsiyon){
+                                                msp.siparisler.get(z).siparisAdedi = msp.siparisler.get(z).siparisAdedi - istenilenTasimaMiktari;
+                                                if(msp.siparisler.get(z).siparisAdedi == 0)
+                                                {
+                                                    msp.siparisler.remove(z);
+                                                    z--;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
                                 for (int x = 0; x < urunListesiToplam.size(); x++) {
-                                    if (urunListesiToplam.get(x).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(x).siparisPorsiyonu == porsiyon) {
+                                    if (urunListesiToplam.get(x).siparisYemekAdi.contentEquals(yemekAdi) && urunListesiToplam.get(x).siparisPorsiyonu == porsiyon && urunListesiToplam.get(x).siparisKiloSatisiMi == kiloSatisiMi) {
                                         if (tasinacakUrunIkramMi == 0) {
                                             if (urunListesiToplam.get(x).siparisFiyati.contentEquals("ikram"))
                                                 continue;
@@ -1584,12 +1649,24 @@ public class HesapEkrani extends ActionBarActivity {
                                 tasinacakUrunIkramMi = Integer.parseInt(detaylari[3]);
                                 porsiyon = Double.parseDouble(detaylari[4].replace(',', '.'));
 
+                                String tur = detaylari[5];
+                                boolean kiloSatisiMi = false;
+                                if(tur.contentEquals("K"))
+                                    kiloSatisiMi = true;
+
+                                Dictionary<String, String> collectionSiparisIslem = new Hashtable<String, String>();
+                                collectionSiparisIslem.put("departmanAdi",departmanAdi);
+                                collectionSiparisIslem.put("masa",masaAdi);
+                                collectionSiparisIslem.put("miktar",String.valueOf(istenilenTasimaMiktari));
+                                collectionSiparisIslem.put("yemekAdi",yemekAdi);
+                                collectionSiparisIslem.put("porsiyon",String.valueOf(porsiyon));
                                 int gruptaYeniGelenSiparisVarmi;
+                                SiparisIslemler siparisIslemler = new SiparisIslemler(collectionSiparisIslem,g);
 
                                 if (tasinacakUrunIkramMi == 0) {
-                                    gruptaYeniGelenSiparisVarmi = siparisGruptaVarMi(yemekAdi, porsiyon); //ürün cinsi hesapta var mı bak
+                                    gruptaYeniGelenSiparisVarmi = siparisGruptaVarMi(yemekAdi, porsiyon,kiloSatisiMi); //ürün cinsi hesapta var mı bak
                                 } else {
-                                    gruptaYeniGelenSiparisVarmi = ikramGruptaVarMi(yemekAdi, porsiyon); //ürün cinsi hesapta var mı bak
+                                    gruptaYeniGelenSiparisVarmi = ikramGruptaVarMi(yemekAdi, porsiyon,kiloSatisiMi); //ürün cinsi hesapta var mı bak
                                 }
 
                                 if (gruptaYeniGelenSiparisVarmi == -1) //yoksa ürünü hesaba ekle
@@ -1602,6 +1679,8 @@ public class HesapEkrani extends ActionBarActivity {
                                     else
                                         gelenSiparis.siparisFiyati = "ikram";
                                     gelenSiparis.siparisPorsiyonu = porsiyon;
+                                    gelenSiparis.siparisKiloSatisiMi = kiloSatisiMi;
+
                                     urunListesiToplam.add(gelenSiparis);
                                 } else // varsa ürünün hesaptaki değerlerini istenilene göre arttır
                                 {
@@ -1688,10 +1767,10 @@ public class HesapEkrani extends ActionBarActivity {
                                 Double fiyat=0d, porsiyon=0d;
                                 int adet;
                                 String yemekAdi;
-
+                                boolean kiloSatisiMi;
                                 String[] odenenSiparisler = collection.get("odenenUrunBilgileri").split("\\*");
 
-                                //fiyat - adet -porsiyon - yemekadi
+                                //fiyat - adet -porsiyon - yemekadi - kilosatışımı
                                 for (String aSiparisler : odenenSiparisler) {
                                     String[] odenenSiparis = aSiparisler.split("-");
 
@@ -1715,8 +1794,10 @@ public class HesapEkrani extends ActionBarActivity {
                                     adet = Integer.parseInt(odenenSiparis[1]);
                                     yemekAdi = odenenSiparis[3];
 
+                                    kiloSatisiMi = Boolean.getBoolean(odenenSiparis[4]);
+
                                     for (int i = 0; i < urunListesiToplam.size(); i++) {
-                                        if (yemekAdi.contentEquals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyon == urunListesiToplam.get(i).siparisPorsiyonu && !urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram")) // listede yemek var
+                                        if (yemekAdi.contentEquals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyon == urunListesiToplam.get(i).siparisPorsiyonu && !urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram") && urunListesiToplam.get(i).siparisKiloSatisiMi == kiloSatisiMi) // listede yemek var
                                         {
                                             toplamHesap -= (fiyat*adet);
 
@@ -1789,12 +1870,12 @@ public class HesapEkrani extends ActionBarActivity {
         }
     };
 
-    private int siparisGruptaVarMi(String yemekAdi, Double porsiyonu)
+    private int siparisGruptaVarMi(String yemekAdi, Double porsiyonu, boolean kiloSatisiMi)
     {
         //ürün cinsi hesapta var mı bak
         for (int i = 0; i < urunListesiToplam.size(); i++)
         {
-            if (yemekAdi.equals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyonu == urunListesiToplam.get(i).siparisPorsiyonu)
+            if (yemekAdi.equals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyonu == urunListesiToplam.get(i).siparisPorsiyonu && urunListesiToplam.get(i).siparisKiloSatisiMi == kiloSatisiMi)
             {
                 return i;
             }
@@ -1802,12 +1883,12 @@ public class HesapEkrani extends ActionBarActivity {
         return -1;
     }
 
-    private int ikramGruptaVarMi(String yemekAdi, Double porsiyonu)
+    private int ikramGruptaVarMi(String yemekAdi, Double porsiyonu, boolean kiloSatisiMi)
     {
         //ürün cinsi hesapta var mı bak
         for (int i = 0; i < urunListesiToplam.size(); i++)
         {
-            if (yemekAdi.equals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyonu == urunListesiToplam.get(i).siparisPorsiyonu && urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram"))
+            if (yemekAdi.equals(urunListesiToplam.get(i).siparisYemekAdi) && porsiyonu == urunListesiToplam.get(i).siparisPorsiyonu && urunListesiToplam.get(i).siparisFiyati.contentEquals("ikram") && urunListesiToplam.get(i).siparisKiloSatisiMi == kiloSatisiMi)
             {
                 return i;
             }

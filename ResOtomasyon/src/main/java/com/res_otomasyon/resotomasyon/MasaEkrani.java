@@ -227,6 +227,8 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             }
                             break;
                         case siparis:
+                            if(collection.get("tur").contentEquals("K"))
+                                return;
                             //Sipariş geldiğinde yapılacak işlemler.
                             SiparisIslemler siparisIslemler = new SiparisIslemler(collection, g);
 
