@@ -14,15 +14,24 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
+import Entity.Departman;
+import Entity.GlobalDepartman;
+import Entity.GlobalMasalar;
+import Entity.MasaDizayn;
 import TCPClientSide.CommonAsyncTask;
+import XMLReader.ReadXML;
+import ekclasslar.FileIO;
 
 public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequestComplete {
 
     SharedPreferences preferences;
     GlobalApplication g;
-
+    ArrayList<Departman> lstDepartmanlar;
+    ArrayList<MasaDizayn> lstMasaDizayn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +68,30 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
             g.bitmapDictionary = g.getImages();
 
         g.canPlayGame = preferences.getBoolean("canPlayGame", false);
+        FileIO fileIO = new FileIO();
+        List<File> files;
+        files = fileIO.getListFiles(new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo"));
+        ReadXML readXML = new ReadXML();
+        lstDepartmanlar = readXML.readDepartmanlar(files);
+        lstMasaDizayn = readXML.readMasaDizayn(files);
+        for (Departman aLstDepartmanlar : lstDepartmanlar) {
+            GlobalDepartman departman = new GlobalDepartman();
+            departman.globalDepartmanAdi = aLstDepartmanlar.DepartmanAdi;
+            departman.globalMasalar = new ArrayList<GlobalMasalar>();
+
+            for (MasaDizayn aLstMasaDizayn : lstMasaDizayn) {
+                if (aLstMasaDizayn.MasaEkraniAdi.contentEquals(aLstDepartmanlar.DepartmanEkrani)) {
+                    GlobalMasalar masa = new GlobalMasalar();
+                    masa.globalMasaAdi = aLstMasaDizayn.MasaAdi;
+                    masa.globalMasaAcikMi = false;
+                    departman.globalMasalar.add(masa);
+                } else {
+                    if (departman.globalMasalar.size() > 0)
+                        break;
+                }
+            }
+            g.globalDepartmanlar.add(departman);
+        }
     }
 
     public Handler myHandler = new Handler() {

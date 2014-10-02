@@ -65,7 +65,7 @@ public class NotificationScreen extends ActionBarActivity {
         String komut, masalar = "";
         komut = "komut=bildirim&masalar=";
         if (g.secilenMasalar.size() > 0) {
-            for (int i=0; i < lstDepartmanlar.size(); i++) {
+            for (int i = 0; i < lstDepartmanlar.size(); i++) {
                 if (g.secilenMasalar != null && g.secilenMasalar.size() > 0) {
                     if (g.secilenMasalar.get(i).Masalar.size() > 0) {
                         masalar += "*" + lstDepartmanlar.get(i).DepartmanAdi;
@@ -198,8 +198,7 @@ public class NotificationScreen extends ActionBarActivity {
                                     g.lstMasaninSiparisleri = new ArrayList<MasaninSiparisleri>();
                                     if (g.lstMasaninSiparisleri.size() == 0) {
                                         BildirimBilgileriIslemler bildirimBilgileriIslemler = new BildirimBilgileriIslemler(collection, g);
-                                        if(bildirimBilgileriIslemler.bildirimBilgileri())
-                                        {
+                                        if (bildirimBilgileriIslemler.bildirimBilgileri()) {
                                             final NotificationExpandableAdapter expandableAdapter = new NotificationExpandableAdapter(NotificationScreen.this, g);
                                             ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
                                             g.adapter = expandableAdapter;
@@ -215,8 +214,9 @@ public class NotificationScreen extends ActionBarActivity {
 
 
                     case siparis:
-                        if(collection.get("tur").contentEquals("K"))
-                            return;
+                        if (collection.get("tur") != null)
+                            if (collection.get("tur").contentEquals("K"))
+                                return;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

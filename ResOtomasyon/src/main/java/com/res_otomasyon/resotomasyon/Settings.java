@@ -41,7 +41,6 @@ public class Settings extends Activity implements View.OnClickListener {
     int kacinci = 1;
     SharedPreferences preferences;
     Switch switchGame;
-    Switch switchNotification;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +73,7 @@ public class Settings extends Activity implements View.OnClickListener {
         btnCancel = (Button) findViewById(R.id.btnIptal);
 
         switchGame = (Switch) findViewById(R.id.switchGame);
-        switchNotification = (Switch) findViewById(R.id.switchNotification);
         switchGame.setChecked(preferences.getBoolean("canPlayGame",false));
-        switchNotification.setChecked(preferences.getBoolean("notifyWaiter",true));
 
         btnSave.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
@@ -148,10 +145,8 @@ public class Settings extends Activity implements View.OnClickListener {
                     editor.putString("TabletName", ((EditText) findViewById(R.id.editTextTableName)).getText()
                             .toString());
                     editor.putBoolean("canPlayGame", switchGame.isChecked());
-                    editor.putBoolean("notifyWaiter",switchNotification.isChecked());
                     editor.apply();
                     g.canPlayGame = switchGame.isChecked();
-                    g.notifyWaiter = switchNotification.isChecked();
                     showAlertDialog = new ShowAlertDialog();
                     AlertDialog alertDialog = showAlertDialog.showAlert(context, "Kayıt başarılı",
                             "Ayarlar kayıt edildi.");

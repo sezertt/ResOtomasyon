@@ -1,10 +1,6 @@
 package com.res_otomasyon.resotomasyon;
 
 import android.app.Activity;
-import android.graphics.Color;
-import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

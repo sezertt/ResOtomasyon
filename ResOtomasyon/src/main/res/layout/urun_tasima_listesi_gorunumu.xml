@@ -83,6 +83,7 @@
         android:gravity="center"
         android:clickable="true"
         android:focusable="true"
+        android:maxLength="2"
         android:focusableInTouchMode="true"
         android:layout_marginRight="10dp"
         android:selectAllOnFocus="true"
