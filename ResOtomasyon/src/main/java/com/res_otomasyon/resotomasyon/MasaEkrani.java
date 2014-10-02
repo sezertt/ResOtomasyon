@@ -282,7 +282,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                             } catch (Exception e) {
                                 acikMasalar = null;
                             }
-
                             if (acikMasalar != null) {
                                 for (int i = 0; i < g.globalDepartmanlar.size(); i++) {
                                     if (g.globalDepartmanlar.get(i).globalDepartmanAdi.contentEquals(tabName)) {
@@ -298,7 +297,6 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                     }
                                 }
                             }
-
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -407,6 +405,7 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                 yemekAdi = detaylari[0];
                                 fiyat = Double.parseDouble(detaylari[1].replace(',', '.'));
                                 istenilenTasimaMiktari = Integer.parseInt(detaylari[2].replace(',', '.'));
+                                int notificationTasinacakMiktar = 0;
                                 tasinacakUrunIkramMi = Integer.parseInt(detaylari[3]);
                                 porsiyon = Double.parseDouble(detaylari[4].replace(',', '.'));
                                 if (g.lstMasaninSiparisleri.size() > 0) {
@@ -415,24 +414,39 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                         if (msp.DepartmanAdi.contentEquals(collection.get("departmanAdi")) && msp.MasaAdi.contentEquals(collection.get("masa"))) {
                                             for (int z = 0; z < msp.siparisler.size(); z++) {
                                                 if (msp.siparisler.get(z).siparisYemekAdi.contentEquals(yemekAdi) && msp.siparisler.get(z).siparisPorsiyonu == porsiyon) {
-                                                    msp.siparisler.get(z).siparisAdedi = msp.siparisler.get(z).siparisAdedi - istenilenTasimaMiktari;
-                                                    if (msp.siparisler.get(z).siparisAdedi <= 0) {
+                                                    if (msp.siparisler.get(z).siparisAdedi <= istenilenTasimaMiktari) {
+                                                        notificationTasinacakMiktar = msp.siparisler.get(z).siparisAdedi;
+                                                        msp.siparisler.get(z).siparisAdedi = msp.siparisler.get(z).siparisAdedi - istenilenTasimaMiktari;
                                                         msp.siparisler.remove(z);
                                                         z--;
+                                                        Dictionary<String, String> collectionSiparisIslem = new Hashtable<String, String>();
+                                                        collectionSiparisIslem.put("departmanAdi", collection.get("yeniDepartmanAdi"));
+                                                        collectionSiparisIslem.put("masa", collection.get("yeniMasa"));
+                                                        collectionSiparisIslem.put("miktar", String.valueOf(notificationTasinacakMiktar));
+                                                        collectionSiparisIslem.put("yemekAdi", yemekAdi);
+                                                        collectionSiparisIslem.put("porsiyon", String.valueOf(porsiyon));
+                                                        SiparisIslemler siparisIslemler1 = new SiparisIslemler(collectionSiparisIslem, g);
+                                                        siparisIslemler1.Islem();
+                                                        istenilenTasimaMiktari -= notificationTasinacakMiktar;
+
+                                                    } else {
+                                                        notificationTasinacakMiktar = istenilenTasimaMiktari;
+                                                        msp.siparisler.get(z).siparisAdedi = msp.siparisler.get(z).siparisAdedi - istenilenTasimaMiktari;
+                                                        Dictionary<String, String> collectionSiparisIslem = new Hashtable<String, String>();
+                                                        collectionSiparisIslem.put("departmanAdi", collection.get("yeniDepartmanAdi"));
+                                                        collectionSiparisIslem.put("masa", collection.get("yeniMasa"));
+                                                        collectionSiparisIslem.put("miktar", String.valueOf(notificationTasinacakMiktar));
+                                                        collectionSiparisIslem.put("yemekAdi", yemekAdi);
+                                                        collectionSiparisIslem.put("porsiyon", String.valueOf(porsiyon));
+                                                        SiparisIslemler siparisIslemler1 = new SiparisIslemler(collectionSiparisIslem, g);
+                                                        siparisIslemler1.Islem();
+                                                        break;
                                                     }
-                                                    Dictionary<String, String> collectionSiparisIslem = new Hashtable<String, String>();
-                                                    collectionSiparisIslem.put("departmanAdi", collection.get("yeniDepartmanAdi"));
-                                                    collectionSiparisIslem.put("masa", collection.get("yeniMasa"));
-                                                    collectionSiparisIslem.put("miktar", String.valueOf(istenilenTasimaMiktari));
-                                                    collectionSiparisIslem.put("yemekAdi", yemekAdi);
-                                                    collectionSiparisIslem.put("porsiyon", String.valueOf(porsiyon));
-                                                    SiparisIslemler siparisIslemler1 = new SiparisIslemler(collectionSiparisIslem, g);
-                                                    siparisIslemler1.Islem();
                                                 }
                                             }
                                             if (g.lstMasaninSiparisleri.get(x).siparisler.size() == 0) {
                                                 g.lstMasaninSiparisleri.remove(x);
-                                                x--;
+                                                break;
                                             }
 
                                         }
@@ -630,6 +644,24 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
         ReadXML readXML = new ReadXML();
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
+//        for (Departman aLstDepartmanlar : lstDepartmanlar) {
+//            GlobalDepartman departman = new GlobalDepartman();
+//            departman.globalDepartmanAdi = aLstDepartmanlar.DepartmanAdi;
+//            departman.globalMasalar = new ArrayList<GlobalMasalar>();
+//
+//            for (MasaDizayn aLstMasaDizayn : lstMasaDizayn) {
+//                if (aLstMasaDizayn.MasaEkraniAdi.contentEquals(aLstDepartmanlar.DepartmanEkrani)) {
+//                    GlobalMasalar masa = new GlobalMasalar();
+//                    masa.globalMasaAdi = aLstMasaDizayn.MasaAdi;
+//                    masa.globalMasaAcikMi = false;
+//                    departman.globalMasalar.add(masa);
+//                } else {
+//                    if (departman.globalMasalar.size() > 0)
+//                        break;
+//                }
+//            }
+//            g.globalDepartmanlar.add(departman);
+//        }
 
         this.masaPlanIsmi = readXML.masaPlanIsimleri;
         if (preferences.getBoolean("MasaKilitli", masaKilitliMi)) {

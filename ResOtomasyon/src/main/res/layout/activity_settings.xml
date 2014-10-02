@@ -14,7 +14,8 @@
         android:layout_below="@+id/switchGame"
         android:layout_alignLeft="@+id/switchGame"
         android:layout_alignStart="@+id/switchGame"
-        android:layout_marginTop="39dp" />
+        android:layout_marginTop="39dp"
+        android:layout_toLeftOf="@+id/textViewPort" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -92,9 +93,9 @@
         android:text="@string/btnIptalText"
         android:id="@+id/btnIptal"
         android:layout_alignTop="@+id/button"
-        android:layout_toRightOf="@+id/textViewPort"
         android:layout_toEndOf="@+id/textViewPort"
-        android:layout_alignRight="@+id/switchGame" />
+        android:layout_alignRight="@+id/switchGame"
+        android:layout_toRightOf="@+id/textViewPort" />
 
     <Switch
         android:layout_width="wrap_content"

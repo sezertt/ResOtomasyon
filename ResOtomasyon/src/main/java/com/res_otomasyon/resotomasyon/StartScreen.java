@@ -32,6 +32,7 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
     GlobalApplication g;
     ArrayList<Departman> lstDepartmanlar;
     ArrayList<MasaDizayn> lstMasaDizayn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +63,7 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         }
         File folder = new File(Environment.getExternalStorageDirectory().getPath() + "/shared/Lenovo");
         folder.mkdirs();
-        if(g.bitmapDictionary == null)
+        if (g.bitmapDictionary == null)
             g.bitmapDictionary = new Hashtable<String, Bitmap>();
         if (g.bitmapDictionary.size() == 0)
             g.bitmapDictionary = g.getImages();
@@ -74,6 +75,8 @@ public class StartScreen extends Activity implements CommonAsyncTask.OnAsyncRequ
         ReadXML readXML = new ReadXML();
         lstDepartmanlar = readXML.readDepartmanlar(files);
         lstMasaDizayn = readXML.readMasaDizayn(files);
+        if (g.globalDepartmanlar.size() > 0)
+            g.globalDepartmanlar.clear();
         for (Departman aLstDepartmanlar : lstDepartmanlar) {
             GlobalDepartman departman = new GlobalDepartman();
             departman.globalDepartmanAdi = aLstDepartmanlar.DepartmanAdi;

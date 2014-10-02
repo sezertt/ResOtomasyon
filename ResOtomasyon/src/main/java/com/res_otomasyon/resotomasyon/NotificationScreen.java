@@ -248,12 +248,12 @@ public class NotificationScreen extends ActionBarActivity {
                             }
                         });
                     case urunuTasiTablet:
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                g.adapter.notifyDataSetChanged();
-                            }
-                        });
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                g.adapter.notifyDataSetChanged();
+//                            }
+//                        });
                         break;
                     default:
                         break;

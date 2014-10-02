@@ -107,7 +107,7 @@ public class LoginScreen extends ActionBarActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         btnGiris.setEnabled(true);
-        g.globalDepartmanlar.clear();
+//        g.globalDepartmanlar.clear();
 
 //        NetworkChangeReceiver checkNetwork = new NetworkChangeReceiver();
 //        checkNetwork.onReceive(context,intent);
