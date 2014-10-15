@@ -412,7 +412,6 @@ public class HesapEkrani extends ActionBarActivity {
         siparisOnayAlertBuilder.setPositiveButton("Onayla", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 if (urunListesiToplam.size() < 1 && g.siparisListesi.size() > 0) {
                     g.commonAsyncTask.client.sendMessage("komut=masaAcildi&masa=" + masaAdi + "&departmanAdi=" + departmanAdi);
                 }
@@ -751,7 +750,14 @@ public class HesapEkrani extends ActionBarActivity {
                     @Override
                     public void onClick(View view) {
 
-                        int kacAdet = Integer.parseInt(kacAdetIptalveyaIkram.getText().toString());
+                        int kacAdet;
+
+                        try
+                        {
+                            kacAdet = Integer.parseInt(kacAdetIptalveyaIkram.getText().toString());
+                        }
+                        catch (Exception ex)
+                        { return; }
 
                         String tur = "P";
                         if (urunListesiToplam.get(info.position).siparisKiloSatisiMi)

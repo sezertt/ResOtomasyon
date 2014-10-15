@@ -52,7 +52,6 @@ public class GlobalApplication extends Application {
         GarsonIstendi, TemizlikIstendi, HesapIstendi, bildirimGoruldu, GarsonGoruldu, HesapGoruldu, TemizlikGoruldu, hesapGeliyor,
         hesapIslemde, departmanMasaSecimiIcin, urunuTasiTablet, departmanMasaTasimaIcin, OdemeBilgileriGuncelleTablet, masaDegistirTablet,
         OdemeIndirimOnayTablet, siparisListesineGeriEkle, masaIslemde, masaGeliyor, anketIstegi
-
     }
 
     public void connectServer(Handler myHandler) throws Exception {

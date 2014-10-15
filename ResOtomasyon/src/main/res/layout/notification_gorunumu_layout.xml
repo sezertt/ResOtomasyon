@@ -10,6 +10,7 @@
         android:layout_height="85dp"
         android:gravity="center|left"
         android:singleLine="false"
+        android:layout_marginLeft="15dp"
         android:inputType="textMultiLine|textNoSuggestions"
         android:lines="4"
         android:text="10 numara yemek"

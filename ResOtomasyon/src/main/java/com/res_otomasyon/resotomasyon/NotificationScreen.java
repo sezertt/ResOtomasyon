@@ -212,6 +212,20 @@ public class NotificationScreen extends ActionBarActivity {
 
                         break;
 
+                    case bildirimGoruldu:
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (collection.get("yemekAdi").contentEquals("hepsi"))
+                                {
+                                    ExpandableListView expandableListviewNotification = (ExpandableListView) findViewById(R.id.expandable_notification_listview);
+                                    int count =  g.adapter.getGroupCount();
+                                    for (int i = 0; i <count ; i++)
+                                        expandableListviewNotification.collapseGroup(i);
+                                }
+                            }
+                        });
+                        break;
 
                     case siparis:
                         if (collection.get("tur") != null)
