@@ -621,6 +621,25 @@ public class MasaEkrani extends ActionBarActivity implements CommonAsyncTask.OnA
                                 public void run() {
                                     if (masaTasimaIcinMasaSecimiAlertDialog != null)
                                         masaTasimaIcinMasaSecimiAlertDialog.dismiss();
+                                    if(g.adapter!=null)
+                                        g.adapter.notifyDataSetChanged();
+                                }
+                            });
+                            break;
+                        case masaDegistir:
+                            for (int i = 0; i<g.lstMasaninSiparisleri.size(); i++)
+                            {
+                                if(g.lstMasaninSiparisleri.get(i).DepartmanAdi.contentEquals(collection.get("departmanAdi")) && g.lstMasaninSiparisleri.get(i).MasaAdi.contentEquals(collection.get("masa")))
+                                {
+                                    g.lstMasaninSiparisleri.get(i).DepartmanAdi = collection.get("yeniDepartmanAdi");
+                                    g.lstMasaninSiparisleri.get(i).MasaAdi = collection.get("yeniMasa");
+                                }
+                            }
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(g.adapter!=null)
+                                        g.adapter.notifyDataSetChanged();
                                 }
                             });
                             break;
